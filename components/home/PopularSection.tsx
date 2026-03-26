@@ -1,4 +1,5 @@
 import { popularMovies } from '@/lib/mock-data';
+import { motion } from 'framer-motion';
 
 const mockPosters = [
   "https://images.unsplash.com/photo-1618519764620-7403abdbdfe9?q=80&w=600&auto=format&fit=crop",
@@ -22,33 +23,42 @@ export default function PopularSection() {
           Using CSS Grid for robust, responsive poster layouts.
           Scales from 2 columns on mobile to 6 columns on large TVs.
         */}
-        <div className="grid grid-cols-2 min-[480px]:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 md:gap-6 lg:gap-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="grid grid-cols-2 min-[480px]:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 md:gap-6 lg:gap-8"
+        >
           {popularMovies.map((movie, index) => (
-            <div key={movie.id} className="group relative cursor-pointer aspect-[2/3] w-full rounded-lg md:rounded-xl overflow-hidden bg-background-base border border-white/5 mx-auto">
+            <div key={movie.id} className="group relative cursor-pointer aspect-[2/3] w-full rounded-[1.5rem] overflow-hidden bg-[#0c0816] border-[6px] border-[#1a1329] mx-auto transition-all duration-500 hover:border-[#251b3a] hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.8),0_0_30px_rgba(34,211,238,0.3)]">
 
               <img
                 src={mockPosters[index % mockPosters.length]}
                 alt={movie.title}
                 loading="lazy"
-                className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:opacity-80"
+                className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:opacity-60"
               />
 
-              {/* Optional Top-10 Badge if it was the first item */}
+              {/* Skeuomorphic Inner Shadow */}
+              <div className="absolute inset-0 shadow-[inset_0_0_30px_rgba(0,0,0,0.7)] pointer-events-none" />
+
+              {/* Optional Top-10 Badge (Cyan) */}
               {index === 0 && (
-                <div className="absolute top-2 left-2 md:top-3 md:left-3 bg-primary text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded shadow-lg uppercase">
-                  Top 10
+                <div className="absolute top-3 left-3 bg-cyan-400 text-black text-[9px] md:text-[10px] font-black tracking-widest px-2 py-0.5 rounded-sm shadow-lg uppercase">
+                   TOP 10
                 </div>
               )}
 
-              {/* Title overlay on hover for better UX */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4 md:p-6 lg:p-8">
-                <h3 className="text-white font-bold text-sm md:text-lg lg:text-xl text-center w-full">
-                  {movie.title}
+              {/* Title overlay on hover */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-5">
+                <h3 className="text-white font-black text-xs md:text-sm tracking-widest uppercase text-center w-full drop-shadow-md">
+                   {movie.title}
                 </h3>
               </div>
             </div>
           ))}
-        </div>
+        </motion.div>
 
       </div>
     </section>

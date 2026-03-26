@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
@@ -26,7 +27,13 @@ export default function Top10Series() {
         Top 10 Series Today
       </h2>
 
-      <div className="relative group/swiper">
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="relative group/swiper"
+      >
         {/* Custom Prev Arrow */}
         <button className="swiper-custom-prev absolute left-0 md:-left-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 md:w-11 md:h-11 flex items-center justify-center bg-black/60 border border-white/20 backdrop-blur-md rounded-full text-white shadow-[0_0_15px_rgba(146,72,255,0.15)] opacity-0 group-hover/swiper:opacity-100 transition-all duration-300 hover:bg-[#9248FF] hover:border-[#9248FF] hover:scale-110 disabled:opacity-0 disabled:cursor-default">
           <ChevronLeft size={22} strokeWidth={2.5} className="mr-0.5" />
@@ -64,10 +71,10 @@ export default function Top10Series() {
                 </span>
 
                 {/* Vertical Poster Container */}
-                <div className="relative w-[65%] md:w-[70%] h-full ml-auto rounded-md overflow-hidden shadow-[0_15px_30px_rgba(0,0,0,0.8)] z-10 transition-transform duration-300 group-hover:scale-[1.05] border border-white/10 group-hover:border-white/30">
-                  <img src={show.image} alt={show.title} className="w-full h-full object-cover" />
+                <div className="relative w-[65%] md:w-[70%] h-full ml-auto rounded-[1.5rem] overflow-hidden shadow-[0_15px_30px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.1)] z-10 transition-all duration-300 group-hover:scale-[1.05] border-[6px] border-[#1a1329] group-hover:border-[#251b3a] group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(34,211,238,0.4)]">
+                  <img src={show.image} alt={show.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90" />
-                  <span className="absolute top-2 right-2 bg-[#9248FF] text-[8px] font-black tracking-widest px-1.5 py-0.5 rounded-sm shadow-md text-white">TOP 10</span>
+                  <span className="absolute top-2 right-2 bg-cyan-400 text-black text-[8px] font-black tracking-widest px-1.5 py-0.5 rounded-sm shadow-md">TOP 10</span>
                 </div>
               </div>
             </SwiperSlide>
@@ -78,7 +85,7 @@ export default function Top10Series() {
         <button className="swiper-custom-next absolute right-0 md:-right-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 md:w-11 md:h-11 flex items-center justify-center bg-black/60 border border-white/20 backdrop-blur-md rounded-full text-white shadow-[0_0_15px_rgba(146,72,255,0.15)] opacity-0 group-hover/swiper:opacity-100 transition-all duration-300 hover:bg-[#9248FF] hover:border-[#9248FF] hover:scale-110 disabled:opacity-0 disabled:cursor-default">
           <ChevronRight size={22} strokeWidth={2.5} className="ml-0.5" />
         </button>
-      </div>
+      </motion.div>
     </section>
   );
 }

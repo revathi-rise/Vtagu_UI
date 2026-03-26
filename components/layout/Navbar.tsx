@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Search, Bell, Menu } from "lucide-react";
 
@@ -21,91 +22,77 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled
-          ? "bg-black/70 backdrop-blur-xl shadow-lg"
-          : "bg-transparent"
-        }`}
-    >
-      <div className="max-w-[90%] mx-auto py-6 flex items-center justify-between">
+    <header className="fixed top-6 left-0 w-full z-50 flex justify-center px-4 pointer-events-none">
+      <div
+        className={`
+          pointer-events-auto flex items-center justify-between gap-6 px-6 py-3 rounded-full 
+          border border-white/10 transition-all duration-500
+          ${scrolled
+            ? "bg-black/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.1)] py-2 scale-95"
+            : "bg-[#161121]/90 backdrop-blur-md shadow-[0_15px_30px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.05)]"
+          }
+        `}
+      >
+        {/* Logo */}
+        <Link href="/" className="flex items-center hover:scale-105 transition-transform duration-300">
+          <Image
+            src="/vtagu_primetime_logo.png"
+            alt="PrimeTime Logo"
+            width={360}
+            height={160}
+            className="w-auto h-7 md:h-9 object-contain"
+            priority
+          />
+        </Link>
 
-        {/* Left */}
-        <div className="flex items-center gap-8 lg:gap-14">
+        {/* Menu */}
+        <nav className="hidden lg:flex items-center gap-1">
+          <NavItem href="/" label="HOME" active={pathname === "/"} />
+          <NavItem href="/movies" label="MOVIES" active={pathname === "/movies"} />
+          <NavItem href="/shows" label="SERIES" active={pathname === "/shows"} />
+          <NavItem href="/interactive/the-choice" label="INTERACTIVE" active={pathname?.startsWith("/interactive")} />
+          <NavItem href="/originals" label="ORIGINALS" active={pathname === "/originals"} />
 
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-white flex items-center justify-center rounded-md">
-              <span className="text-primary font-bold text-xl md:text-2xl">
-                P
-              </span>
-            </div>
-
-            <span className="font-bold text-xl md:text-2xl tracking-tight text-white hidden sm:block">
-              PrimeTime
-            </span>
-          </Link>
-
-          {/* Menu */}
-          <nav className="hidden md:flex items-center gap-8 font-medium">
-
-            <NavItem href="/" label="Home" active={pathname === "/"} />
-
-            <NavItem href="/movies" label="Movies" active={pathname === "/movies"} />
-
-            <NavItem href="/shows" label="Series" active={pathname === "/shows"} />
-            <NavItem href="/interactive/the-choice" label="Interactive" active={pathname?.startsWith("/interactive")} />
-            <NavItem href="/originals" label="Originals" active={pathname === "/originals"} />
-
-          </nav>
-        </div>
-
-        {/* Right */}
-        <div className="flex items-center gap-4 md:gap-3">
-
-          {/* Search */}
-          <div className="hidden md:flex items-center bg-white/10 rounded-full px-4 py-2 border border-white/10 backdrop-blur-sm">
-            <Search className="w-5 h-5 text-white/60" />
-
-            <input
-              type="text"
-              placeholder="Search..."
-              className="bg-transparent border-none outline-none text-white px-3 w-[150px] lg:w-[250px] placeholder:text-white/50"
-            />
+          <div className="relative group ml-1">
+            <button className="text-[10px] xl:text-xs font-black tracking-[0.15em] px-4 py-2 text-white/70 hover:text-white transition-all uppercase flex items-center gap-1 group">
+              LANGUAGES
+              <svg className="w-3 h-3 transition-transform group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+            </button>
           </div>
+        </nav>
 
-          <button className="text-white/80 hover:text-white transition-colors">
-            <Search className="w-6 h-6 md:hidden" />
-          </button>
-
-          {/* Bell */}
-          <button className="text-white/80 hover:text-white transition-colors relative">
-            <Bell className="w-6 h-6" />
-
-            <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-primary rounded-full border-2 border-black"></span>
+        {/* Right Actions */}
+        <div className="flex items-center gap-2">
+          {/* Search */}
+          <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/80 hover:text-white transition-all border border-white/5 shadow-inner group">
+            <Search className="w-5 h-5 group-hover:scale-110 transition-transform" />
           </button>
 
           {/* Profile */}
-          <Link 
-            href="/account" 
-            className={`w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-tr from-purple-500 to-orange-400 border-2 transition-all duration-300 hover:scale-110 shadow-lg ${
-              pathname === "/account" 
-                ? "border-[#cca8ff] shadow-[0_0_15px_rgba(146,72,255,0.8)]" 
-                : "border-white/20 hover:border-white/60"
-            }`}
-          />
+          <Link
+            href="/account"
+            className="flex items-center gap-3 pl-2 pr-4 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all group lg:min-w-[120px]"
+          >
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-tr from-purple-500 to-orange-400 border border-white/20 shadow-md flex items-center justify-center text-[10px] font-bold text-white overflow-hidden uppercase">
+              {/* VU Initial or Placeholder */}
+              VU
+            </div>
+            <span className="hidden sm:block text-[10px] xl:text-xs font-black tracking-widest text-white/90 group-hover:text-white transition-colors uppercase">
+              PROFILE
+            </span>
+          </Link>
 
           {/* Mobile Menu */}
-          <button className="md:hidden text-white">
-            <Menu className="w-7 h-7" />
+          <button className="lg:hidden w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-white">
+            <Menu className="w-6 h-6" />
           </button>
-
         </div>
       </div>
     </header>
   );
 }
 
-/* Menu Item Component */
-
+/* Updated NavItem for pill style */
 function NavItem({
   href,
   label,
@@ -118,16 +105,15 @@ function NavItem({
   return (
     <Link
       href={href}
-      className={`group relative text-sm lg:text-base font-medium transition-colors ${active ? "text-white" : "text-white/70 hover:text-white"
-        }`}
+      className={`
+        relative text-[10px] xl:text-xs font-black tracking-[0.15em] px-5 py-2.5 rounded-full transition-all duration-300 uppercase
+        ${active
+          ? "bg-[#1e172e] text-cyan-400 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_4px_10px_rgba(0,0,0,0.3)] border border-white/5"
+          : "text-white/60 hover:text-white hover:bg-white/5"
+        }
+      `}
     >
       {label}
-
-      {/* Hover Animation */}
-      <span
-        className={`absolute left-0 -bottom-1 h-[2px] bg-primary transition-all duration-300 ${active ? "w-full" : "w-0 group-hover:w-full"
-          }`}
-      />
     </Link>
   );
 }

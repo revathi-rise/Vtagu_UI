@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
@@ -26,7 +27,13 @@ export default function Top10Row() {
         Top 10 Movies Today
       </h2>
 
-      <div className="relative group/swiper">
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="relative group/swiper"
+      >
         {/* Custom Prev Arrow */}
         <button className="swiper-custom-prev absolute left-0 md:-left-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 md:w-11 md:h-11 flex items-center justify-center bg-black/60 border border-white/20 backdrop-blur-md rounded-full text-white shadow-[0_0_15px_rgba(146,72,255,0.15)] opacity-0 group-hover/swiper:opacity-100 transition-all duration-300 hover:bg-[#9248FF] hover:border-[#9248FF] hover:scale-110 disabled:opacity-0 disabled:cursor-default">
           <ChevronLeft size={22} strokeWidth={2.5} className="mr-0.5" />
@@ -55,7 +62,7 @@ export default function Top10Row() {
               <div className="relative flex items-end h-[180px] md:h-[240px] w-[95%] mx-auto mt-4 transition-transform duration-300 group-hover:-translate-y-4">
                 
                 {/* Netflix-style Ranked Number */}
-                <span className="absolute -left-1 md:-left-4 -bottom-4 md:-bottom-5 text-[80px] md:text-[110px] font-black leading-none text-[#0f0a19] z-20 pointer-events-none drop-shadow-2xl select-none tracking-tighter"
+                <span className="absolute -left-1 md:left-[10%] -bottom-4 md:-bottom-5 text-[80px] md:text-[110px] font-black leading-none text-[#0f0a19] z-20 pointer-events-none drop-shadow-2xl select-none tracking-tighter"
                       style={{
                         WebkitTextStroke: "2px #7a7a7a",
                         fontFamily: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"
@@ -78,7 +85,7 @@ export default function Top10Row() {
         <button className="swiper-custom-next absolute right-0 md:-right-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 md:w-11 md:h-11 flex items-center justify-center bg-black/60 border border-white/20 backdrop-blur-md rounded-full text-white shadow-[0_0_15px_rgba(146,72,255,0.15)] opacity-0 group-hover/swiper:opacity-100 transition-all duration-300 hover:bg-[#9248FF] hover:border-[#9248FF] hover:scale-110 disabled:opacity-0 disabled:cursor-default">
           <ChevronRight size={22} strokeWidth={2.5} className="ml-0.5" />
         </button>
-      </div>
+      </motion.div>
     </section>
   );
 }

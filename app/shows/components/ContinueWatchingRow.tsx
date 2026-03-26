@@ -5,6 +5,7 @@ import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import { Play, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
 
 const watchHistory = [
   { series: "Mind Hunter", episode: "S2:E3 - The Interrogation", progress: 65, image: "https://images.unsplash.com/photo-1541873676-a18131494184?q=80&w=600&auto=format&fit=crop" },
@@ -21,7 +22,13 @@ export default function ContinueWatchingRow() {
         Continue Watching
       </h2>
 
-      <div className="relative group/swiper">
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="relative group/swiper"
+      >
         {/* Custom Prev Arrow */}
         <button className="swiper-custom-prev absolute left-0 md:-left-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 md:w-11 md:h-11 flex items-center justify-center bg-black/60 border border-white/20 backdrop-blur-md rounded-full text-white shadow-[0_0_15px_rgba(146,72,255,0.15)] opacity-0 group-hover/swiper:opacity-100 transition-all duration-300 hover:bg-[#9248FF] hover:border-[#9248FF] hover:scale-110 disabled:opacity-0 disabled:cursor-default">
           <ChevronLeft size={22} strokeWidth={2.5} className="mr-0.5" />
@@ -47,26 +54,29 @@ export default function ContinueWatchingRow() {
         >
           {watchHistory.map((item, index) => (
             <SwiperSlide key={index} className="!overflow-visible">
-              <div className="group/card relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer bg-[#1a1329] border border-white/10 transition-all duration-300 hover:-translate-y-2 hover:border-white/30 hover:shadow-[0_20px_40px_rgba(0,0,0,0.6)]">
+              <div className="group/card relative w-full aspect-video rounded-[2rem] overflow-hidden cursor-pointer bg-[#0c0816] border-[8px] border-[#1a1329] transition-all duration-500 hover:-translate-y-2 hover:border-[#251b3a] hover:shadow-[0_25px_50px_rgba(0,0,0,0.8),0_0_30px_rgba(34,211,238,0.3)]">
                 {/* Image */}
-                <img src={item.image} alt={item.series} className="w-full h-full object-cover opacity-80 group-hover/card:opacity-100 transition-opacity duration-300" />
+                <img src={item.image} alt={item.series} className="w-full h-full object-cover opacity-60 group-hover/card:opacity-100 transition-all duration-500 group-hover/card:scale-110" />
                 
-                {/* Central Play Icon on Hover */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300 bg-black/20 backdrop-blur-[2px]">
-                   <div className="w-12 h-12 rounded-full border border-white/50 text-white flex items-center justify-center bg-black/40 shadow-xl scale-75 group-hover/card:scale-100 transition-all duration-300 hover:bg-white hover:text-black hover:border-white">
-                      <Play className="fill-current w-5 h-5 ml-1" />
+                {/* Skeuomorphic Inner Shadow */}
+                <div className="absolute inset-0 shadow-[inset_0_0_30px_rgba(0,0,0,0.7)] pointer-events-none" />
+
+                {/* Central Play Icon on Hover (Cyan) */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-500">
+                   <div className="w-14 h-14 rounded-full bg-cyan-400/20 backdrop-blur-md flex items-center justify-center border border-cyan-400/40 shadow-[0_0_20px_rgba(34,211,238,0.3)] scale-75 group-hover/card:scale-100 transition-all duration-500">
+                      <Play className="text-cyan-400 fill-cyan-400 w-6 h-6 ml-1" />
                    </div>
                 </div>
 
                 {/* Info Bar at Bottom */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-12 pb-3 px-4 pointer-events-none">
-                  <h4 className="text-white font-bold text-sm md:text-base leading-tight truncate">{item.series}</h4>
-                  <p className="text-gray-300 text-xs md:text-sm truncate drop-shadow-md">{item.episode}</p>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent pt-12 pb-4 px-5 pointer-events-none">
+                  <h4 className="text-white font-black text-xs md:text-sm tracking-widest uppercase truncate">{item.series}</h4>
+                  <p className="text-gray-400/80 text-[10px] md:text-xs font-bold uppercase tracking-tight truncate">{item.episode}</p>
                 </div>
                 
-                {/* Progress Bar overlapping the bottom boundary */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 md:h-[5px] bg-white/20">
-                   <div className="h-full bg-[#e50914]" style={{ width: `${item.progress}%` }} />
+                {/* Progress Bar (Cyan) */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 md:h-[4px] bg-white/10">
+                   <div className="h-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" style={{ width: `${item.progress}%` }} />
                 </div>
               </div>
             </SwiperSlide>
@@ -77,7 +87,7 @@ export default function ContinueWatchingRow() {
         <button className="swiper-custom-next absolute right-0 md:-right-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 md:w-11 md:h-11 flex items-center justify-center bg-black/60 border border-white/20 backdrop-blur-md rounded-full text-white shadow-[0_0_15px_rgba(146,72,255,0.15)] opacity-0 group-hover/swiper:opacity-100 transition-all duration-300 hover:bg-[#9248FF] hover:border-[#9248FF] hover:scale-110 disabled:opacity-0 disabled:cursor-default">
           <ChevronRight size={22} strokeWidth={2.5} className="ml-0.5" />
         </button>
-      </div>
+      </motion.div>
     </section>
   );
 }

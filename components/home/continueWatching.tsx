@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ChevronRight, Play, History, Info, Plus } from 'lucide-react';
+import { Play, History, Plus, Clock } from 'lucide-react';
 import SectionTitle from './SectionTitle';
 
 const CONTINUE_MOVIES = [
@@ -21,81 +21,81 @@ const mockImages = [
 
 export default function ContinueWatching() {
     return (
-        <section className="w-full py-12 bg-[#0f0a19]">
-            <div className="max-w-[90%] mx-auto">
-
-                {/* Header */}
-                <div className="flex items-center justify-between mb-6">
+        <section className="w-full py-16 bg-[#0f0a19] overflow-hidden">
+            <div className="max-w-[94%] mx-auto">
+                
+                <div className="flex items-center justify-between mb-10">
                     <SectionTitle
-                        title="Continue Watching"
-                        subtitle="Your Progress"
+                        title="Resume Transmission"
+                        subtitle="CONTINUE"
                         Icon={History}
-                        gradientText="Watching"
+                        gradientText="Transmission"
                     />
-                    <button className="text-gray-400 hover:text-white flex items-center gap-1 text-sm font-medium transition-colors">
-                        View All <ChevronRight size={16} />
-                    </button>
                 </div>
 
-                {/* Grid with specialized hover behavior */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {CONTINUE_MOVIES.map((movie, index) => (
                         <motion.div
                             key={movie.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
                             transition={{ delay: index * 0.1 }}
-                            className="group relative cursor-pointer"
+                            className="group relative"
                         >
-                            {/* Card Body */}
-                            <div className="relative aspect-video rounded-[8px] overflow-hidden border border-white/5 bg-[#1a1329] shadow-lg transition-all duration-300 group-hover:shadow-purple-500/20 group-hover:-translate-y-2">
-
+                            {/* Skeuomorphic Transmission Card */}
+                            <div className="relative aspect-[16/10] rounded-[2rem] overflow-hidden bg-[#0c0816] border-[8px] border-[#1a1329] transition-all duration-500 group-hover:bg-[#161121] group-hover:border-[#251b3a] group-hover:shadow-[0_30px_60px_rgba(0,0,0,0.9),0_0_30px_rgba(34,211,238,0.15)]">
+                                
+                                {/* Image with refined Overlay */}
                                 <img
                                     src={mockImages[index % mockImages.length]}
                                     alt={movie.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                    className="w-full h-full object-cover grayscale-[40%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105 opacity-60 group-hover:opacity-100"
                                 />
 
-                                {/* Dark Gradient Overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40" />
+                                {/* Skeuomorphic Inner Shadow */}
+                                <div className="absolute inset-0 shadow-[inset_0_0_40px_rgba(0,0,0,0.8)] pointer-events-none" />
+                                
+                                {/* Sophisticated Gradient Overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#050208] via-transparent to-transparent opacity-90" />
 
-                                {/* Interactive Resume Layer */}
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px] bg-black/20">
-                                    <div className="flex gap-3 scale-75 group-hover:scale-100 transition-transform duration-300">
-                                        <div className="bg-white p-3 rounded-full hover:bg-purple-500 hover:text-white transition-colors">
-                                            <Play fill="currentColor" size={20} className="ml-0.5 text-black hover:text-white" />
+                                {/* Floating Progress Pill - Tactical Style with Hover Blur */}
+                                <div className="absolute top-5 left-5 bg-black/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 flex items-center gap-2 group-hover:backdrop-blur-[24px] transition-all duration-500 shadow-xl">
+                                    <Clock size={12} className="text-cyan-400" />
+                                    <span className="text-[10px] font-black text-white tracking-[0.1em] uppercase">{movie.remaining}</span>
+                                </div>
+
+                                {/* Center Play Action - Minimalist Tactical */}
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                    <motion.div 
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        className="w-20 h-20 rounded-full bg-cyan-400 border-4 border-black/20 flex items-center justify-center text-black shadow-[0_0_30px_rgba(34,211,238,0.5)] cursor-pointer"
+                                    >
+                                        <Play fill="black" size={32} className="ml-1" />
+                                    </motion.div>
+                                </div>
+
+                                {/* Bottom Info Bar */}
+                                <div className="absolute bottom-0 left-0 w-full p-6">
+                                    <div className="flex justify-between items-end mb-4">
+                                        <div>
+                                            <span className="text-[11px] text-cyan-400 font-black uppercase tracking-[0.2em]">{movie.genre}</span>
+                                            <h3 className="text-white font-black text-xl uppercase tracking-tighter leading-none mt-1.5">{movie.title}</h3>
                                         </div>
-                                        <div className="bg-white/10 backdrop-blur-md p-3 rounded-full border border-white/20 hover:bg-white/20 transition-colors text-white">
-                                            <Plus size={20} />
-                                        </div>
+                                        <span className="text-[10px] text-white/40 font-black font-mono tracking-widest">{movie.progress}%</span>
                                     </div>
-                                </div>
-
-                                {/* Progress Bar - Matches Screenshot style */}
-                                <div className="absolute bottom-0 left-0 w-full h-1.5 bg-white/20">
-                                    <motion.div
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${movie.progress}%` }}
-                                        className="h-full bg-gradient-to-r from-purple-600 to-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.6)]"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Meta Info */}
-                            <div className="mt-4 flex flex-col gap-1">
-                                <h3 className="text-white font-bold text-lg group-hover:text-purple-400 transition-colors truncate">
-                                    {movie.title}
-                                </h3>
-                                <div className="flex items-center gap-2">
-                                    <span className="bg-white/10 text-[10px] text-gray-300 px-1.5 py-0.5 rounded font-bold border border-white/5">
-                                        {movie.quality}
-                                    </span>
-                                    <span className="text-xs text-gray-500 font-medium">
-                                        {movie.remaining}
-                                    </span>
-                                    <span className="text-xs text-purple-400 font-semibold ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                                        Resume
-                                    </span>
+                                    
+                                    {/* Recessed Progress Track */}
+                                    <div className="h-1.5 w-full bg-black/60 rounded-full overflow-hidden border border-white/5">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            whileInView={{ width: `${movie.progress}%` }}
+                                            transition={{ duration: 1, ease: "easeOut" }}
+                                            className="h-full bg-cyan-400 shadow-[0_0_15px_#22d3ee] relative"
+                                        >
+                                            <div className="absolute right-0 top-0 h-full w-4 bg-white/30 blur-[2px]" />
+                                        </motion.div>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>

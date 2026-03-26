@@ -36,10 +36,10 @@ export default function MoviesHero() {
         >
           {/* Top Badge */}
           <div className="flex items-center gap-3 mb-6">
-            <span className="bg-[#e50914] text-white text-xs font-black uppercase px-2 py-1 tracking-wider rounded-sm shadow-[0_0_15px_rgba(229,9,20,0.5)]">
+            <span className="bg-cyan-400 text-black text-[10px] font-black uppercase px-2 py-1 tracking-widest rounded-sm shadow-[0_0_15px_rgba(34,211,238,0.5)]">
               Top 1
             </span>
-            <span className="text-sm font-bold tracking-widest text-gray-300 uppercase shadow-black drop-shadow-md">
+            <span className="text-xs md:text-sm font-black tracking-[0.2em] text-white uppercase shadow-black drop-shadow-md">
               Movies Today
             </span>
           </div>
@@ -51,26 +51,26 @@ export default function MoviesHero() {
           />
 
           {/* Metadata */}
-          <div className="flex items-center gap-4 text-sm font-semibold text-gray-300 mb-6 shadow-black drop-shadow-md">
-            <span className="text-green-500 font-black">99% Match</span>
+          <div className="flex items-center gap-4 text-[10px] font-black tracking-widest text-gray-400 uppercase mb-8 drop-shadow-md">
+            <span className="text-cyan-400 font-black">99% Match</span>
             <span>2010</span>
-            <span className="border border-white/40 px-1.5 py-0.5 rounded text-[10px] text-white backdrop-blur-md">PG-13</span>
+            <span className="border border-white/20 px-2 py-0.5 rounded-full text-[9px] text-white bg-white/5 backdrop-blur-md">PG-13</span>
             <span>1h 52m</span>
-            <span className="flex items-center gap-1 border border-white/30 px-1.5 rounded text-[10px] bg-black/50 backdrop-blur-md">
-              HD <span className="text-blue-400 font-bold">Atmos</span>
+            <span className="flex items-center gap-1 border border-white/10 px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-md">
+              HD <span className="text-cyan-400 font-bold uppercase">Atmos</span>
             </span>
           </div>
           
-          <p className="max-w-xl text-sm md:text-base text-gray-200 leading-relaxed shadow-black drop-shadow-xl mb-8 font-medium">
+          <p className="max-w-xl text-sm md:text-base text-gray-300/90 leading-relaxed drop-shadow-xl mb-10 font-medium">
             Alone, a young woman embarks on a perilous journey across a dangerous land to find a stolen dragon. An epic tale of courage, loss, and the unyielding bond between two souls.
           </p>
           
-          <div className="flex flex-wrap items-center gap-4">
-            <button className="bg-white text-black px-8 md:px-10 py-3.5 rounded-md text-base md:text-lg font-black flex items-center gap-3 hover:bg-gray-200 transition-colors shadow-[0_10px_30px_rgba(255,255,255,0.2)]">
-              <Play size={24} className="fill-current" /> Play
+          <div className="flex flex-wrap items-center gap-6">
+            <button className="bg-cyan-400 hover:bg-cyan-300 text-black px-8 md:px-10 py-3.5 rounded-full text-xs font-black tracking-widest uppercase flex items-center gap-3 transition-all scale-100 hover:scale-105 shadow-[0_15px_30px_rgba(34,211,238,0.2)]">
+              <Play size={20} className="fill-current" /> Watch Now
             </button>
-            <button className="bg-[#413955]/70 hover:bg-[#413955] backdrop-blur-xl text-white px-8 md:px-10 py-3.5 rounded-md text-base md:text-lg font-bold flex items-center gap-3 transition-colors border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
-              <Info size={24} /> More Info
+            <button className="bg-white/5 hover:bg-white/10 backdrop-blur-xl text-white px-8 md:px-10 py-3.5 rounded-full text-xs font-black tracking-widest uppercase flex items-center gap-3 transition-all border border-white/10 scale-100 hover:scale-105 shadow-2xl">
+              <Info size={20} /> More Info
             </button>
           </div>
         </motion.div>

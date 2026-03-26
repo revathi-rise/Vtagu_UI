@@ -3,6 +3,7 @@
 import React, { useState, useRef } from "react";
 import Image from "next/image";
 import { Play, Plus, Star } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, EffectFade } from "swiper/modules";
 import type { Swiper as SwiperType } from 'swiper';
@@ -82,7 +83,12 @@ export default function HeroSection() {
 
               {/* Content Wrapper */}
               <div className="content-container relative z-10 w-full mx-auto px-[5%]">
-                <div className="max-w-full lg:max-w-[70%] xl:max-w-[60%] 2xl:max-w-[50%] animate-in fade-in slide-in-from-left-12 duration-1000">
+                <motion.div 
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  className="max-w-full lg:max-w-[70%] xl:max-w-[60%] 2xl:max-w-[50%]"
+                >
                   
                   {/* Badge Row */}
                   <div className="flex items-center gap-4 mb-4 md:mb-6">
@@ -107,12 +113,12 @@ export default function HeroSection() {
 
                   {/* Action Buttons */}
                   <div className="flex flex-wrap items-center gap-4 md:gap-6 mb-12">
-                    <button className="btn-primary flex items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-[#3299FF] to-[#9248FF] text-white font-bold transition-all hover:scale-105 hover:brightness-110 active:scale-95">
-                      <Play className="w-6 h-6 fill-white" />
+                    <button className="h-[56px] px-10 flex items-center justify-center gap-3 rounded-full bg-cyan-400 text-black font-black uppercase tracking-widest transition-all hover:scale-105 hover:bg-cyan-300 active:scale-95 shadow-[0_10px_25px_rgba(34,211,238,0.3)]">
+                      <Play className="w-5 h-5 fill-black" />
                       Watch Now
                     </button>
-                    <button className="btn-secondary flex items-center justify-center gap-3 rounded-xl bg-white/10 backdrop-blur-md text-white font-bold transition-all hover:bg-white/20 border border-white/10 active:scale-95">
-                      <Plus className="w-6 h-6" />
+                    <button className="h-[56px] px-10 flex items-center justify-center gap-3 rounded-full bg-white/5 backdrop-blur-md text-white font-black uppercase tracking-widest transition-all hover:bg-white/10 border border-white/10 active:scale-95">
+                      <Plus className="w-5 h-5" />
                       Add to List
                     </button>
                   </div>
@@ -123,19 +129,21 @@ export default function HeroSection() {
                       <button
                         key={item.id}
                         onClick={() => handleThumbnailClick(idx)}
-                        className={`group relative w-40 xl:w-48 aspect-video rounded-lg overflow-hidden transition-all duration-300 border-2 ${
-                          activeIndex === idx ? "border-[#3299FF] scale-105 ring-4 ring-blue-500/10" : "border-transparent opacity-40 hover:opacity-80"
+                        className={`group relative w-40 xl:w-48 aspect-video rounded-2xl overflow-hidden transition-all duration-300 border-[4px] shadow-lg ${
+                          activeIndex === idx 
+                            ? "border-cyan-400 scale-105 shadow-[0_0_25px_rgba(34,211,238,0.4)]" 
+                            : "border-[#1a1329] opacity-40 hover:opacity-100 hover:border-white/20"
                         }`}
                       >
                         <Image src={item.image} alt={item.title} fill sizes="(max-width: 1024px) 0vw, 20vw" className="object-cover" />
                         {activeIndex === idx && (
-                          <div className="absolute bottom-0 left-0 h-1 bg-[#3299FF] w-full animate-progress" />
+                          <div className="absolute bottom-0 left-0 h-1 bg-cyan-400 w-full animate-progress shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
                         )}
                       </button>
                     ))}
                   </div>
 
-                </div>
+                </motion.div>
               </div>
             </div>
           </SwiperSlide>

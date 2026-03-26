@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ChevronRight, Play, Star, Plus, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
 import SectionTitle from './SectionTitle';
 import { useDelayedHover } from '../../hooks/useDelayedHover';
 
@@ -33,7 +34,13 @@ export default function NewReleases() {
                 </div>
 
                 {/* Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4"
+        >
                     {NEW_RELEASES.map((movie, index) => {
                         const isHovered = hoveredId === movie.id;
 
@@ -48,90 +55,89 @@ export default function NewReleases() {
                                 onMouseEnter={() => handleMouseEnter(movie.id)}
                                 onMouseLeave={handleMouseLeave}
                             >
-                                {/* OUTER WRAPPER (EXPAND EFFECT) */}
                                 <div
                                     className={`
-                    absolute top-0 left-0 w-full rounded-2xl p-[2px]
-                    transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
-                    ${isHovered
-                                            ? "scale-110 z-50 bg-gradient-to-r from-[#3299FF] to-[#9248FF] shadow-[0_0_30px_rgba(50,153,255,0.3)] -translate-y-[10%]"
-                                            : "scale-100 z-10 bg-transparent"
+            absolute top-0 left-0 w-full rounded-[1.5rem] p-[3px]
+            transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
+            ${isHovered
+                                            ? "scale-110 z-50 bg-[#251b3a] shadow-[0_25px_50px_rgba(0,0,0,0.8),0_0_30px_rgba(34,211,238,0.3)] -translate-y-[5%]"
+                                            : "scale-100 z-10 bg-[#1a1329]"
                                         }
-                  `}
+        `}
                                     style={{ transformOrigin }}
                                 >
-                                    {/* INNER CARD */}
-                                    <div className="w-full h-full bg-[#1a1329] rounded-[14px] overflow-hidden">
+                                    {/* INNER CARD: This acts as the clipping container */}
+                                    <div className="relative w-full aspect-[2/3] bg-[#0c0816] rounded-[1.3rem] overflow-hidden border-[1px] border-white/10">
 
-                                        {/* IMAGE */}
-                                        <div className="relative w-full h-full">
+                                        {/* IMAGE & PREVIEW LAYER */}
+                                        <div className="absolute inset-0 w-full h-full">
                                             <img
                                                 src={`https://picsum.photos/seed/${movie.id + 20}/600/900`}
                                                 alt={movie.title}
-                                                className="w-full h-full object-cover"
+                                                className={`w-full h-full object-cover transition-opacity duration-500 ${isHovered ? 'opacity-40' : 'opacity-100'}`}
                                             />
 
-                                            {/* PREVIEW (like Trending) */}
-                                            <div className={`absolute inset-0 transition-opacity duration-500 ${isHovered ? "opacity-100" : "opacity-0"}`}>
-                                                {isHovered && (
-                                                    <img
-                                                        src="https://media.giphy.com/media/3o7TKMGpxxcaeqpI0o/giphy.gif"
-                                                        className="w-full h-full object-cover opacity-70"
-                                                    />
-                                                )}
-                                            </div>
+                                            {isHovered && (
+                                                <img
+                                                    src="https://media.giphy.com/media/3o7TKMGpxxcaeqpI0o/giphy.gif"
+                                                    className="absolute inset-0 w-full h-full object-cover opacity-60"
+                                                    alt="preview"
+                                                />
+                                            )}
 
-                                            {/* BADGE */}
-                                            <div className="absolute top-3 right-3 z-20">
-                                                <div className="px-2 py-1 rounded-md bg-black/40 backdrop-blur-md border border-white/10 text-[10px] font-bold text-white">
-                                                    NEW
-                                                </div>
-                                            </div>
+                                            {/* Skeuomorphic Inner Shadow */}
+                                            <div className="absolute inset-0 shadow-[inset_0_0_40px_rgba(0,0,0,0.9)] pointer-events-none" />
 
-                                            {/* GRADIENT */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                                            {/* GRADIENT: Higher z-index to stay behind text but over images */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-[#0c0816] via-[#0c0816]/60 to-transparent z-10" />
                                         </div>
 
-                                        {/* CONTENT */}
-                                        <div className="absolute bottom-0 p-4 w-full">
-                                            <h4 className="text-white font-bold text-sm">
+                                        {/* BADGE */}
+                                        <div className="absolute top-3 right-3 z-30">
+                                            <div className="px-2 py-0.5 rounded-sm bg-cyan-400 text-[9px] font-black text-black tracking-widest uppercase">
+                                                NEW
+                                            </div>
+                                        </div>
+
+                                        {/* CONTENT: Bottom Aligned */}
+                                        <div className="absolute bottom-0 left-0 w-full p-4 z-20 flex flex-col justify-end">
+                                            <h4 className="text-white font-black text-[12px] uppercase tracking-wider truncate mb-1">
                                                 {movie.title}
                                             </h4>
 
-                                            <div className="flex items-center gap-2 text-[10px] text-gray-300 mt-1">
-                                                <span className="text-yellow-400 flex items-center gap-1">
-                                                    <Star size={10} fill="currentColor" /> {movie.rating}
-                                                </span>
+                                            <div className="flex items-center gap-2 text-[9px] font-bold text-gray-400 uppercase">
+                                                <span className="text-cyan-400 flex items-center gap-1">★ {movie.rating}</span>
                                                 <span>{movie.year}</span>
-                                                <span className="border px-1 text-[8px]">4K</span>
+                                                <span className="border border-white/20 px-1 text-[7px]">4K</span>
                                             </div>
 
-                                            {/* EXPANDABLE */}
+                                            {/* EXPANDABLE AREA */}
                                             <div className={`
-                        transition-all duration-500 overflow-hidden
-                        ${isHovered ? "max-h-[200px] opacity-100 mt-3" : "max-h-0 opacity-0"}
-                      `}>
-                                                <p className="text-[11px] text-gray-300 mb-3 line-clamp-2">
-                                                    {movie.desc}
-                                                </p>
+                    grid transition-all duration-500 ease-in-out
+                    ${isHovered ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0"}
+                `}>
+                                                <div className="overflow-hidden">
+                                                    <p className="text-[10px] text-gray-400 mb-4 line-clamp-2 leading-relaxed">
+                                                        {movie.desc}
+                                                    </p>
 
-                                                <div className="flex gap-2">
-                                                    <button className="flex-1 bg-white text-black py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 hover:bg-purple-400 transition">
-                                                        <Play size={14} /> Play
-                                                    </button>
-                                                    <button className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition">
-                                                        <Plus size={14} />
-                                                    </button>
+                                                    <div className="flex gap-2 pb-1">
+                                                        <button className="flex-1 bg-cyan-400 text-black py-2 rounded-lg text-[10px] font-black uppercase tracking-tighter flex items-center justify-center gap-1 hover:scale-105 transition-transform">
+                                                            <Play size={12} fill="black" /> Play
+                                                        </button>
+                                                        <button className="w-9 h-9 flex items-center justify-center bg-white/10 rounded-lg border border-white/10 hover:bg-white/20 transition-all text-white">
+                                                            <Plus size={14} />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         );
                     })}
-                </div>
+                </motion.div>
 
             </div>
         </section>

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Play, Plus, Star, Zap, Info, ChevronRight, LayoutGrid } from 'lucide-react';
+import { motion } from 'framer-motion';
 import SectionTitle from './SectionTitle';
 
 const MOVIES = [
@@ -68,83 +69,119 @@ export default function InteractiveGridHero() {
                 </div>
 
                 {/* The Grid Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <section className="w-full bg-[#0f0a19] overflow-hidden">
 
-                    {/* LARGE DISPLAY CARD (Takes up 2 columns) */}
-                    <div className="lg:col-span-2 relative group overflow-hidden rounded-3xl border border-white/10 bg-[#1a1329]">
-                        <div className="absolute inset-0">
-                            <img
-                                src="https://media.giphy.com/media/3o7TKMGpxxcaeqpI0o/giphy.gif"
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                alt={activeMovie.title}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#1a1329] via-[#1a1329]/40 to-transparent" />
-                        </div>
+                        {/* Reference Style Container */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
+                            className="relative bg-[#0c0816] rounded-[3rem] p-8 md:p-12 border-[10px] border-[#1a1329] shadow-2xl overflow-hidden"
+                        >
+                            {/* Background Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/10 via-transparent to-transparent opacity-40" />
 
-                        <div className="relative h-[400px] flex flex-col justify-end p-8 min-h-[400px]">
-                            <div className="flex items-center gap-3 mb-4">
-                                <span className="bg-gradient-to-r from-[#3299FF] to-[#9248FF] text-white text-[10px] font-bold px-2 py-1 rounded uppercase">
-                                    {activeMovie.category}
-                                </span>
-                                <span className="text-gray-300 text-xs font-medium">{activeMovie.duration}</span>
-                            </div>
-
-                            <h3 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tighter">
-                                {activeMovie.title}
-                            </h3>
-
-                            <p className="text-gray-300 text-sm leading-relaxed mb-6 line-clamp-2 max-w-md">
-                                {activeMovie.desc}
-                            </p>
-
-                            <div className="flex items-center gap-4">
-                                <button className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-[#3299FF] hover:text-white transition-all">
-                                    <Play size={18} fill="currentColor" /> Play Now
-                                </button>
-                                <button className="p-3 bg-white/10 backdrop-blur-md rounded-xl text-white border border-white/10 hover:bg-white/20 transition-all">
-                                    <Plus size={20} />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* INTERACTIVE THUMBNAILS (The Grid Handle) */}
-                    <div className="lg:col-span-2 grid grid-cols-2 gap-4">
-                        {MOVIES.map((movie) => (
-                            <div
-                                key={movie.id}
-                                onClick={() => setSelectedId(movie.id)}
-                                className={`
-                  relative cursor-pointer rounded-2xl overflow-hidden transition-all duration-500 p-[2px]
-                  ${selectedId === movie.id
-                                        ? "bg-gradient-to-r from-[#3299FF] to-[#9248FF] ring-4 ring-[#3299FF]/20"
-                                        : "bg-transparent hover:bg-white/10"
-                                    }
-                `}
-                            >
-                                <div className="bg-[#1a1329] rounded-[14px] h-full overflow-hidden">
-                                    <div className="relative aspect-video">
-                                        <img src={movie.image} className="w-full h-full object-cover" alt="" />
-                                        <div className={`absolute inset-0 bg-[#3299FF]/20 transition-opacity ${selectedId === movie.id ? 'opacity-100' : 'opacity-0'}`} />
+                            {/* Header Row */}
+                            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                                <div className="space-y-4">
+                                    {/* Specialized USB Badge */}
+                                    <div className="inline-flex items-center gap-2 bg-cyan-400 text-black px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(34,211,238,0.4)]">
+                                        <Zap size={14} fill="black" />
+                                        USB: Unique Story Branching
                                     </div>
 
-                                    <div className="p-3">
-                                        <h4 className="text-white font-bold text-sm truncate">{movie.title}</h4>
-                                        <div className="flex items-center justify-between mt-2">
-                                            <div className="flex items-center gap-1 text-[10px] text-yellow-500 font-bold">
-                                                <Star size={10} fill="currentColor" /> {movie.rating}
+                                    <h2 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none">
+                                        Interactive Core: <span className="text-cyan-400">USB Prototypes</span>
+                                    </h2>
+                                </div>
+
+                                <button className="flex items-center gap-2 text-cyan-400 font-black text-xs uppercase tracking-widest hover:text-cyan-300 transition-colors group">
+                                    Live Narratives
+                                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            </div>
+
+                            {/* Main Content Area */}
+                            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-12">
+
+                                {/* THE INTERACTIVE CARD (Left) */}
+                                <div className="lg:col-span-1">
+                                    <motion.div
+                                        whileHover={{ y: -10, scale: 1.02 }}
+                                        className="relative aspect-[3/4] rounded-[2.5rem] border-[8px] border-[#251b3a] bg-[#0c0816] overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.9),0_0_40px_rgba(34,211,238,0.2)] group"
+                                    >
+                                        {/* Poster Image */}
+                                        <img
+                                            src="/fractured_choice_poster.png"
+                                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700"
+                                            alt="Fractured Choice"
+                                        />
+
+                                        {/* Skeuomorphic Inner Shadow */}
+                                        <div className="absolute inset-0 shadow-[inset_0_0_50px_rgba(0,0,0,1)] pointer-events-none" />
+
+                                        {/* Poster UI Overlays */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent p-8 flex flex-col justify-end">
+                                            <h3 className="text-3xl font-black text-white uppercase tracking-tighter mb-4 drop-shadow-2xl">
+                                                Fractured Choice
+                                            </h3>
+
+                                            <div className="flex gap-3">
+                                                <button className="flex-1 bg-cyan-400/20 backdrop-blur-xl border border-cyan-400/40 text-cyan-400 text-[10px] font-black uppercase py-3 rounded-xl shadow-lg hover:bg-cyan-400 hover:text-black transition-all">
+                                                    Decide Now
+                                                </button>
+                                                <button className="flex-1 bg-magenta-500/20 backdrop-blur-xl border border-magenta-500/40 text-[#ff00ff] text-[10px] font-black uppercase py-3 rounded-xl shadow-lg hover:bg-[#ff00ff] hover:text-black transition-all" style={{ borderColor: '#ff00ff66', color: '#ff00ff' }}>
+                                                    Take a Chance
+                                                </button>
                                             </div>
-                                            <span className="text-[10px] text-gray-500 font-bold border border-gray-700 px-1 rounded">
-                                                {movie.quality}
-                                            </span>
+                                        </div>
+                                    </motion.div>
+                                </div>
+
+                                {/* DESCRIPTIVE CONTENT (Right) */}
+                                <div className="lg:col-span-2 flex flex-col justify-center space-y-8">
+                                    <div className="p-8 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl">
+                                        <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
+                                            <div className="w-2 h-8 bg-cyan-400 rounded-full" />
+                                            The Future of Interactive Storytelling
+                                        </h4>
+                                        <p className="text-gray-400 leading-relaxed font-medium">
+                                            USB (Unique Story Branching) is our experimental prototype core for
+                                            non-linear cinematic experiences. Unlike traditional movies,
+                                            USB-enabled titles adapt in real-time to your subconscious choices
+                                            and tactical decisions.
+                                        </p>
+
+                                        <div className="grid grid-cols-2 gap-6 mt-8">
+                                            <div className="space-y-1">
+                                                <span className="text-cyan-400 font-black text-[10px] uppercase tracking-widest">Tech</span>
+                                                <p className="text-white font-bold">Neural Engine 2.0</p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <span className="text-cyan-400 font-black text-[10px] uppercase tracking-widest">Status</span>
+                                                <p className="text-white font-bold text-green-400">Live Beta</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
 
-                </div>
+                                    <div className="flex gap-6 items-center">
+                                        <button className="h-[56px] px-10 rounded-full bg-cyan-400 text-black font-black uppercase tracking-widest hover:bg-cyan-300 transition-all shadow-[0_10px_20px_rgba(34,211,238,0.2)]">
+                                            Enter Prototype Core
+                                        </button>
+                                        <button className="h-[56px] w-[56px] flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all">
+                                            <Plus size={20} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            {/* Bottom Glow */}
+                            <div className="absolute bottom-0 left-0 w-full h-[100px] bg-gradient-to-t from-cyan-400/5 to-transparent pointer-events-none" />
+                        </motion.div>
+
+                </section>
             </div>
 
             <style jsx global>{`

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Play, Info, Volume2, VolumeX } from "lucide-react";
+import { Play, Info, Plus, Volume2, VolumeX } from "lucide-react";
 
 export default function HeroSection() {
   const [isMuted, setIsMuted] = useState(true);
@@ -36,38 +36,40 @@ export default function HeroSection() {
         >
           {/* Logo / Title treatment */}
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-[#9248FF] font-black text-2xl tracking-tighter shadow-black drop-shadow-lg">P</span>
-            <p className="text-xs font-bold tracking-[0.2em] text-gray-300 uppercase shadow-black drop-shadow-md">Original Series</p>
+            <div className="w-8 h-8 rounded-lg bg-cyan-400 flex items-center justify-center shadow-[0_4px_10px_rgba(34,211,238,0.4)]">
+               <span className="text-black font-black text-xl tracking-tighter">P</span>
+            </div>
+            <p className="text-[10px] font-black tracking-[0.2em] text-cyan-400 uppercase drop-shadow-md">Original Series</p>
           </div>
           
-          <h1 className="text-6xl md:text-8xl font-black leading-[0.9] tracking-tighter mb-4 shadow-black drop-shadow-2xl">
+          <h1 className="text-6xl md:text-8xl font-black leading-[0.9] tracking-tighter mb-4 drop-shadow-2xl">
             CHRONOS<br/>
-            <span className="text-3xl md:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-orange-300 tracking-tight">
+            <span className="text-3xl md:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500 tracking-tight uppercase">
               The Beginning
             </span>
           </h1>
 
           {/* Metadata */}
-          <div className="flex items-center gap-4 text-sm font-semibold text-gray-300 mb-5 shadow-black drop-shadow-md">
-            <span className="text-green-400 font-bold">98% Match</span>
+          <div className="flex items-center gap-4 text-[10px] font-black tracking-widest text-gray-400 uppercase mb-8 drop-shadow-md">
+            <span className="text-cyan-400">98% Match</span>
             <span>2024</span>
-            <span className="border border-white/40 px-1 py-0.5 rounded text-[10px] text-white backdrop-blur-md">TV-MA</span>
+            <span className="border border-white/20 px-2 py-0.5 rounded-full text-[9px] text-white bg-white/5 backdrop-blur-md">TV-MA</span>
             <span>1 Season</span>
-            <span className="flex items-center gap-1 border border-white/30 px-1 rounded text-[10px] bg-black/50 backdrop-blur-md">
-              HD <span className="text-purple-400">4K</span>
+            <span className="flex items-center gap-1 border border-white/10 px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-md">
+              HD <span className="text-cyan-400">4K</span>
             </span>
           </div>
           
-          <p className="max-w-xl text-sm md:text-base text-gray-200 leading-relaxed shadow-black drop-shadow-lg mb-8 font-medium">
+          <p className="max-w-xl text-sm md:text-base text-gray-300/90 leading-relaxed drop-shadow-lg mb-10 font-medium">
             In a world where time is the only currency left, one man must journey to the edge of the galaxy to find the source of eternity before his clock runs out.
           </p>
           
-          <div className="flex flex-wrap items-center gap-4">
-            <button className="bg-white text-black px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-bold flex items-center gap-2 hover:bg-gray-200 transition-colors shadow-2xl">
-              <Play size={24} className="fill-current" /> Play
+          <div className="flex flex-wrap items-center gap-6">
+            <button className="bg-cyan-400 hover:bg-cyan-300 text-black px-8 md:px-10 py-3.5 rounded-full text-xs font-black tracking-widest uppercase flex items-center gap-3 transition-all scale-100 hover:scale-105 shadow-[0_15px_30px_rgba(34,211,238,0.2)]">
+              <Play size={20} className="fill-current" /> Watch Now
             </button>
-            <button className="bg-[#413955]/70 hover:bg-[#413955] backdrop-blur-xl text-white px-6 md:px-8 py-3 rounded-md text-base md:text-lg font-bold flex items-center gap-2 transition-colors border border-white/10 shadow-2xl">
-              <Info size={24} /> More Info
+            <button className="bg-white/5 hover:bg-white/10 backdrop-blur-xl text-white px-8 md:px-10 py-3.5 rounded-full text-xs font-black tracking-widest uppercase flex items-center gap-3 transition-all border border-white/10 scale-100 hover:scale-105 shadow-2xl">
+              <Plus size={20} /> Add to List
             </button>
           </div>
         </motion.div>

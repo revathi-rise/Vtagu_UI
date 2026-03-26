@@ -20,13 +20,14 @@ export const metadata = {
 export default function Home() {
   return (
     <main className="min-h-screen bg-background-base selection:bg-primary/30">
-      
+
       <HeroSection />
+      <ContinueWatching />
       <InteractiveHero />
       <TrendingSection />
       <NewReleases />
       <MovieGenres />
-      <ContinueWatching />
+
 
     </main>
   );

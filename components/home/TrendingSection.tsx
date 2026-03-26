@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Zap, Play, Plus } from 'lucide-react';
+import { motion } from 'framer-motion';
 import SectionTitle from './SectionTitle';
 
 const TRENDING_MOVIES = [
@@ -42,7 +43,13 @@ export default function TrendingLandscape() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
 
           {TRENDING_MOVIES.map((movie) => {
             const isHovered = hoveredId === movie.id;
@@ -54,103 +61,105 @@ export default function TrendingLandscape() {
                 onMouseEnter={() => handleMouseEnter(movie.id)}
                 onMouseLeave={handleMouseLeave}
               >
-                {/* Gradient Border */}
+                {/* Card */}
                 <div
                   className={`
-                    rounded-2xl p-[2px] transition-all duration-300
+                    bg-[#0c0816] rounded-[2rem] overflow-hidden
+                    transition-all duration-500 border-[8px]
                     ${isHovered
-                      ? "bg-gradient-to-r from-[#3299FF] to-[#9248FF] shadow-lg"
-                      : "bg-transparent"}
+                      ? "scale-[1.05] -translate-y-2 border-[#251b3a] shadow-[0_25px_50px_rgba(0,0,0,0.8),0_0_30px_rgba(34,211,238,0.3)]"
+                      : "border-[#1a1329] shadow-lg"}
                   `}
                 >
-                  {/* Card */}
-                  <div
-                    className={`
-                      bg-[#1a1329] rounded-[14px] overflow-hidden
-                      transition-all duration-300
-                      ${isHovered ? "scale-[1.04]" : ""}
-                    `}
-                  >
 
-                    {/* Media */}
-                    <div className="relative aspect-video overflow-hidden">
+                  {/* Media */}
+                  <div className="relative aspect-video overflow-hidden rounded-[1.5rem]">
 
-                      {/* Thumbnail */}
-                      <img
-                        src={`https://picsum.photos/seed/${movie.id + 22}/800/450`}
-                        alt={movie.title}
-                        className={`
+                    {/* Thumbnail */}
+                    <img
+                      src={`https://picsum.photos/seed/${movie.id + 22}/800/450`}
+                      alt={movie.title}
+                      className={`
                           absolute inset-0 w-full h-full object-cover
-                          transition-opacity duration-500
-                          ${isHovered ? "opacity-0" : "opacity-100"}
+                          transition-all duration-500
+                          ${isHovered ? "opacity-30 scale-110" : "opacity-100 brightness-75"}
                         `}
-                      />
+                    />
 
-                      {/* Preview */}
-                      <img
-                        src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueW9ueW9ueW9ueW9ueW9ueW9ueW9ueW9ueW9ueW9ueW9ueSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKMGpxxcaeqpI0o/giphy.gif"
-                        className={`
-                          absolute inset-0 w-full h-full object-cover
-                          transition-opacity duration-500
-                          ${isHovered ? "opacity-70" : "opacity-0"}
-                        `}
-                        alt="Preview"
-                      />
+                    {/* Skeuomorphic Inner Shadow */}
+                    <div className="absolute inset-0 shadow-[inset_0_0_30px_rgba(0,0,0,0.7)] pointer-events-none" />
 
-                      {/* Gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#1a1329] via-transparent to-transparent" />
+                    {/* Play Button Overlay (Cyan) */}
+                    <div className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${isHovered ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}>
+                      <div className="w-12 h-12 rounded-full bg-cyan-400/20 backdrop-blur-md flex items-center justify-center border border-cyan-400/40 shadow-[0_0_20px_rgba(34,211,238,0.3)]">
+                        <Play size={20} className="text-cyan-400 fill-cyan-400 ml-1" />
+                      </div>
                     </div>
 
-                    {/* Info Section */}
-                    <div className="p-4 flex flex-col justify-between min-h-[140px]">
-
-                      {/* Title */}
-                      <div>
-                        <h4 className="text-lg font-bold text-white truncate">
-                          {movie.title}
-                        </h4>
-
-                        <div className="flex items-center gap-2 mt-1 text-[11px] font-semibold text-gray-400">
-                          <span className="text-[#3299FF]">98% Match</span>
-                          <span className="px-1 border border-gray-600 rounded text-[9px] text-white">
-                            {movie.quality}
-                          </span>
-                          <span>{movie.duration}</span>
-                        </div>
-                      </div>
-
-                      {/* Description (hover only) */}
-                      <div
-                        className={`
-                          transition-all duration-300 ease-in-out overflow-hidden
-                          ${isHovered ? "max-h-[60px] opacity-100 mt-2" : "max-h-0 opacity-0"}
+                    {/* Preview Image/Gif */}
+                    <img
+                      src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueW9ueW9ueW9ueW9ueW9ueW9ueW9ueW9ueW9ueW9ueW9ueSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKMGpxxcaeqpI0o/giphy.gif"
+                      className={`
+                          absolute inset-0 w-full h-full object-cover
+                          transition-opacity duration-700
+                          ${isHovered ? "opacity-60" : "opacity-0"}
                         `}
-                      >
-                        <p className="text-[12px] text-gray-400 line-clamp-2">
-                          {movie.desc}
-                        </p>
+                      alt="Preview"
+                    />
+
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+                  </div>
+
+                  {/* Info Section */}
+                  <div className="p-5 flex flex-col justify-between min-h-[140px]">
+
+                    {/* Title */}
+                    <div>
+                      <h4 className="text-sm font-black text-white uppercase tracking-widest truncate">
+                        {movie.title}
+                      </h4>
+
+                      <div className="flex items-center gap-2 mt-2 text-[10px] font-black tracking-widest text-gray-400 uppercase">
+                        <span className="text-cyan-400">98% Match</span>
+                        <span className="px-1.5 border border-white/10 rounded-sm text-[9px] text-white bg-white/5">
+                          {movie.quality}
+                        </span>
+                        <span>{movie.duration}</span>
                       </div>
-
-                      {/* Buttons (ALWAYS visible) */}
-                      <div className="flex items-center gap-2 mt-3">
-                        <button className="flex-1 bg-gradient-to-r from-[#3299FF] to-[#9248FF] text-white font-bold py-2 rounded-lg text-xs flex items-center justify-center gap-1 hover:opacity-90 transition">
-                          <Play size={14} fill="currentColor" />
-                          Play
-                        </button>
-
-                        <button className="p-2 bg-white/10 hover:bg-white/20 rounded-lg border border-white/5">
-                          <Plus size={16} className="text-white" />
-                        </button>
-                      </div>
-
                     </div>
+
+                    {/* Description (hover only) */}
+                    <div
+                      className={`
+                          transition-all duration-500 ease-in-out overflow-hidden
+                          ${isHovered ? "max-h-[60px] opacity-100 mt-3" : "max-h-0 opacity-0"}
+                        `}
+                    >
+                      <p className="text-[11px] text-gray-400 leading-relaxed font-medium line-clamp-2">
+                        {movie.desc}
+                      </p>
+                    </div>
+
+                    {/* Buttons (ALWAYS visible in new style) */}
+                    <div className="flex items-center gap-3 mt-4">
+                      <button className="flex-1 bg-cyan-400 text-black font-black uppercase tracking-widest py-2 rounded-full text-[10px] flex items-center justify-center gap-1.5 hover:bg-cyan-300 transition-all shadow-[0_4px_10px_rgba(34,211,238,0.2)]">
+                        <Play size={14} fill="currentColor" />
+                        Watch
+                      </button>
+
+                      <button className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-full border border-white/10 transition-all text-white">
+                        <Plus size={14} />
+                      </button>
+                    </div>
+
                   </div>
                 </div>
               </div>
             );
           })}
 
-        </div>
+        </motion.div>
       </div>
     </section>
   );

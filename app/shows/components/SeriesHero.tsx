@@ -36,7 +36,7 @@ export default function SeriesHero() {
         >
           {/* Top Badge */}
           <div className="flex items-center gap-3 mb-6">
-            <span className="bg-[#9248FF] text-white text-[10px] md:text-xs font-black uppercase px-2 py-1 tracking-widest rounded-sm shadow-[0_0_15px_rgba(146,72,255,0.5)]">
+            <span className="bg-cyan-400 text-black text-[10px] md:text-xs font-black uppercase px-2 py-1 tracking-widest rounded-sm shadow-[0_0_15px_rgba(34,211,238,0.5)]">
               PrimeTime Exclusive
             </span>
             <span className="text-xs md:text-sm font-black tracking-[0.2em] text-white uppercase shadow-black drop-shadow-md">
@@ -44,31 +44,31 @@ export default function SeriesHero() {
             </span>
           </div>
           
-          <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-4 drop-shadow-2xl">
+          <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-4 drop-shadow-2xl uppercase">
             THE REALM
           </h1>
 
           {/* Metadata */}
-          <div className="flex flex-wrap items-center gap-4 text-sm font-bold text-gray-300 mb-6 shadow-black drop-shadow-md">
-            <span className="text-green-500 font-black">98% Match</span>
+          <div className="flex flex-wrap items-center gap-4 text-[10px] font-black tracking-widest text-gray-400 uppercase mb-8 drop-shadow-md">
+            <span className="text-cyan-400 font-black">98% Match</span>
             <span>2024</span>
-            <span className="border border-white/40 px-1.5 py-0.5 rounded text-[10px] text-white backdrop-blur-md">TV-MA</span>
+            <span className="border border-white/20 px-2 py-0.5 rounded-full text-[9px] text-white bg-white/5 backdrop-blur-md">TV-MA</span>
             <span>4 Seasons</span>
-            <span className="flex items-center gap-1 border border-white/30 px-1.5 rounded text-[10px] bg-black/50 backdrop-blur-md">
-              4K <span className="text-[#9248FF] font-bold">Dolby Vision</span>
+            <span className="flex items-center gap-1 border border-white/10 px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-md">
+              4K <span className="text-cyan-400 font-bold uppercase">Dolby Vision</span>
             </span>
           </div>
           
-          <p className="max-w-xl text-sm md:text-base text-gray-200 leading-relaxed shadow-black drop-shadow-xl mb-8 font-medium">
+          <p className="max-w-xl text-sm md:text-base text-gray-300/90 leading-relaxed drop-shadow-xl mb-10 font-medium">
             Betrayal. Power. Survival. In the gripping fourth season, the factions make their final moves as the old world crumbles. The throne remains empty, but not for long. 
           </p>
           
-          <div className="flex flex-wrap items-center gap-4">
-            <button className="bg-white text-black px-8 md:px-10 py-3.5 rounded-md text-base md:text-lg font-black flex items-center gap-3 hover:bg-gray-200 transition-colors shadow-[0_10px_30px_rgba(255,255,255,0.2)]">
-              <Play size={24} className="fill-current" /> Play S4:E1
+          <div className="flex flex-wrap items-center gap-6">
+            <button className="bg-cyan-400 hover:bg-cyan-300 text-black px-8 md:px-10 py-3.5 rounded-full text-xs font-black tracking-widest uppercase flex items-center gap-3 transition-all scale-100 hover:scale-105 shadow-[0_15px_30px_rgba(34,211,238,0.2)]">
+              <Play size={20} className="fill-current" /> Watch S4:E1
             </button>
-            <button className="bg-[#413955]/70 hover:bg-[#413955] backdrop-blur-xl text-white px-8 md:px-10 py-3.5 rounded-md text-base md:text-lg font-bold flex items-center gap-3 transition-colors border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
-              <ListVideo size={24} /> Episodes 
+            <button className="bg-white/5 hover:bg-white/10 backdrop-blur-xl text-white px-8 md:px-10 py-3.5 rounded-full text-xs font-black tracking-widest uppercase flex items-center gap-3 transition-all border border-white/10 scale-100 hover:scale-105 shadow-2xl">
+               <ListVideo size={20} /> Episodes 
             </button>
           </div>
         </motion.div>
