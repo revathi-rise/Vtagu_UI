@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import Sidebar from '@/components/interactive/Sidebar';
 import Hero from '@/components/interactive/Hero';

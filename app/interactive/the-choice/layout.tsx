@@ -1,4 +1,3 @@
-"use client";
 import React from 'react';
 import Sidebar from '@/components/interactive/Sidebar';
 
@@ -18,19 +17,6 @@ export default function InteractiveMovieLayout({
             <div className="flex-1 flex flex-col min-h-screen">
                 {children}
             </div>
-            
-            <style jsx global>{`
-                .no-scrollbar::-webkit-scrollbar { display: none; }
-                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-                
-                @keyframes pulse-soft {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.5; }
-                }
-                .animate-pulse-soft {
-                    animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-                }
-            `}</style>
         </div>
     );
 }

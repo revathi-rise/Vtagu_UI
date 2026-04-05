@@ -196,4 +196,26 @@ body {
   .skeuo-tab-inactive {
     @apply text-white/40 hover:text-white/80 transition-colors uppercase text-xs tracking-widest font-black;
   }
+
+  /* Interactive Experience Utilities */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
