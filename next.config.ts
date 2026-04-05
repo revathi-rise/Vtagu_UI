@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'commondatastorage.googleapis.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.vtagu.in',
       }
     ],
   },

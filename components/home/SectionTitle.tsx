@@ -10,112 +10,100 @@ interface SectionTitleProps {
   subtitle: string;
   Icon: LucideIcon;
   gradientText?: string;
-  viewAllHref?: string; // Added for the "View All" functionality
+  viewAllHref?: string;
 }
 
 export default function SectionTitle({ title, subtitle, Icon, gradientText, viewAllHref }: SectionTitleProps) {
   const parts = gradientText ? title.split(gradientText) : [title, ""];
 
   return (
-    <div className="flex flex-col gap-1 select-none overflow-visible w-full group">
+    <div className="flex flex-col gap-2 select-none overflow-visible w-full group/title">
 
-      {/* 1. Sub-Header Row */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      {/* 1. Sub-Header Row: Cinematic Reveal */}
+      <div className="flex items-center gap-3">
         <div className="relative flex items-center justify-center">
-          <div className="absolute inset-0 bg-[#3299FF]/30 blur-md rounded-full animate-pulse" />
+          <div className="absolute inset-0 bg-cyan-400/40 blur-lg rounded-full animate-pulse" />
           <Icon
-            className="text-[#3299FF] relative z-10 
-                       w-[14px] h-[14px] 
-                       tablet:w-[16px] tablet:h-[16px] 
-                       desktop:w-[18px] desktop:h-[18px]"
+            className="text-cyan-400 relative z-10 
+                       w-[16px] h-[16px] 
+                       tablet:w-[18px] tablet:h-[18px] 
+                       desktop:w-[20px] desktop:h-[20px]
+                       transition-transform duration-700 group-hover/title:rotate-[360deg] group-hover/title:scale-125"
           />
         </div>
 
-        <span className="font-bold uppercase tracking-[0.3em] text-gray-400/80 italic text-[9px] tablet:text-[11px]">
+        <span 
+          className="font-bold uppercase tracking-[0.4em] text-gray-500 italic text-[10px] tablet:text-[12px] group-hover/title:text-cyan-400 transition-colors duration-500" 
+          style={{ fontFamily: 'var(--font-inter)' }}
+        >
           {subtitle}
         </span>
 
-        {/* The thin line from your reference image */}
-        <div className="h-[1px] flex-1 max-w-[40px] tablet:max-w-[60px] bg-gray-700" />
+        {/* The thin line: Animated growth */}
+        <div className="h-[1px] flex-1 max-w-[60px] tablet:max-w-[100px] bg-gradient-to-r from-gray-700 to-transparent group-hover/title:from-cyan-400 group-hover/title:max-w-[150px] transition-all duration-700" />
       </div>
 
       {/* 2. Main Header & "View All" Row */}
-      <div className="flex items-end justify-between overflow-visible">
+      <div className="flex items-end justify-between overflow-visible mt-1">
         <div className="relative block overflow-visible">
-          <h2 className="
-            font-black tracking-tighter text-white uppercase italic leading-[1] overflow-visible
-            text-[22px] 
-            tablet:text-[28px] 
-            laptop:text-[36px] 
-            desktop:text-[44px]
-            tv:text-[56px]
-          ">
+          <h3 
+            className="font-bold tracking-tighter text-white uppercase leading-none overflow-visible text-[26px] md:text-[34px] lg:text-[40px] transition-all duration-500 group-hover/title:tracking-tight"
+            style={{ fontFamily: 'var(--font-poppins)' }}
+          >
             {parts[0]}
             {gradientText && (
               <span
-                className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-[#3299FF] to-[#9248FF] pr-2 -mr-2"
+                className="relative inline-block text-gradient-neon pr-3 -mr-3 drop-shadow-[0_0_15px_rgba(50,153,255,0.3)]"
                 style={{ WebkitBackgroundClip: 'text', WebkitBoxDecorationBreak: 'clone' }}
               >
                 {gradientText}
               </span>
             )}
             {parts[1]}
-          </h2>
+          </h3>
         </div>
 
-        {/* "View All" Action Group */}
+        {/* "View All" Action Group: Premium Skeuomorphic Action */}
         <Link
           href={viewAllHref || '#'}
-          className="flex items-center gap-2 tablet:gap-3 group/btn cursor-pointer no-underline transition-transform hover:translate-x-1"
+          className="flex items-center gap-3 tablet:gap-5 group/btn cursor-pointer no-underline transition-all hover:translate-x-2"
         >
-          {/* Text Label */}
-          <div className="flex items-baseline gap-1">
-            <span className="
-      text-white font-medium 
-      text-[14px] 
-      tablet:text-[16px] 
-      desktop:text-[18px] 
-      tv:text-[22px]
-    ">
+          {/* Text Labels */}
+          <div className="hidden sm:flex items-baseline gap-1.5" style={{ fontFamily: 'var(--font-inter)' }}>
+            <span className="text-white/60 font-medium text-[16px] tablet:text-[18px] group-hover/btn:text-white transition-colors duration-300">
               View
             </span>
-            <span className="
-      text-[#3299FF] font-black italic uppercase
-      text-[12px] 
-      tablet:text-[14px] 
-      desktop:text-[16px] 
-      tv:text-[20px]
-    ">
-              All
+            <span className="text-[#3299FF] font-black italic uppercase text-[14px] tablet:text-[16px] group-hover/btn:text-cyan-300 transition-all duration-300 tracking-widest">
+              Catalog
             </span>
           </div>
 
-          {/* Circle Icon */}
+          {/* Button Bezel */}
           <div className="
-    relative flex items-center justify-center rounded-full border border-white/10 bg-white/5 
-    transition-all duration-300 group-hover/btn:border-[#3299FF]/50 group-hover/btn:bg-[#3299FF]/10
-    w-[28px] h-[28px]
-    tablet:w-[34px] tablet:h-[34px]
-    desktop:w-[40px] desktop:h-[40px]
-  ">
+            relative flex items-center justify-center rounded-2xl glass-panel
+            transition-all duration-500 group-hover/btn:border-cyan-400/50 group-hover/btn:bg-cyan-400/10 group-hover/btn:shadow-[0_0_20px_rgba(34,211,238,0.3)]
+            w-[40px] h-[40px]
+            tablet:w-[48px] tablet:h-[48px]
+            desktop:w-[54px] desktop:h-[54px]
+          ">
             <ChevronRight
               className="
-        text-gray-400 transition-colors group-hover/btn:text-white
-        w-[14px] h-[14px]
-        tablet:w-[18px] tablet:h-[18px]
-      "
+                text-gray-400 transition-all duration-500 group-hover/btn:text-white group-hover/btn:scale-125
+                w-[18px] h-[18px]
+                tablet:w-[22px] tablet:h-[22px]
+              "
             />
           </div>
         </Link>
       </div>
 
-      {/* 3. Bottom Gradient Glow Line */}
+      {/* 3. Bottom Kinetic Glow Line */}
       <motion.div
         initial={{ width: 0, opacity: 0 }}
-        whileInView={{ width: "60px", opacity: 1 }}
+        whileInView={{ width: "100px", opacity: 1 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.8, ease: "circOut" }}
-        className="h-[3px] mt-2 bg-gradient-to-r from-[#3299FF] to-transparent rounded-full shadow-[0_0_15px_rgba(50,153,255,0.5)]"
+        transition={{ duration: 1, ease: "circOut", delay: 0.2 }}
+        className="h-[4px] mt-2 bg-gradient-to-r from-cyan-400 via-[#3299FF] to-transparent rounded-full shadow-[0_0_20px_rgba(34,211,238,0.4)] group-hover/title:w-[200px] transition-all duration-1000"
       />
     </div>
   );

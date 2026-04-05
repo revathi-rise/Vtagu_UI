@@ -2,217 +2,198 @@
 
 import React, { useState, useRef } from "react";
 import Image from "next/image";
-import { Play, Plus, Star } from "lucide-react";
+import { Play, Plus, Star, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, EffectFade } from "swiper/modules";
 import type { Swiper as SwiperType } from 'swiper';
+import { Poster } from "@/lib/vtagu.api";
+import Link from "next/link";
 
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
 
-export const featuredMovies = [
-  {
-    id: 1,
-    title: "The Last Hunt",
-    rating: 4.9,
-    category: "Trending Now",
-    description: "In a world where survival is the only law, one man must face his past to protect his future.",
-    image: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=3840&auto=format&fit=crop",
-  },
-  {
-    id: 2,
-    title: "Dark Horizon",
-    rating: 4.8,
-    category: "New Releases",
-    description: "A mysterious force threatens the universe and only one crew can stop it. An epic journey into the unknown.",
-    image: "https://images.unsplash.com/photo-1505686994434-e3cc5abf1330?q=80&w=3840&auto=format&fit=crop",
-  },
-  {
-    id: 3,
-    title: "Neon Jungle",
-    rating: 4.7,
-    category: "Sci-Fi",
-    description: "The neon lights hide a dark secret. Follow K-0 as they navigate corporate wars in 2099.",
-    image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=3840&auto=format&fit=crop",
-  }
-];
+interface HeroSectionProps {
+  posters: Poster[];
+}
 
-export default function HeroSection() {
+const IMAGE_BASE_URL = "https://www.vtagu.in/";
+
+export default function HeroSection({ posters = [] }: HeroSectionProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const swiperRef = useRef<SwiperType | null>(null);
+
+  const videoSlide = {
+    poster_id: -1,
+    title: "VTAGU ORIGINALS",
+    category: "FEATURED",
+    rating: 5.0,
+    description: "Experience the next level of immersive storytelling. Watch our latest original series and movies in stunning 4K HDR.",
+    type: "video" as const,
+    videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+    image: "/assets/dashboard/thumb1.png",
+    link: "#"
+  };
+
+  const movieSlides = posters.map((poster: Poster) => ({
+    ...poster,
+    title: poster.poster_id === 28 ? "THE RISE OF VTAGU" : `PRIME EXCLUSIVE ${poster.poster_id}`,
+    category: "EXCLUSIVE",
+    rating: 4.8,
+    description: "Discover a curated selection of premium content tailored for your entertainment. High-quality streaming across all your devices.",
+    type: "image" as const,
+    image: `${IMAGE_BASE_URL}${poster.path}`,
+  }));
+
+  const allSlides = [videoSlide, ...movieSlides];
 
   const handleThumbnailClick = (index: number) => {
     swiperRef.current?.slideToLoop(index);
   };
 
+  if (allSlides.length === 0) {
+    return (
+      <section className="relative w-full h-[60vh] md:h-screen flex items-center justify-center bg-[#0f0a19]">
+        <div className="text-white/20 text-sm font-bold tracking-[0.3em] uppercase animate-pulse">
+          Premium Content Loading...
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className="hero-container relative w-full h-screen overflow-hidden bg-[#0f0a19]">
+    <section className="relative w-full h-screen overflow-hidden bg-[#0f0a19]">
       <Swiper
         modules={[Autoplay, Pagination, EffectFade]}
         effect="fade"
-        autoplay={{ delay: 6000, disableOnInteraction: false }}
+        autoplay={{ delay: 10000, disableOnInteraction: false }}
         loop
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
         className="h-full"
       >
-        {featuredMovies.map((movie, index) => (
+        {allSlides.map((item: any, index: number) => (
           <SwiperSlide key={index}>
             <div className="relative w-full h-full flex items-center">
-              
-              {/* Cinematic Background */}
+
+              {/* Cinematic Background Layer */}
               <div
-                className="absolute inset-0 transition-transform duration-[10s]"
-                style={{
-                  animation: activeIndex === index ? 'kenburns 20s infinite alternate' : 'none'
-                }}
+                className={`absolute inset-0 transition-transform duration-[10s] ${activeIndex === index ? 'animate-kenburns scale-110' : ''}`}
               >
-                <Image 
-                  src={movie.image} 
-                  alt={movie.title} 
-                  fill 
-                  priority={index === 0}
-                  className="object-cover"
-                  sizes="100vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#0f0a19] via-[#0f0a19]/70 md:via-[#0f0a19]/30 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0f0a19] via-transparent to-transparent" />
+                {item.type === "video" && activeIndex === index ? (
+                  <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden bg-black">
+                    <video
+                      key={item.videoUrl}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="absolute inset-0 w-full h-full object-cover"
+                      poster={item.image}
+                    >
+                      <source src={item.videoUrl} type="video/mp4" />
+                    </video>
+                  </div>
+                ) : (
+                  <Image
+                    src={item.image || "/assets/placeholder.png"}
+                    alt={item.title || "PrimeTime Title"}
+                    fill
+                    priority={index === 0}
+                    className="object-cover"
+                    sizes="100vw"
+                  />
+                )}
+                
+                {/* Multi-layered Gradients for Cinematic Depth */}
+                <div className="absolute inset-0 bg-gradient-to-r from-[#0f0a19] via-[#0f0a19]/60 to-transparent z-10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0f0a19] via-transparent to-transparent z-10" />
+                <div className="absolute inset-0 bg-black/20 z-10" />
               </div>
 
-              {/* Content Wrapper */}
-              <div className="content-container relative z-10 w-full mx-auto px-[5%]">
-                <motion.div 
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                  className="max-w-full lg:max-w-[70%] xl:max-w-[60%] 2xl:max-w-[50%]"
+              {/* Content Layer: Slide Up Intersection */}
+              <div className="relative z-20 w-full mx-auto px-[5%] md:px-[8%] lg:px-[10%]">
+                <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={activeIndex === index ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
+                  transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
+                  className="max-w-4xl"
                 >
-                  
-                  {/* Badge Row */}
-                  <div className="flex items-center gap-4 mb-4 md:mb-6">
-                    <span className="badge px-4 py-1.5 rounded-sm bg-gradient-to-r from-[#3299FF] to-[#9248FF] text-white font-black uppercase tracking-widest shadow-lg shadow-blue-500/20">
-                      {movie.category}
-                    </span>
-                    <div className="flex items-center gap-2 text-white bg-black/40 backdrop-blur-xl py-1.5 px-4 rounded-full border border-white/10">
-                      <Star className="w-4 h-4 md:w-5 md:h-5 text-[#FACC15] fill-[#FACC15]" />
-                      <span className="font-bold text-sm md:text-base">{movie.rating}</span>
+                  <div className="flex flex-col gap-8">
+                    {/* Badge System */}
+                    <div className="flex items-center gap-4">
+                      <div className="glass-panel px-5 py-2 rounded-full shadow-2xl border-white/20 flex items-center gap-2">
+                        <Zap size={14} className="text-cyan-400 fill-cyan-400 animate-pulse" />
+                        <span className="text-[10px] md:text-[12px] font-bold text-white tracking-[0.2em] uppercase">
+                          {item.category}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 bg-black/60 backdrop-blur-xl py-2 px-5 rounded-full border border-white/10 shadow-2xl">
+                        <Star className="w-4 h-4 text-[#FACC15] fill-[#FACC15]" />
+                        <span className="font-bold text-white text-[12px] md:text-[14px]">{item.rating}</span>
+                      </div>
+                    </div>
+
+                    {/* Main Responsive Title: Poppins Bold */}
+                    <h1 
+                      className="text-[40px] md:text-[64px] lg:text-[80px] font-bold text-white leading-[0.95] tracking-tighter drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+                      style={{ fontFamily: 'var(--font-poppins)' }}
+                    >
+                      {item.title}
+                    </h1>
+
+                    {/* Cinematic Description: Inter Regular */}
+                    <p className="text-[16px] md:text-[18px] lg:text-[20px] text-white/70 leading-relaxed max-w-2xl font-normal drop-shadow-lg" style={{ fontFamily: 'var(--font-inter)' }}>
+                      {item.description}
+                    </p>
+
+                    {/* Primary Actions: Skeuomorphic Buttons */}
+                    <div className="flex flex-wrap items-center gap-6 mt-4">
+                      <Link
+                        href={item.link || "#"}
+                        className="h-14 md:h-16 px-10 md:px-12 flex items-center justify-center gap-4 rounded-full bg-cyan-400 text-black font-bold uppercase tracking-widest transition-all hover:scale-110 hover:bg-cyan-300 hover:shadow-[0_20px_40px_rgba(34,211,238,0.4)] active:scale-95 shadow-2xl"
+                      >
+                        <Play className="w-6 h-6 fill-black" />
+                        Watch Now
+                      </Link>
+                      <button className="h-14 md:h-16 px-10 md:px-12 flex items-center justify-center gap-4 rounded-full glass-panel text-white font-bold uppercase tracking-widest transition-all hover:bg-white/10 active:scale-95 border-white/20 shadow-2xl">
+                        <Plus className="w-6 h-6" />
+                        Watchlist
+                      </button>
+                    </div>
+
+                    {/* Dynamic Interactive Thumbnails (Laptop+) */}
+                    <div className="hidden lg:flex gap-6 mt-12 overflow-visible">
+                      {allSlides.slice(0, 4).map((thumbItem, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleThumbnailClick(idx)}
+                          className={`
+                            relative w-48 xl:w-56 aspect-video rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] skeuo-card border-[3px] 
+                            ${activeIndex === idx
+                              ? "scale-110 -translate-y-2 border-cyan-400 z-30 shadow-[0_30px_60px_rgba(0,0,0,0.8),0_0_30px_rgba(34,211,238,0.3)]"
+                              : "border-[#1a1329] opacity-40 hover:opacity-100 hover:scale-105 hover:border-white/20"
+                            }
+                          `}
+                        >
+                          <Image src={thumbItem.image} alt={thumbItem.title} fill sizes="20vw" className="object-cover" />
+                          {activeIndex === idx && (
+                            <div className="absolute bottom-0 left-0 h-1.5 bg-cyan-400 w-full animate-progress" />
+                          )}
+                        </button>
+                      ))}
                     </div>
                   </div>
-
-                  {/* Fluid Title */}
-                  <h1 className="hero-title text-white font-black leading-[1] tracking-tighter mb-6 md:mb-8 drop-shadow-2xl">
-                    {movie.title}
-                  </h1>
-
-                  {/* Responsive Description */}
-                  <p className="hero-description text-gray-300 leading-relaxed mb-8 md:mb-12 max-w-[95%] md:max-w-[85%]">
-                    {movie.description}
-                  </p>
-
-                  {/* Action Buttons */}
-                  <div className="flex flex-wrap items-center gap-4 md:gap-6 mb-12">
-                    <button className="h-[56px] px-10 flex items-center justify-center gap-3 rounded-full bg-cyan-400 text-black font-black uppercase tracking-widest transition-all hover:scale-105 hover:bg-cyan-300 active:scale-95 shadow-[0_10px_25px_rgba(34,211,238,0.3)]">
-                      <Play className="w-5 h-5 fill-black" />
-                      Watch Now
-                    </button>
-                    <button className="h-[56px] px-10 flex items-center justify-center gap-3 rounded-full bg-white/5 backdrop-blur-md text-white font-black uppercase tracking-widest transition-all hover:bg-white/10 border border-white/10 active:scale-95">
-                      <Plus className="w-5 h-5" />
-                      Add to List
-                    </button>
-                  </div>
-
-                  {/* Interactive Thumbnails (Laptop and above) */}
-                  <div className="hidden lg:flex gap-4 mt-8">
-                    {featuredMovies.map((item, idx) => (
-                      <button
-                        key={item.id}
-                        onClick={() => handleThumbnailClick(idx)}
-                        className={`group relative w-40 xl:w-48 aspect-video rounded-2xl overflow-hidden transition-all duration-300 border-[4px] shadow-lg ${
-                          activeIndex === idx 
-                            ? "border-cyan-400 scale-105 shadow-[0_0_25px_rgba(34,211,238,0.4)]" 
-                            : "border-[#1a1329] opacity-40 hover:opacity-100 hover:border-white/20"
-                        }`}
-                      >
-                        <Image src={item.image} alt={item.title} fill sizes="(max-width: 1024px) 0vw, 20vw" className="object-cover" />
-                        {activeIndex === idx && (
-                          <div className="absolute bottom-0 left-0 h-1 bg-cyan-400 w-full animate-progress shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-
                 </motion.div>
               </div>
             </div>
           </SwiperSlide>
         ))}
       </Swiper>
-
-      <style jsx global>{`
-        /* 1. Fluid Typography & Sizing using your Breakpoints */
-        :root {
-          --fs-title: clamp(2.5rem, 8vw, 4.5rem);
-          --fs-desc: clamp(1rem, 2vw, 1.25rem);
-          --btn-h: 3.5rem;
-          --btn-px: 2rem;
-        }
-
-        /* Desktop (1441px+) */
-        @media (min-width: 1441px) {
-          :root {
-            --fs-title: 6rem;
-            --fs-desc: 1.5rem;
-            --btn-h: 4rem;
-          }
-        }
-
-        /* TV (1921px+) */
-        @media (min-width: 1921px) {
-          :root {
-            --fs-title: 8rem;
-            --fs-desc: 2rem;
-            --btn-h: 5rem;
-            --btn-px: 3.5rem;
-          }
-          .content-container { max-width: 1800px; }
-        }
-
-        /* 4K TV (2560px+) */
-        @media (min-width: 2560px) {
-          :root {
-            --fs-title: 10rem;
-            --fs-desc: 2.5rem;
-            --btn-h: 6rem;
-          }
-          .content-container { max-width: 2400px; }
-        }
-
-        .hero-title { font-size: var(--fs-title); }
-        .hero-description { font-size: var(--fs-desc); }
-        .btn-primary, .btn-secondary { 
-          height: var(--btn-h); 
-          padding-left: var(--btn-px); 
-          padding-right: var(--btn-px);
-          font-size: calc(var(--fs-desc) * 0.9);
-        }
-
-        .badge { font-size: clamp(0.6rem, 1vw, 0.85rem); }
-
-        @keyframes kenburns {
-          0% { transform: scale(1); }
-          100% { transform: scale(1.15); }
-        }
-        @keyframes progress {
-          0% { width: 0%; }
-          100% { width: 100%; }
-        }
-        .animate-progress { animation: progress 6s linear forwards; }
-        
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
+      
+      {/* Cinematic Vignette Overlay */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] z-10" />
     </section>
   );
 }
