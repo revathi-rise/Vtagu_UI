@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import Image from 'next/image';
 import { Zap, Play, Plus, Film, ArrowLeft, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SectionTitle from './SectionTitle';
@@ -88,116 +89,115 @@ export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
                     onMouseEnter={() => handleMouseEnter(episode.episode_id)}
                     onMouseLeave={handleMouseLeave}
                   >
-                    {/* Full-Cover Premium Card */}
-                    <div
-                      className={`
-                        skeuo-card relative w-full aspect-[2/3.2] overflow-hidden
-                        transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]
-                        ${isHovered
-                          ? "scale-105 -translate-y-4 z-50 shadow-[0_45px_90px_rgba(0,0,0,0.95),0_0_40px_rgba(34,211,238,0.3)] border-cyan-400/30"
-                          : "scale-100 z-10 border-[#1a1329]"}
-                      `}
-                    >
-                      {/* Rotating Cinematic Border (Reduced opacity for subtlety) */}
-                      {isHovered && (
-                          <div className="absolute inset-0 rounded-[2rem] overflow-hidden pointer-events-none transition-opacity duration-500 z-20">
-                              <div 
-                                  className="absolute top-1/2 left-1/2 aspect-square w-[250%] -translate-x-1/2 -translate-y-1/2 animate-spin mix-blend-screen opacity-20" 
-                                  style={{ backgroundImage: 'conic-gradient(from 0deg, transparent 60%, rgba(139,92,246,0.4) 75%, #22d3ee 100%)', animationDuration: '4s' }}
-                              />
-                          </div>
-                      )}
-
-                      {/* Main Media Background */}
-                      <div className="absolute inset-0 w-full h-full bg-[#0c0816]">
-                          {/* Thumbnail */}
-                          <img
-                            src={episode.image && typeof episode.image === 'string' && episode.image !== '0' 
-                              ? episode.image 
-                              : `https://picsum.photos/seed/${episode.episode_id + 500}/600/900`}
-                            alt={episode.title}
-                            className={`
-                                absolute inset-0 w-full h-full object-cover
-                                transition-all duration-1000
-                                ${isHovered ? "opacity-0 scale-110" : "opacity-100 brightness-90"}
-                              `}
-                          />
-
-                          {/* GIF/Video Preview Layer */}
-                          {isHovered && (
-                            <motion.div 
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ duration: 0.8 }}
-                              className="absolute inset-0 w-full h-full z-0"
-                            >
-                              <img
-                                src={previewGif}
-                                alt="Preview"
-                                className="w-full h-full object-cover brightness-75 scale-105"
-                              />
-                            </motion.div>
-                          )}
-                      </div>
-
-                      {/* Content Overlay (Bottom-to-Top Gradient) */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10 pointer-events-none" />
-
-                      {/* Info & Actions Layer */}
-                      <div className="absolute inset-0 p-6 flex flex-col justify-end z-20">
-                        
-                        {/* Premium Badge & Icons Row */}
-                        <div className={`flex items-center gap-3 mb-6 transition-all duration-500 ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-100'}`}>
-                          {/* Premium Pill */}
-                          <div className="bg-[#ff9900] text-black text-[10px] font-black uppercase px-4 py-1.5 rounded-full tracking-wider shadow-[0_5px_15px_rgba(255,153,0,0.4)]">
-                            PREMIUM
-                          </div>
-                          
-                          {/* Action Group */}
-                          <div className="flex items-center gap-2 ml-auto pointer-events-auto">
-                            <motion.button 
-                              whileHover={{ scale: 1.1 }}
-                              className="w-10 h-10 rounded-xl bg-cyan-400 flex items-center justify-center text-black shadow-lg"
-                            >
-                              <Play size={20} className="fill-black ml-0.5" />
-                            </motion.button>
-                            <motion.button 
-                              whileHover={{ scale: 1.1 }}
-                              className="w-10 h-10 rounded-xl bg-[#1a1329]/80 backdrop-blur-md flex items-center justify-center text-cyan-400 border border-white/10"
-                            >
-                              <Zap size={18} />
-                            </motion.button>
-                          </div>
-                        </div>
-
-                        {/* Title & Metadata */}
-                        <div className="space-y-2">
-                           <h4 
-                            className="text-[20px] md:text-[24px] font-bold text-white tracking-tight leading-tight"
-                            style={{ fontFamily: 'var(--font-poppins)' }}
-                          >
-                            {episode.title}
-                          </h4>
-
-                          <div className="flex items-center gap-2 text-[12px] font-bold tracking-widest text-cyan-400 uppercase" style={{ fontFamily: 'var(--font-inter)' }}>
-                            <span className="opacity-80">EPISODE</span>
-                            <span className="text-white">/</span>
-                            <span className="text-white">S{episode.season_id}</span>
-                            <span className="text-white">/</span>
-                            <span className="text-white">UHD</span>
-                          </div>
-                        </div>
-
-                        {/* Reveal Description (Only on Hover) */}
-                        <motion.div
-                          initial={false}
-                          animate={isHovered ? { height: 'auto', opacity: 1, marginTop: 16 } : { height: 0, opacity: 0, marginTop: 0 }}
-                          className="overflow-hidden"
+                    {/* Full-Cover Premium Card with Moving Border */}
+                    <div className="skeuo-moving-border-container transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]"
+                         style={{ transform: isHovered ? 'scale(1.05) translateY(-1rem)' : 'scale(1) translateY(0)' }}>
+                      <div className="skeuo-moving-border-inner h-full">
+                        <div
+                          className={`
+                            skeuo-card relative w-full aspect-[2/3.2] overflow-hidden
+                            transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]
+                            ${isHovered
+                              ? "shadow-[0_45px_90px_rgba(0,0,0,0.95),0_0_40px_rgba(34,211,238,0.3)] border-cyan-400/30"
+                              : "border-[#1a1329]"}
+                          `}
+                          suppressHydrationWarning
                         >
-                          <p className="text-[13px] text-gray-300 leading-relaxed font-medium line-clamp-2" style={{ fontFamily: 'var(--font-inter)' }}>
-                            Stream this exclusive production in stunning 4K Dolby Vision. Part of the Vanguard Originals collection.
-                          </p>
-                        </motion.div>
+                          {/* Main Media Background */}
+                          <div className="absolute inset-0 w-full h-full bg-[#0c0816]">
+                              {/* Thumbnail */}
+                              <Image
+                                src={episode.image && typeof episode.image === 'string' && episode.image !== '0' 
+                                  ? episode.image 
+                                  : `https://picsum.photos/seed/${episode.episode_id + 500}/600/900`}
+                                alt={episode.title}
+                                fill
+                                className={`
+                                    object-cover
+                                    transition-all duration-1000
+                                    ${isHovered ? "opacity-0 scale-110" : "opacity-100 brightness-90"}
+                                  `}
+                                sizes="(max-width: 640px) 70vw, (max-width: 1024px) 40vw, 20vw"
+                                unoptimized
+                              />
+
+                              {/* GIF/Video Preview Layer */}
+                              {isHovered && (
+                                <motion.div 
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ duration: 0.8 }}
+                                  className="absolute inset-0 w-full h-full z-0"
+                                >
+                                  <Image
+                                    src={previewGif}
+                                    alt="Preview"
+                                    fill
+                                    className="object-cover brightness-75 scale-105"
+                                    unoptimized // Giphy GIFs often perform better unoptimized by Next.js if they are small
+                                  />
+                                </motion.div>
+                              )}
+                          </div>
+
+                          {/* Content Overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10 pointer-events-none" />
+
+                          {/* Info & Actions Layer */}
+                          <div className="absolute inset-0 p-6 flex flex-col justify-end z-20">
+                            
+                            {/* Premium Badge Row */}
+                            <div className="flex items-center gap-3 mb-6">
+                              <div className="bg-[#ff9900] text-black text-[10px] font-black uppercase px-4 py-1.5 rounded-full tracking-wider shadow-[0_5px_15px_rgba(255,153,0,0.4)]">
+                                PREMIUM
+                              </div>
+                              
+                              <div className="flex items-center gap-2 ml-auto pointer-events-auto">
+                                <motion.button 
+                                  whileHover={{ scale: 1.1 }}
+                                  className="w-10 h-10 rounded-xl bg-cyan-400 flex items-center justify-center text-black shadow-lg"
+                                >
+                                  <Play size={20} className="fill-black ml-0.5" />
+                                </motion.button>
+                                <motion.button 
+                                  whileHover={{ scale: 1.1 }}
+                                  className="w-10 h-10 rounded-xl bg-[#1a1329]/80 backdrop-blur-md flex items-center justify-center text-cyan-400 border border-white/10"
+                                >
+                                  <Zap size={18} />
+                                </motion.button>
+                              </div>
+                            </div>
+
+                            {/* Title & Metadata */}
+                            <div className="space-y-2">
+                               <h4 
+                                className="text-[20px] md:text-[24px] font-bold text-white tracking-tight leading-tight"
+                                style={{ fontFamily: 'var(--font-poppins)' }}
+                              >
+                                {episode.title}
+                              </h4>
+
+                              <div className="flex items-center gap-2 text-[12px] font-bold tracking-widest text-cyan-400 uppercase" style={{ fontFamily: 'var(--font-inter)' }}>
+                                <span className="opacity-80">EPISODE</span>
+                                <span className="text-white">/</span>
+                                <span className="text-white">S{episode.season_id}</span>
+                                <span className="text-white">/</span>
+                                <span className="text-white">UHD</span>
+                              </div>
+                            </div>
+
+                            {/* Reveal Description */}
+                            <motion.div
+                              initial={false}
+                              animate={isHovered ? { height: 'auto', opacity: 1, marginTop: 16 } : { height: 0, opacity: 0, marginTop: 0 }}
+                              className="overflow-hidden"
+                            >
+                              <p className="text-[13px] text-gray-300 leading-relaxed font-medium line-clamp-2" style={{ fontFamily: 'var(--font-inter)' }}>
+                                Stream this exclusive production in stunning 4K Dolby Vision. Part of the Vanguard Originals collection.
+                              </p>
+                            </motion.div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </Link>

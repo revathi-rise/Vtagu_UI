@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Play, History, Plus, Clock } from 'lucide-react';
 import SectionTitle from './SectionTitle';
@@ -43,13 +44,19 @@ export default function ContinueWatching() {
                             className="group relative"
                         >
                             {/* Premium Skeuomorphic Transmission Card */}
-                            <div className="skeuo-card relative aspect-[16/10] overflow-hidden group-hover:scale-110 group-hover:z-50 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:shadow-[0_40px_80px_rgba(0,0,0,0.9),0_0_30px_rgba(34,211,238,0.25)] border-[#1a1329] group-hover:border-cyan-400/40">
+                            <div 
+                                className="skeuo-card relative aspect-[16/10] overflow-hidden group-hover:scale-110 group-hover:z-50 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:shadow-[0_40px_80px_rgba(0,0,0,0.9),0_0_30px_rgba(34,211,238,0.25)] border-[#1a1329] group-hover:border-cyan-400/40"
+                                suppressHydrationWarning
+                            >
                                 
                                 {/* Image with Cinematic Refinement */}
-                                <img
+                                <Image
                                     src={mockImages[index % mockImages.length]}
                                     alt={movie.title}
-                                    className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110 opacity-70 group-hover:opacity-100"
+                                    fill
+                                    className="object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110 opacity-70 group-hover:opacity-100"
+                                    sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 22vw"
+                                    unoptimized
                                 />
 
                                 {/* Sophisticated Cinematic Overlay */}

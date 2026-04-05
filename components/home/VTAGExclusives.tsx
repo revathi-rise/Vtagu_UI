@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import Image from 'next/image';
 import { Zap, Play, Plus, Film, ArrowLeft, ArrowRight, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SectionTitle from './SectionTitle';
@@ -96,6 +97,7 @@ export default function VTAGExclusives() {
                           ? "scale-105 -translate-y-4 z-50 shadow-[0_45px_90px_rgba(0,0,0,0.95),0_0_40px_rgba(34,211,238,0.3)] border-cyan-400/30"
                           : "scale-100 z-10 border-[#1a1329]"}
                       `}
+                      suppressHydrationWarning
                     >
                       {/* Rotating Cinematic Border */}
                       {isHovered && (
@@ -109,14 +111,17 @@ export default function VTAGExclusives() {
 
                       {/* Main Media Background */}
                       <div className="absolute inset-0 w-full h-full bg-[#0c0816]">
-                          <img
+                          <Image
                             src={`https://picsum.photos/seed/${item.id + 1000}/600/900`}
                             alt={item.title}
+                            fill
                             className={`
-                                absolute inset-0 w-full h-full object-cover
+                                object-cover
                                 transition-all duration-1000
                                 ${isHovered ? "opacity-0 scale-110" : "opacity-100 brightness-90"}
                               `}
+                            sizes="(max-width: 640px) 70vw, (max-width: 1024px) 40vw, 20vw"
+                            unoptimized
                           />
 
                           {isHovered && (
@@ -126,10 +131,12 @@ export default function VTAGExclusives() {
                               transition={{ duration: 0.8 }}
                               className="absolute inset-0 w-full h-full z-0"
                             >
-                              <img
+                              <Image
                                 src={previewGif}
                                 alt="Preview"
-                                className="w-full h-full object-cover brightness-75 scale-105"
+                                fill
+                                className="object-cover brightness-75 scale-105"
+                                unoptimized
                               />
                             </motion.div>
                           )}

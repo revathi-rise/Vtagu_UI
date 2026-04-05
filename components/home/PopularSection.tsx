@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { popularMovies } from '@/lib/mock-data';
 import { motion } from 'framer-motion';
 
@@ -38,17 +39,19 @@ export default function PopularSection() {
             <div 
               key={movie.id} 
               className="group relative cursor-pointer aspect-[2/3] w-full skeuo-card overflow-hidden hover:scale-110 hover:-translate-y-4 hover:z-50 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.9),0_0_30px_rgba(34,211,238,0.25)] border-[#1a1329] hover:border-cyan-400/40"
+              suppressHydrationWarning
             >
               {/* Rotating Glow Effect on Hover */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-10">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(34,211,238,0.2),transparent_70%)]" />
               </div>
-
-              <img
+              <Image
                 src={mockPosters[index % mockPosters.length]}
                 alt={movie.title}
-                loading="lazy"
-                className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-125 group-hover:opacity-30 group-hover:blur-sm brightness-90"
+                fill
+                className="object-cover transition-all duration-1000 group-hover:scale-125 group-hover:opacity-30 group-hover:blur-sm brightness-90"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 15vw"
+                unoptimized
               />
 
               {/* Skeuomorphic Inner Shadow */}

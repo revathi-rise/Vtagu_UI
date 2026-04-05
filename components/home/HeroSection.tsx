@@ -63,7 +63,7 @@ export default function HeroSection({ posters = [] }: HeroSectionProps) {
   }
 
   return (
-    <section className="relative w-full h-screen overflow-hidden bg-[#0f0a19]">
+    <section className="relative w-full h-screen overflow-hidden bg-[#0f0a19] ">
       <Swiper
         modules={[Autoplay, Pagination, EffectFade]}
         effect="fade"
@@ -75,7 +75,7 @@ export default function HeroSection({ posters = [] }: HeroSectionProps) {
       >
         {allSlides.map((item: any, index: number) => (
           <SwiperSlide key={index}>
-            <div className="relative w-full h-full flex items-center">
+            <div className="relative w-full h-full flex items-center pt-20">
 
               {/* Cinematic Background Layer */}
               <div
@@ -105,7 +105,7 @@ export default function HeroSection({ posters = [] }: HeroSectionProps) {
                     sizes="100vw"
                   />
                 )}
-                
+
                 {/* Multi-layered Gradients for Cinematic Depth */}
                 <div className="absolute inset-0 bg-gradient-to-r from-[#0f0a19] via-[#0f0a19]/60 to-transparent z-10" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0f0a19] via-transparent to-transparent z-10" />
@@ -136,7 +136,7 @@ export default function HeroSection({ posters = [] }: HeroSectionProps) {
                     </div>
 
                     {/* Main Responsive Title: Poppins Bold */}
-                    <h1 
+                    <h1
                       className="text-[40px] md:text-[64px] lg:text-[80px] font-bold text-white leading-[0.95] tracking-tighter drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
                       style={{ fontFamily: 'var(--font-poppins)' }}
                     >
@@ -191,7 +191,7 @@ export default function HeroSection({ posters = [] }: HeroSectionProps) {
           </SwiperSlide>
         ))}
       </Swiper>
-      
+
       {/* Cinematic Vignette Overlay */}
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] z-10" />
     </section>

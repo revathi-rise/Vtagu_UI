@@ -1,5 +1,44 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
-console.log("API_BASE", API_BASE);
+
+/**
+ * Enhanced logging that only runs in development
+ */
+const logger = {
+  debug: (...args: any[]) => {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[DEBUG]', ...args);
+    }
+  },
+  error: (...args: any[]) => {
+    // We always log errors, but we can format them consistently
+    console.error('[ERROR]', ...args);
+  }
+};
+
+async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 2): Promise<Response> {
+  try {
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    });
+    
+    if (!res.ok && retries > 0) {
+      logger.debug(`Retrying fetch for ${url}. Retries left: ${retries}`);
+      return fetchWithRetry(url, options, retries - 1);
+    }
+    
+    return res;
+  } catch (err) {
+    if (retries > 0) {
+      logger.debug(`Retrying fetch for ${url} due to error. Retries left: ${retries}`);
+      return fetchWithRetry(url, options, retries - 1);
+    }
+    throw err;
+  }
+}
 
 export interface Genre {
   genre_id: number;
@@ -10,31 +49,25 @@ export interface Genre {
 
 export async function getGenres(): Promise<Genre[]> {
   const url = `${API_BASE}/genres`;
-  
-  console.log(`[DEBUG] Fetching genres from: ${url}`);
+  logger.debug(`Fetching genres from: ${url}`);
   
   try {
-    const res = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      next: { revalidate: 60 },
-    });
+    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
 
     if (!res.ok) {
-      console.error(`[DEBUG] Fetch failed with status: ${res.status}`);
       throw new Error(`Failed to fetch genres. Status: ${res.status}`);
     }
 
     const result = await res.json();
     const genres = result.data || [];
-    console.log(`[DEBUG] Successfully fetched ${genres.length} genres.`);
+    logger.debug(`Successfully fetched ${genres.length} genres.`);
     return genres;
   } catch (err: any) {
-    console.error(`[DEBUG] Fetch error for ${url}:`, err.message || err);
+    logger.error(`Fetch error for ${url}:`, err.message || err);
     return [];
   }
 }
+
 export interface Poster {
   poster_id: number;
   path: string;
@@ -45,19 +78,16 @@ export interface Poster {
 
 export async function getPosters(): Promise<Poster[]> {
   const url = `${API_BASE}/posters`;
-  console.log(`[DEBUG] Fetching posters from: ${url}`);
+  logger.debug(`Fetching posters from: ${url}`);
   try {
-    const res = await fetch(url, {
-      headers: { "Content-Type": "application/json" },
-      next: { revalidate: 60 },
-    });
+    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
     if (!res.ok) {
         throw new Error(`Failed to fetch posters. Status: ${res.status}`);
     }
     const result = await res.json();
     return result.data || [];
   } catch (err: any) {
-    console.error(`[DEBUG] Fetch error for ${url}:`, err.message || err);
+    logger.error(`Fetch error for ${url}:`, err.message || err);
     return [];
   }
 }
@@ -79,21 +109,16 @@ export interface Series {
 
 export async function getSeries(): Promise<Series[]> {
   const url = `${API_BASE}/series`;
-  console.log(`[DEBUG] Fetching series from: ${url}`);
+  logger.debug(`Fetching series from: ${url}`);
   try {
-    const res = await fetch(url, {
-      headers: { "Content-Type": "application/json" },
-      next: { revalidate: 60 },
-    });
+    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
     if (!res.ok) {
       throw new Error(`Failed to fetch series. Status: ${res.status}`);
     }
     const result = await res.json();
-    // According to user example, series returns a direct array, 
-    // but genres/posters return { data: [...] }. Handling both logic.
     return Array.isArray(result) ? result : (result.data || []);
   } catch (err: any) {
-    console.error(`[DEBUG] Fetch error for ${url}:`, err.message || err);
+    logger.error(`Fetch error for ${url}:`, err.message || err);
     return [];
   }
 }
@@ -107,22 +132,20 @@ export interface InteractiveMovie {
 
 export async function getInteractiveMovies(): Promise<InteractiveMovie[]> {
   const url = `${API_BASE}/interactive-movies`;
-  console.log(`[DEBUG] Fetching interactive movies from: ${url}`);
+  logger.debug(`Fetching interactive movies from: ${url}`);
   try {
-    const res = await fetch(url, {
-      headers: { "Content-Type": "application/json" },
-      next: { revalidate: 60 },
-    });
+    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
     if (!res.ok) {
       throw new Error(`Failed to fetch interactive movies. Status: ${res.status}`);
     }
     const result = await res.json();
     return result.data || [];
   } catch (err: any) {
-    console.error(`[DEBUG] Fetch error for ${url}:`, err.message || err);
+    logger.error(`Fetch error for ${url}:`, err.message || err);
     return [];
   }
 }
+
 export interface Episode {
   episode_id: number;
   season_id: number;
@@ -133,19 +156,17 @@ export interface Episode {
 
 export async function getEpisodes(): Promise<Episode[]> {
   const url = `${API_BASE}/episodes`;
-  console.log(`[DEBUG] Fetching episodes from: ${url}`);
+  logger.debug(`Fetching episodes from: ${url}`);
   try {
-    const res = await fetch(url, {
-      headers: { "Content-Type": "application/json" },
-      next: { revalidate: 60 },
-    });
+    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
     if (!res.ok) {
       throw new Error(`Failed to fetch episodes. Status: ${res.status}`);
     }
     const result = await res.json();
     return result.data || [];
   } catch (err: any) {
-    console.error(`[DEBUG] Fetch error for ${url}:`, err.message || err);
+    logger.error(`Fetch error for ${url}:`, err.message || err);
     return [];
   }
 }
+

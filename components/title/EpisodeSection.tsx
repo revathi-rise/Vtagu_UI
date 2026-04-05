@@ -29,50 +29,67 @@ export default function EpisodeSection() {
 
   return (
     <section className="py-20 tv-container px-6 md:px-12 lg:px-20">
-      <div className="skeuo-card p-12 lg:p-16 relative overflow-visible">
+      <div className="skeuo-surface-high p-8 lg:p-16 relative overflow-visible">
         {/* Header with Season Selector */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
-          <h2 className="text-4xl md:text-5xl font-black text-white italic uppercase tracking-tighter">
-            EPISODES
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-16 gap-8">
+          <h2 className="text-4xl md:text-5xl font-black text-white italic uppercase tracking-tighter skeuo-title-3d">
+            EPISODE EXPLORER
           </h2>
           
-          <div className="flex items-center gap-4 bg-black/40 p-1.5 rounded-xl border border-white/5 shadow-inner">
+          <div className="skeuo-surface-low p-2 flex items-center gap-4 bg-gradient-to-b from-white/5 to-transparent">
+            <span className="hidden sm:inline-block px-4 text-[10px] font-black uppercase text-white/30 tracking-widest">Select Sequence</span>
             {[1, 2].map((s) => (
               <button
                 key={s}
                 onClick={() => setActiveSeason(s)}
-                className={activeSeason === s ? "skeuo-tab-active" : "skeuo-tab-inactive px-4 py-1.5"}
+                className={`
+                  transition-all duration-300 active:skeuo-pressed
+                  ${activeSeason === s ? "skeuo-tab-active" : "skeuo-tab-inactive px-6 py-2.5"}
+                `}
               >
-                SEASON {s}
+                S-0{s}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Episode Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Episode Grid with Premium Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {episodes.map((episode) => (
-            <div key={episode.id} className="skeuo-episode-card flex flex-col sm:flex-row group cursor-pointer hover:bg-white/5 transition-colors">
-              <div className="relative w-full sm:w-[240px] aspect-video">
+            <div 
+              key={episode.id} 
+              className="skeuo-episode-card flex flex-col sm:flex-row group cursor-pointer active:skeuo-pressed hover:bg-[#1a1329] hover:scale-[1.02] transition-all duration-500 ease-out border-white/5 hover:border-cyan-500/30"
+            >
+              {/* Thumbnail Container with Specular Highlights */}
+              <div className="relative w-full sm:w-[280px] aspect-video skeuo-glass-specular overflow-hidden border-r border-white/5">
                 <Image 
                   src={episode.thumbnail} 
                   alt={episode.title}
                   fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  className="object-cover group-hover:scale-110 transition-transform duration-1000 grayscale-[0.3] group-hover:grayscale-0"
                 />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
-                <div className="absolute bottom-3 right-3 bg-black/80 px-2 py-0.5 rounded text-[10px] font-bold text-[#00E5FF] tracking-widest uppercase border border-[#00E5FF]/30">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                <div className="absolute top-3 left-3 bg-[#00E5FF] w-1.5 h-1.5 rounded-full shadow-[0_0_8px_#00E5FF] animate-pulse-soft" />
+                <div className="absolute bottom-3 right-3 bg-black/85 backdrop-blur-md px-3 py-1 rounded-lg text-[10px] font-black text-[#00E5FF] tracking-widest uppercase border border-[#00E5FF]/30 shadow-lg">
                   {episode.duration}
                 </div>
               </div>
               
-              <div className="p-6 flex-1 flex flex-col justify-center gap-2">
-                <h3 className="text-white font-bold uppercase tracking-tight text-lg leading-tight group-hover:text-[#00E5FF] transition-colors">
-                  EPISODE {episode.number}: {episode.title}
+              {/* Meta Content */}
+              <div className="p-8 flex-1 flex flex-col justify-center gap-3 relative overflow-hidden">
+                {/* Micro background gradient for card depth */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none opacity-50" />
+                
+                <h3 className="text-white font-black uppercase tracking-tight text-xl leading-tight group-hover:text-[#00E5FF] transition-colors relative z-10">
+                  <span className="text-cyan-500/50 mr-2 font-black italic">0{episode.number}</span>
+                  {episode.title}
                 </h3>
-                <p className="text-white/40 text-sm line-clamp-2 leading-relaxed">
+                <p className="text-white/40 text-sm line-clamp-2 leading-relaxed font-medium relative z-10">
                   {episode.description}
                 </p>
+                
+                {/* Hover indicator line */}
+                <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-[#00E5FF] transition-all duration-700 group-hover:w-full opacity-40 shadow-[0_0_10px_#00E5FF]" />
               </div>
             </div>
           ))}

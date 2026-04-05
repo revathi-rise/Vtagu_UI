@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { topPicks } from '@/lib/mock-data';
 import { Play, Plus, Zap, Clock, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -38,12 +39,17 @@ export default function TopPicksSection() {
               className="group flex flex-col md:flex-row items-center skeuo-card overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:scale-[1.03] hover:-translate-y-2 hover:shadow-[0_40px_80px_rgba(0,0,0,0.95),0_0_40px_rgba(34,211,238,0.2)] border-[#1a1329] hover:border-cyan-400/30"
             >
               {/* Image Container: Upgraded with Inner Glow */}
-              <div className="w-full md:w-[45%] h-[300px] md:h-full relative overflow-hidden shrink-0 rounded-[1.8rem] m-2">
-                <img
+              <div 
+                className="w-full md:w-[45%] h-[300px] md:h-full relative overflow-hidden shrink-0 rounded-[1.8rem] m-2"
+                suppressHydrationWarning
+              >
+                <Image
                   src={mockShowcase[index % mockShowcase.length]}
                   alt={pick.title}
-                  loading="lazy"
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-70 group-hover:opacity-100 brightness-90"
+                  fill
+                  className="object-cover transition-transform duration-1000 group-hover:scale-110 opacity-70 group-hover:opacity-100 brightness-90"
+                  sizes="(max-width: 768px) 100vw, 40vw"
+                  unoptimized
                 />
                 
                 {/* Skeuomorphic Inner Shadow */}

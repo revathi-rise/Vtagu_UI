@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { LayoutGrid, Zap, Heart, Smile, Sparkles, ArrowLeft, ArrowRight, Music, Clapperboard, Leaf } from 'lucide-react';
 import SectionTitle from './SectionTitle';
@@ -75,12 +76,16 @@ export default function MovieGenres({ genres = [] }: MovieGenresProps) {
                                     whileHover={{ y: -15, scale: 1.05 }}
                                     transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
                                     className="skeuo-card relative h-[320px] overflow-hidden cursor-pointer group border-[#1a1329] hover:border-cyan-400/40 hover:shadow-[0_40px_80px_rgba(0,0,0,0.95),0_0_40px_rgba(34,211,238,0.25)]"
+                                    suppressHydrationWarning
                                 >
                                     {/* Main Artwork with Cinematic Shimmer */}
-                                    <img
+                                    <Image
                                         src={genre.path ? `${IMAGE_BASE_URL}${genre.path}` : "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1000&auto=format&fit=crop"}
                                         alt={genre.name}
-                                        className="absolute inset-0 w-full h-full object-cover transition-all duration-1000 group-hover:scale-125 group-hover:opacity-40 grayscale-[20%] group-hover:grayscale-0 brightness-75 group-hover:blur-sm"
+                                        fill
+                                        className="object-cover transition-all duration-1000 group-hover:scale-125 group-hover:opacity-40 grayscale-[20%] group-hover:grayscale-0 brightness-75 group-hover:blur-sm"
+                                        sizes="(max-width: 640px) 80vw, (max-width: 1024px) 40vw, 25vw"
+                                        unoptimized
                                     />
 
                                     {/* Skeuomorphic Inner Shadow */}

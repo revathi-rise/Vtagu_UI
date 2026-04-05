@@ -20,15 +20,13 @@ export const metadata = {
 };
 
 export default async function Home() {
-  const posters = await getPosters();
-  const genres = await getGenres();
-  const series = await getSeries();
-  const interactiveMovies = await getInteractiveMovies();
-  const episodes = await getEpisodes();
-  
-  console.log("series",series);
-  console.log("interactiveMovies", interactiveMovies);
-  console.log("episodes", episodes);
+  const [posters, genres, series, interactiveMovies, episodes] = await Promise.all([
+    getPosters(),
+    getGenres(),
+    getSeries(),
+    getInteractiveMovies(),
+    getEpisodes(),
+  ]);
   
   
   return (

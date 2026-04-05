@@ -12,7 +12,8 @@ export default function RegisterForm() {
   const onSubmit = async (data: any) => {
     setIsLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log("Register Payload:", data);
+    // In production, we would call an auth service here
+    // logger.debug("Register Payload:", data);
     setIsLoading(false);
   };
 

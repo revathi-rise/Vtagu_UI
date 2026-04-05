@@ -14,7 +14,7 @@ interface TitleHeroProps {
 
 export default function TitleHero({ title, year, rating, seasons, description, backdropUrl }: TitleHeroProps) {
   
-  // Logic to separate Title from Episode if it's concatenated (common in the mock)
+  // Logic to separate Title from Episode if it's concatenated
   const isEpisode = title.toUpperCase().includes("EPISODE");
   const mainTitle = isEpisode ? title.split(/EPISODE/i)[0].trim() : title;
   const episodeNumber = isEpisode ? title.match(/EPISODE\s*(\d+)/i)?.[0] : null;
@@ -30,9 +30,7 @@ export default function TitleHero({ title, year, rating, seasons, description, b
           className="object-cover animate-kenburns scale-105"
           priority
         />
-        {/* Left-to-Right deep shadow for text legibility */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#0B0A10] via-[#0B0A10]/80 via-40% to-transparent z-10" />
-        {/* Bottom fade */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B0A10] via-transparent to-transparent z-10" />
       </div>
 
@@ -42,59 +40,60 @@ export default function TitleHero({ title, year, rating, seasons, description, b
           
           {/* Subtitle / Episode Badge */}
           {episodeNumber && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-cyan-400/10 border border-cyan-400/30 text-cyan-400 text-xs font-black tracking-[0.2em] uppercase shadow-[0_0_15px_rgba(34,211,238,0.2)] animate-pulse">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-cyan-400/10 border border-cyan-400/30 text-cyan-400 text-xs font-black tracking-[0.2em] uppercase skeuo-neon-glow-refined animate-pulse">
               <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,1)]" />
               {episodeNumber}
             </div>
           )}
 
-          {/* Main Title - Split logic for better aesthetics */}
+          {/* Main Title - Skeuomorphic 3D Look */}
           <div className="space-y-2">
-            <h1 className="text-[clamp(3.5rem,10vw,7rem)] font-black text-white leading-[0.9] tracking-tighter uppercase italic drop-shadow-[0_15px_30px_rgba(0,0,0,0.8)] [text-shadow:_0_0_40px_rgba(255,255,255,0.1)]">
+            <h1 className="text-[28px] md:text-[35px] font-black text-white leading-[0.9] tracking-tighter uppercase italic skeuo-title-3d">
               {mainTitle}
             </h1>
           </div>
 
-          {/* Metadata Badges */}
+          {/* Metadata Badges - Tactile Labels */}
           <div className="flex flex-wrap items-center gap-4 text-sm font-bold text-white/90">
-            <div className="flex items-center gap-1.5 text-[#00E5FF] uppercase tracking-widest bg-white/5 px-2.5 py-1 rounded-lg border border-white/10">
+            <div className="flex items-center gap-1.5 text-[#00E5FF] uppercase tracking-widest bg-white/5 px-2.5 py-1.5 rounded-xl border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_4px_10px_rgba(0,0,0,0.5)] bg-gradient-to-tr from-white/5 to-transparent">
               <Star size={16} fill="currentColor" />
               <span>New Release</span>
             </div>
             <span className="text-white/40">•</span>
-            <span className="bg-white/5 px-2.5 py-1 rounded-lg border border-white/10">{year}</span>
+            <span className="bg-white/5 px-2.5 py-1.5 rounded-xl border border-white/10 shadow-[inner_0_1px_1px_rgba(255,255,255,0.05)]">{year}</span>
             {rating && (
               <>
                 <span className="text-white/40">•</span>
-                <span className="border border-[#00E5FF]/40 text-[#00E5FF] px-2.5 py-1 rounded-lg text-xs bg-[#00E5FF]/5 font-black">{rating}</span>
+                <span className="border border-[#00E5FF]/40 text-[#00E5FF] px-2.5 py-1.5 rounded-xl text-xs bg-[#00E5FF]/5 font-black shadow-[inset_0_1px_1px_rgba(0,229,255,0.1)]">{rating}</span>
               </>
             )}
             {seasons && (
               <>
                 <span className="text-white/40">•</span>
-                <span className="bg-white/5 px-2.5 py-1 rounded-lg border border-white/10">{seasons}</span>
+                <span className="bg-white/5 px-2.5 py-1.5 rounded-xl border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">{seasons}</span>
               </>
             )}
           </div>
 
-          {/* Description - More contrast and better font-weight */}
-          <p className="text-xl md:text-2xl text-white/70 max-w-2xl leading-relaxed font-semibold drop-shadow-lg">
+          {/* Description */}
+          <p className="text-xl md:text-[24px] text-white/70 max-w-2xl leading-relaxed font-semibold drop-shadow-lg">
             {description}
           </p>
 
-          {/* Action Buttons - Refined sizes */}
+          {/* Action Buttons - Premium Tactile Design */}
           <div className="flex items-center gap-6 pt-6">
-            <button className="skeuo-button-cyan h-20 px-12 rounded-[2rem] text-2xl hover:shadow-[0_0_50px_rgba(0,229,255,0.6)] group">
-              <Play size={32} fill="black" className="group-hover:scale-110 transition-transform" />
-              EXECUTE PLAY
+            <button className="skeuo-button-cyan h-18 px-[2rem] rounded-[2rem] text-[18px] active:skeuo-pressed transition-all duration-300 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Play size={24} fill="black" className="group-hover:scale-110 transition-transform relative z-10" />
+              <span className="relative z-10">EXECUTE PLAY</span>
             </button>
             
-            <button className="skeuo-icon-btn w-20 h-20 rounded-[2rem]">
-              <Plus size={32} />
+            <button className="skeuo-icon-btn w-18 h-18 rounded-[2.5rem] active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparent">
+              <Plus size={24} />
             </button>
             
-            <button className="skeuo-icon-btn w-20 h-20 rounded-[2rem]">
-              <Share2 size={28} />
+            <button className="skeuo-icon-btn w-18 h-18 rounded-[2.5rem] active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparent">
+              <Share2 size={24} />
             </button>
           </div>
         </div>
