@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Play, Info, Volume2, VolumeX } from "lucide-react";
+import VideoPlayer from "@/components/ui/VideoPlayer";
 
 export default function MoviesHero() {
   const [isMuted, setIsMuted] = useState(true);
@@ -10,14 +11,14 @@ export default function MoviesHero() {
     <section className="relative h-[85vh] min-h-[600px] w-full pt-[90px] overflow-hidden flex items-end pb-24">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
-        <video 
+        <VideoPlayer 
           className="w-full h-full object-cover scale-105"
           autoPlay 
           loop 
           muted={isMuted}
-          playsInline
           src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
           poster="https://images.unsplash.com/photo-1542204165-65bf26472b9b?q=80&w=2000&auto=format&fit=crop"
+          showControls={false}
         />
       </div>
 

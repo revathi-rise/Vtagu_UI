@@ -3,20 +3,18 @@
 import React from 'react';
 import { Film, ArrowLeft, ArrowRight } from 'lucide-react';
 import SectionTitle from './SectionTitle';
-import { MediaCard } from '../shared/MediaCard';
-import { Episode } from '@/lib/vtagu.api';
+import { Movie } from '@/lib/vtagu.api';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay, FreeMode } from 'swiper/modules';
 import Link from 'next/link';
+import { MediaCard } from '../shared/MediaCard';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/free-mode';
 
-const slugify = (text: string) => text.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-
-interface EpisodicVanguardProps {
-  episodes: Episode[];
+interface MovieSectionProps {
+  movies: Movie[];
 }
 
 const mockGifs = [
@@ -26,23 +24,24 @@ const mockGifs = [
   "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHYyNnd6b3B6Z3B6Z3B6Z3B6Z3B6Z3B6Z3B6Z3B6Z3B6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l41lMvTqO9B3o0O9a/giphy.gif"
 ];
 
-export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
-  if (!episodes || episodes.length === 0) {
+export default function MovieSection({ movies }: MovieSectionProps) {
+  if (!movies || movies.length === 0) {
     return null;
   }
+  console.log(movies);
 
   return (
     <section className="w-full py-16 overflow-visible">
-      <div className="max-w-[94%] mx-auto overflow-visible">
+      <div className="max-w-[95%] lg:max-w-[90%] mx-auto overflow-visible">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-10 px-4">
           <SectionTitle
-            title="FEATURED "
-            subtitle="Premium Collection"
+            title="CINEMATIC "
+            subtitle="Trending Movies"
             Icon={Film}
-            gradientText="EPISODES"
-            viewAllHref="#"
+            gradientText="MOVIES"
+            viewAllHref="/movies"
           />
         </div>
 
@@ -50,12 +49,12 @@ export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
         <div className="relative group/slider overflow-visible">
           <Swiper
             modules={[Navigation, Autoplay, FreeMode]}
-            spaceBetween={24}
+            spaceBetween={30}
             slidesPerView={1.2}
             freeMode={true}
             navigation={{
-              prevEl: '.episodic-prev',
-              nextEl: '.episodic-next',
+              prevEl: '.movie-prev',
+              nextEl: '.movie-next',
             }}
             breakpoints={{
               640: { slidesPerView: 2.2 },
@@ -64,22 +63,25 @@ export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
             }}
             className="!overflow-visible !px-4"
           >
-            {episodes.map((episode, index) => (
-              <SwiperSlide key={episode.episodeId} className="!overflow-visible">
+            {movies.map((movie, index) => (
+              <SwiperSlide key={movie.id} className="!overflow-visible">
                 <Link
-                  href={`/episodes/${slugify(episode.title)}`}
+                  href={`/movies/${movie.slug}`}
                   className="block"
                 >
                   <MediaCard
-                    variant="landscape"
-                    title={episode.title}
-                    image={`https://picsum.photos/seed/${episode.episodeId + 100}/800/450`}
-                    previewGif={mockGifs[index % mockGifs.length]}
-                    subtitle={`S${episode.seasonId} • EPISODE`}
-                    description={`Watch the latest episode of ${episode.title}. Experience premium episodic storytelling at its best.`}
-                    badge="PREMIUM"
-                    badgeColor="orange"
-                    infoLabel="EPISODE" // Explicitly setting EPISODE label
+                    variant="portrait"
+                    title={movie.title}
+                    image={movie.posterImage || "https://picsum.photos/seed/movie/600/900"}
+                    // previewGif={mockGifs[index % mockGifs.length]}
+                    trailerUrl={movie.trailerUrl}
+                    rating={movie.rating}
+                    duration={movie.duration}
+                    year={movie.releaseYear}
+                    description={movie.shortDescription}
+                    badge={movie.isFree ? 'FREE' : 'PREMIUM'}
+                    badgeColor={movie.isFree ? 'green' : 'orange'}
+                    infoLabel="MOVIE" // Explicitly setting MOVIE label
                   />
                 </Link>
               </SwiperSlide>
@@ -87,10 +89,10 @@ export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
           </Swiper>
 
           {/* Navigation */}
-          <button className="episodic-prev absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-40 w-12 h-12 rounded-full glass-panel flex items-center justify-center text-white opacity-0 group-hover/slider:opacity-100 transition-all duration-300 hover:bg-primary shadow-2xl border border-white/10">
+          <button className="movie-prev absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-40 w-12 h-12 rounded-full glass-panel flex items-center justify-center text-white opacity-0 group-hover/slider:opacity-100 transition-all duration-300 hover:bg-primary shadow-2xl border border-white/10">
             <ArrowLeft size={20} />
           </button>
-          <button className="episodic-next absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-40 w-12 h-12 rounded-full glass-panel flex items-center justify-center text-white opacity-0 group-hover/slider:opacity-100 transition-all duration-300 hover:bg-primary shadow-2xl border border-white/10">
+          <button className="movie-next absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-40 w-12 h-12 rounded-full glass-panel flex items-center justify-center text-white opacity-0 group-hover/slider:opacity-100 transition-all duration-300 hover:bg-primary shadow-2xl border border-white/10">
             <ArrowRight size={20} />
           </button>
         </div>

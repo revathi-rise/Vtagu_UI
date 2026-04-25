@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
-import { Poppins, Inter } from 'next/font/google';
+import { Montserrat, Inter } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { getGenres, Genre } from '@/lib/vtagu.api';
 
-const poppins = Poppins({
+const montserrat = Montserrat({
   subsets: ['latin'],
-  weight: ['400', '600', '700'],
-  variable: '--font-poppins'
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-montserrat'
 });
 
 const inter = Inter({
@@ -38,8 +38,8 @@ export default async function RootLayout({
 
   return (
 
-    <html lang="en" className={`${poppins.variable} ${inter.variable}`}>
-      <body className={`${inter.className} antialiased`}>
+    <html lang="en" className={`${montserrat.variable} ${inter.variable}`}>
+      <body className={`${montserrat.className} antialiased`}>
         <Navbar genres={genres} />
         {children}
         <Footer />

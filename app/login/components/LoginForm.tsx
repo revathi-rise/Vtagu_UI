@@ -3,24 +3,50 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { authApi } from '../../../lib/api/auth.api';
+import { setToken } from '../../../lib/api-client';
 
 export default function LoginForm() {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const router = useRouter();
+  const { register, handleSubmit, formState: { errors }, setError } = useForm();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
 
   const onSubmit = async (data: any) => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    // In production, we would call an auth service here
-    // logger.debug("Login Payload:", data);
-    setIsLoading(false);
+    setApiError('');
+    try {
+      const res = await authApi.login({ email: data.email, password: data.password });
+      if (res.status && res.token) {
+        setToken(res.token);
+        if (res.data) {
+          localStorage.setItem('user', JSON.stringify(res.data));
+          document.cookie = `userId=${res.data.userId}; path=/; max-age=86400; SameSite=Lax`;
+        }
+        // We could also store user details in a context here if we had one
+        router.push('/browse'); // or wherever they should go
+      } else {
+        setApiError(res.message || 'Login failed. Please try again.');
+      }
+    } catch (error) {
+      setApiError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="w-full max-w-[400px]">
       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-3">Welcome Back</p>
       <h1 className="text-4xl lg:text-5xl font-bold text-white mb-10 tracking-tight drop-shadow-sm">Sign In</h1>
+
+      {apiError && (
+        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm">
+          {apiError}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div>

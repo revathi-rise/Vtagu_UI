@@ -1,70 +1,50 @@
 import Navbar from '@/components/layout/Navbar';
 import dynamic from 'next/dynamic';
-const HeroSection = dynamic(() => import("@/components/home/HeroSection"))
 import EpisodicVanguard from '@/components/home/EpisodicVanguard';
-import PopularSection from '@/components/home/PopularSection';
-import TopPicksSection from '@/components/home/TopPicksSection';
 import Footer from '@/components/layout/Footer';
 import ContinueWatching from '@/components/home/continueWatching';
-// import NewReleases from '@/components/home/NewRelease';
-import VTAGExclusives from '@/components/home/VTAGExclusives';
-import MovieGenres from '@/components/home/MovieGenres';
 import InteractiveHero from '@/components/home/InteractiveHero';
-import { ScrollReveal } from '@/components/home/ScrollReveal';
-import { getPosters, getGenres, getSeries, getInteractiveMovies, getEpisodes } from '@/lib/vtagu.api';
+import MovieSection from '@/components/home/MovieSection';
+import MovieGenres from '@/components/home/MovieGenres';
+import { getPosters, getInteractiveMovies, getEpisodes, getMovies, getGenres } from '@/lib/vtagu.api';
+
+const HeroSection = dynamic(() => import("@/components/home/HeroSection"))
 
 export const metadata = {
   title: 'PrimeTime - Watch TV Shows, Movies, Originals',
-  description: 'Watch PrimeTime movies & TV shows online or stream right to your smart TV, game console, PC, Mac, mobile, tablet and more.',
-  keywords: ['streaming', 'movies', 'tv shows', 'primetime', 'watch online'],
+  description: 'The ultimate streaming destination for premium entertainment.',
+  keywords: ['streaming', 'movies', 'tv shows', 'primetime'],
 };
 
 export default async function Home() {
-  const [posters, genres, series, interactiveMovies, episodes] = await Promise.all([
+  const [posters, interactiveMovies, episodes, movies, genres] = await Promise.all([
     getPosters(),
-    getGenres(),
-    getSeries(),
     getInteractiveMovies(),
     getEpisodes(),
+    getMovies(),
+    getGenres(),
   ]);
-  
-  
   return (
-    <main className="snap-container bg-[#0f0a10] selection:bg-primary/30">
+    <main className="bg-[#0f0a10] selection:bg-primary/30 min-h-screen">
+      <Navbar />
       
-      <div className="snap-section">
-        <HeroSection posters={posters} />
-      </div>
+      {/* 1. Banner */}
+      <HeroSection posters={posters} />
       
-      <div className="snap-section">
-        <ScrollReveal>
-          <ContinueWatching />
-        </ScrollReveal>
-      </div>
+      {/* 2. Continue Watching */}
+      <ContinueWatching />
 
-      <div className="snap-section">
-        <ScrollReveal>
-          <InteractiveHero interactiveMovies={interactiveMovies} />
-        </ScrollReveal>
-      </div>
+      {/* 3. Movies Section */}
+      <MovieSection movies={movies} />
+      
+      {/* 4. Interactive Section */}
+      <InteractiveHero interactiveMovies={interactiveMovies} />
+      
+      {/* 5. Episodes Section */}
+      <EpisodicVanguard episodes={episodes} />
 
-      <div className="snap-section">
-        <ScrollReveal>
-          <EpisodicVanguard episodes={episodes} />
-        </ScrollReveal>
-      </div>
-      <div className="snap-section">
-        <ScrollReveal>
-          <VTAGExclusives />
-        </ScrollReveal>
-      </div>
-
-      <div className="snap-section">
-        <ScrollReveal>
-          <MovieGenres genres={genres} />
-        </ScrollReveal>
-      </div>
-
+      {/* 6. Genre Section */}
+      <MovieGenres genres={genres} />
     </main>
   );
 }

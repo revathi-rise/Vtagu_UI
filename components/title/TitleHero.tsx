@@ -10,9 +10,10 @@ interface TitleHeroProps {
   seasons?: string;
   description: string;
   backdropUrl: string;
+  videoUrl?: string;
 }
 
-export default function TitleHero({ title, year, rating, seasons, description, backdropUrl }: TitleHeroProps) {
+export default function TitleHero({ title, year, rating, seasons, description, backdropUrl, videoUrl }: TitleHeroProps) {
   
   // Logic to separate Title from Episode if it's concatenated
   const isEpisode = title.toUpperCase().includes("EPISODE");
@@ -82,17 +83,24 @@ export default function TitleHero({ title, year, rating, seasons, description, b
 
           {/* Action Buttons - Premium Tactile Design */}
           <div className="flex items-center gap-6 pt-6">
-            <button className="skeuo-button-cyan h-18 px-[2rem] rounded-[2rem] text-[18px] active:skeuo-pressed transition-all duration-300 group relative overflow-hidden">
+            <button
+              onClick={() => {
+                const player = document.getElementById('episode-player');
+                if (player) player.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
+              className="skeuo-button-cyan h-18 px-[2rem] rounded-[2rem] text-[18px] active:skeuo-pressed transition-all duration-300 group relative overflow-hidden flex items-center gap-3"
+            >
               <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <Play size={24} fill="black" className="group-hover:scale-110 transition-transform relative z-10" />
               <span className="relative z-10">EXECUTE PLAY</span>
             </button>
+
             
-            <button className="skeuo-icon-btn w-18 h-18 rounded-[2.5rem] active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparent">
+            <button className="skeuo-icon-btn w-18 h-18 rounded-[2.5rem] active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparen flex justify-center items-center">
               <Plus size={24} />
             </button>
             
-            <button className="skeuo-icon-btn w-18 h-18 rounded-[2.5rem] active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparent">
+            <button className="skeuo-icon-btn w-18 h-18 rounded-[2.5rem] active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparent flex justify-center items-center">
               <Share2 size={24} />
             </button>
           </div>

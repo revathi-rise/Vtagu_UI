@@ -30,7 +30,7 @@ export default function Error({
         </div>
 
         <div className="space-y-4">
-          <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight" style={{ fontFamily: 'var(--font-poppins)' }}>
+          <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight" style={{ fontFamily: 'var(--font-montserrat)' }}>
             CHANNELS <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">UNSTABLE</span>
           </h1>
           <p className="text-gray-400 text-lg font-medium leading-relaxed max-w-sm mx-auto" style={{ fontFamily: 'var(--font-inter)' }}>
