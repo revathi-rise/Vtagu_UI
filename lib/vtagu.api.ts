@@ -397,3 +397,35 @@ export async function deleteEpisode(id: number): Promise<any> {
     throw err;
   }
 }
+
+// ----------------------------------------------------
+// Plans Endpoints
+// ----------------------------------------------------
+
+export interface Plan {
+  planId: number;
+  name: string;
+  screens: string;
+  quality: string;
+  compatibility: number;
+  unlimited: number;
+  cancellation: number;
+  price: string;
+  discount: number;
+  validity: string;
+  status: number;
+}
+
+export async function getPlans(): Promise<Plan[]> {
+  const url = `${API_BASE}/plans`;
+  try {
+    const res = await fetchWithRetry(url, { next: { revalidate: 3600 } });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch plans. Status: ${res.status}`);
+    }
+    const result = await res.json();
+    return result.data || [];
+  } catch (err: any) {
+    return [];
+  }
+}

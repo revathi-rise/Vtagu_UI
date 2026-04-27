@@ -168,7 +168,7 @@ body {
 
 .title-h2 {
   @apply font-bold tracking-[0.2px] text-white uppercase leading-none overflow-visible 
-  text-[26px] md:text-[34px]
+  text-[28px] md:text-[35px]
   transition-all duration-500 
   group-hover/title:tracking-tight;
 }
