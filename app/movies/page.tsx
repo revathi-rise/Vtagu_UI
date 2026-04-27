@@ -1,9 +1,5 @@
 import React from 'react';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { getMovies } from '@/lib/vtagu.api';
-import Image from 'next/image';
-import { Play, Info, Star, Calendar, Clock } from 'lucide-react';
 import { MediaCard } from '@/components/shared/MediaCard';
 import Link from 'next/link';
 
@@ -31,7 +27,6 @@ export default async function MoviesPage() {
 
   return (
     <main className="min-h-screen bg-[#050505] text-white selection:bg-primary/30">
-      <Navbar />
 
       {/* 1. Featured Hero Carousel (60% VH) */}
       <ListingHero items={carouselItems} basePath="/movies" />
@@ -70,7 +65,6 @@ export default async function MoviesPage() {
         </div>
       </section>
 
-      <Footer />
     </main>
   );
 }

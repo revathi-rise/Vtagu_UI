@@ -1,6 +1,4 @@
 import React from 'react';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { getInteractiveMovies } from '@/lib/vtagu.api';
 import { MediaCard } from '@/components/shared/MediaCard';
 import ListingHero from '@/components/shared/ListingHero';
@@ -32,7 +30,7 @@ export default async function InteractiveListing() {
             <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/5 rounded-full blur-[150px] pointer-events-none" />
 
-            <Navbar />
+
 
             {/* 1. Interactive Hero Carousel */}
             <ListingHero items={carouselItems} basePath="/interactive" />
@@ -89,7 +87,7 @@ export default async function InteractiveListing() {
                 </div>
             </div>
 
-            <Footer />
+
         </main>
     );
 }

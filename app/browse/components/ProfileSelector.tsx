@@ -1,36 +1,115 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Plus, Edit2 } from 'lucide-react';
-
-const PROFILES = [
-  { id: 1, name: "Alexander", avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop", color: "from-blue-500 to-purple-600" },
-  { id: 2, name: "Sarah", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop", color: "from-pink-500 to-rose-500" },
-  { id: 3, name: "Kids", avatar: "https://images.unsplash.com/photo-1560525821-1d4a21183181?q=80&w=200&auto=format&fit=crop", color: "from-yellow-400 to-orange-500" }
-];
+import { authApi } from '@/lib/api/auth.api';
+import { getUserId } from '@/lib/api-client';
 
 export default function ProfileSelector() {
+  const router = useRouter();
   const [isManaging, setIsManaging] = useState(false);
+  const [profiles, setProfiles] = useState([
+    { id: 1, name: "Loading...", avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop", color: "from-blue-500 to-purple-600" },
+    { id: 2, name: "Kids", avatar: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=200&auto=format&fit=crop", color: "from-yellow-400 to-orange-500", isKids: true }
+  ]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      let userJson = localStorage.getItem('user');
+      let userData = null;
+
+      if (userJson) {
+        try {
+          userData = JSON.parse(userJson);
+        } catch (e) {
+          console.error("Error parsing user in ProfileSelector:", e);
+        }
+      }
+
+      // If no user in localStorage, try fetching from API using userId/token
+      if (!userData) {
+        const userId = getUserId();
+        if (userId) {
+          try {
+            const res = await authApi.getProfile(userId);
+            if (res.status && res.data) {
+              userData = res.data;
+              localStorage.setItem('user', JSON.stringify(userData));
+            }
+          } catch (e) {
+            console.error("Error fetching profile in ProfileSelector:", e);
+          }
+        }
+      }
+
+      if (userData) {
+        setProfiles([
+          { 
+            id: userData.userId || userData.id || 1, 
+            name: userData.user_name || userData.name || "User", 
+            avatar: userData.profile_picture || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop", 
+            color: "from-blue-500 to-purple-600" 
+          },
+          { 
+            id: 2, 
+            name: "Kids", 
+            avatar: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=200&auto=format&fit=crop", 
+            color: "from-yellow-400 to-orange-500",
+            isKids: true
+          }
+        ]);
+      } else {
+        // Guest mode
+        setProfiles([
+          { id: 1, name: "Guest", avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop", color: "from-blue-500 to-purple-600" },
+          { id: 2, name: "Kids", avatar: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=200&auto=format&fit=crop", color: "from-yellow-400 to-orange-500", isKids: true }
+        ]);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const handleProfileClick = (e: React.MouseEvent, profile: any) => {
+    // If not logged in and not a public profile, redirect to login
+    const userJson = localStorage.getItem('user');
+    if (!userJson && !profile.isKids) {
+      e.preventDefault();
+      router.push('/login');
+      return;
+    }
+
+    // Save selected profile for the session
+    localStorage.setItem('currentProfile', JSON.stringify(profile));
+  };
 
   return (
     <div className="fixed inset-0 z-[200] w-full min-h-screen bg-[#0f0a19] flex flex-col items-center justify-center overflow-y-auto">
       {/* Brand Logo Header */}
-      <div className="absolute top-8 left-8 sm:left-12 flex items-center gap-2 hover:opacity-80 transition-opacity">
+      <Link href="/" className="absolute top-8 left-8 sm:left-12 flex items-center gap-2 hover:opacity-80 transition-opacity">
          <div className="w-10 h-10 bg-white flex items-center justify-center rounded-lg shadow-lg">
             <span className="text-[#1a1329] font-black text-2xl">P</span>
          </div>
          <span className="font-extrabold text-2xl tracking-tighter text-white">PrimeTime</span>
-      </div>
+      </Link>
 
       <div className="flex flex-col items-center mt-16 sm:mt-0 animate-in fade-in zoom-in duration-500">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-10 tracking-tight drop-shadow-lg text-center">Who's watching?</h1>
         
         <div className="flex flex-wrap justify-center gap-6 sm:gap-10">
-           {PROFILES.map(profile => (
-             <Link href="/" key={profile.id} className="group flex flex-col items-center gap-4">
+           {profiles.map(profile => (
+             <Link 
+               href="/" 
+               key={profile.id} 
+               onClick={(e) => handleProfileClick(e, profile)}
+               className="group flex flex-col items-center gap-4"
+             >
                <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(146,72,255,0.4)] border-4 border-transparent group-hover:border-white">
                   <div className={`absolute inset-0 bg-gradient-to-tr ${profile.color} opacity-20`} />
-                  <img src={profile.avatar} className="w-full h-full object-cover" alt={profile.name} />
+                  {profile.avatar && (
+                    <img src={profile.avatar} className="w-full h-full object-cover" alt={profile.name} />
+                  )}
                   
                   {isManaging && (
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center transition-opacity border-4 border-white/20 rounded-xl">

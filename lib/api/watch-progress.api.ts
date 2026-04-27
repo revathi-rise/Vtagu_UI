@@ -1,16 +1,23 @@
 import { API_BASE, fetchWithAuth, logger } from '../api-client';
 
 export interface WatchProgress {
-  id?: string;
-  userId: string;
-  contentId: string;
-  contentType: 'movie' | 'episode'; // Type of content
-  progress: number; // Progress in percentage (0-100)
-  currentTime: number; // Current time in seconds
-  duration: number; // Total duration in seconds
+  id?: number | string;
+  userId: number | string;
+  contentId: number | string;
+  contentType: 'movie' | 'episode';
+  watchedDuration: number; // Current time in seconds
+  totalDuration: number; // Total duration in seconds
+  progressPercentage: number; // Progress in percentage (0-100)
   lastWatchedAt?: string;
   createdAt?: string;
   updatedAt?: string;
+  content?: {
+    movie_id?: number;
+    title?: string;
+    movie_image?: string;
+    duration?: number;
+    [key: string]: any;
+  };
 }
 
 export interface WatchProgressResponse {
@@ -25,7 +32,7 @@ export const watchProgressApi = {
    * Update or create watch progress
    * POST /watch-progress
    */
-  updateProgress: async (data: Omit<WatchProgress, 'id' | 'createdAt' | 'updatedAt'>): Promise<WatchProgressResponse> => {
+  updateProgress: async (data: Omit<WatchProgress, 'id' | 'createdAt' | 'updatedAt' | 'content'>): Promise<WatchProgressResponse> => {
     const url = `${API_BASE}/watch-progress`;
     logger.debug(`Calling updateProgress API: ${url}`, data);
     
@@ -54,7 +61,7 @@ export const watchProgressApi = {
    * Get watch progress list for a user
    * GET /watch-progress/user/:userId
    */
-  getProgressList: async (userId: string): Promise<WatchProgressResponse> => {
+  getProgressList: async (userId: number | string): Promise<WatchProgressResponse> => {
     const url = `${API_BASE}/watch-progress/user/${userId}`;
     logger.debug(`Calling getProgressList API: ${url}`);
     
@@ -83,7 +90,7 @@ export const watchProgressApi = {
    * Get progress for a specific content item
    * GET /watch-progress/user/:userId/content/:contentId
    */
-  getContentProgress: async (userId: string, contentId: string): Promise<WatchProgressResponse> => {
+  getContentProgress: async (userId: number | string, contentId: number | string): Promise<WatchProgressResponse> => {
     const url = `${API_BASE}/watch-progress/user/${userId}/content/${contentId}`;
     logger.debug(`Calling getContentProgress API: ${url}`);
     
@@ -111,7 +118,7 @@ export const watchProgressApi = {
    * Delete watch progress record
    * DELETE /watch-progress/:progressId
    */
-  deleteProgress: async (progressId: string): Promise<WatchProgressResponse> => {
+  deleteProgress: async (progressId: number | string): Promise<WatchProgressResponse> => {
     const url = `${API_BASE}/watch-progress/${progressId}`;
     logger.debug(`Calling deleteProgress API: ${url}`);
     
@@ -139,7 +146,7 @@ export const watchProgressApi = {
    * Clear all progress for a user
    * DELETE /watch-progress/user/:userId
    */
-  clearUserProgress: async (userId: string): Promise<WatchProgressResponse> => {
+  clearUserProgress: async (userId: number | string): Promise<WatchProgressResponse> => {
     const url = `${API_BASE}/watch-progress/user/${userId}`;
     logger.debug(`Calling clearUserProgress API: ${url}`);
     

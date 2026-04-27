@@ -165,10 +165,23 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                 hlsRef.current = hls;
                 
                 hls.on(Hls.Events.MANIFEST_PARSED, handleCanPlay);
-                hls.on(Hls.Events.ERROR, (event: any, data: any) => {
-                    console.error('HLS Error:', data);
+                hls.on(Hls.Events.ERROR, (_: any, data: any) => {
                     if (data.fatal) {
-                        setError('HLS stream error. Please try again.');
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                console.warn('Fatal network error, attempting to recover...');
+                                hls.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                console.warn('Fatal media error, attempting to recover...');
+                                hls.recoverMediaError();
+                                break;
+                            default:
+                                console.error('Unrecoverable HLS error:', data);
+                                hls.destroy();
+                                setError('Video playback failed. Please try again.');
+                                break;
+                        }
                     }
                 });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {

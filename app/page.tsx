@@ -1,4 +1,3 @@
-import Navbar from '@/components/layout/Navbar';
 import dynamic from 'next/dynamic';
 import EpisodicVanguard from '@/components/home/EpisodicVanguard';
 import Footer from '@/components/layout/Footer';
@@ -26,7 +25,6 @@ export default async function Home() {
   ]);
   return (
     <main className="bg-[#0f0a10] selection:bg-primary/30 min-h-screen">
-      <Navbar />
       
       {/* 1. Banner */}
       <HeroSection posters={posters} />

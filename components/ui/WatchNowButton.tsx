@@ -5,6 +5,7 @@ import { Play, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import VideoPlayerModal from './VideoPlayerModal';
 import { getVideoUrl } from '@/lib/video-utils';
+import { getUserId } from '@/lib/api-client';
 
 interface WatchNowButtonProps {
   url?: string | null;
@@ -27,10 +28,10 @@ export default function WatchNowButton({
   const [showError, setShowError] = useState(false);
 
   useEffect(() => {
-    // Get userId from localStorage for progress tracking
-    const storedUserId = localStorage.getItem('userId');
-    if (storedUserId) {
-      setUserId(storedUserId);
+    // Get userId reliably for progress tracking
+    const id = getUserId();
+    if (id) {
+      setUserId(id);
     }
     
     // Get valid video URL with fallback

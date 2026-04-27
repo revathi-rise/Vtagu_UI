@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { RefreshCcw, Home, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Error({
   error,
@@ -18,14 +19,22 @@ export default function Error({
 
   return (
     <div className="min-h-screen bg-[#0f0a10] flex items-center justify-center p-4 selection:bg-cyan-500/30">
-      <div className="max-w-md w-full text-center space-y-10">
+      <div className="max-w-2xl w-full text-center space-y-8">
         
         {/* Error Visual */}
-        <div className="relative inline-block group">
-          <div className="absolute -inset-4 bg-red-500/20 rounded-full blur-3xl group-hover:bg-red-500/30 transition-all duration-700" />
-          <div className="relative bg-[#1a1329]/80 backdrop-blur-2xl border border-white/10 w-24 h-24 rounded-3xl flex items-center justify-center mx-auto shadow-2xl overflow-hidden">
-            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-red-500/10" />
-            <div className="text-red-400 font-black text-4xl italic tracking-tighter">!</div>
+        <div className="relative w-full aspect-[16/9] rounded-[2rem] overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] group">
+          <Image 
+            src="/vtagu_prevent.png" 
+            alt="Vtagu Preview" 
+            fill 
+            className="object-cover group-hover:scale-105 transition-transform duration-700"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f0a10] via-transparent to-black/20" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-20 h-20 bg-red-500/20 backdrop-blur-md rounded-full border border-red-500/50 flex items-center justify-center animate-pulse">
+               <div className="text-red-500 font-black text-4xl italic tracking-tighter">!</div>
+            </div>
           </div>
         </div>
 

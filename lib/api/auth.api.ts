@@ -80,8 +80,8 @@ export const authApi = {
   },
 
   // Get User Profile
-  getProfile: async (userId: number): Promise<AuthResponse> => {
-    const url = `${API_BASE}/users/${userId}`;
+  getProfile: async (userId: number | string): Promise<AuthResponse> => {
+    const url = `${API_BASE}/users/get-profile/${userId}`;
     logger.debug(`Calling getProfile API: ${url}`);
     
     const res = await fetchWithAuth(url, {
@@ -91,12 +91,12 @@ export const authApi = {
   },
 
   // Update User Profile
-  updateProfile: async (userId: number, data: any): Promise<AuthResponse> => {
+  updateProfile: async (userId: number | string, data: any): Promise<AuthResponse> => {
     const url = `${API_BASE}/users/${userId}`;
     logger.debug(`Calling updateProfile API: ${url}`);
     
     const res = await fetchWithAuth(url, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify(data),
     });
     return res.json();

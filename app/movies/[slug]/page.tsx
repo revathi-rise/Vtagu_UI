@@ -2,8 +2,6 @@ import React from 'react';
 import dynamic from 'next/dynamic';
 import { getMovieBySlug, getMovies } from '@/lib/vtagu.api';
 import { notFound } from 'next/navigation';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import Image from 'next/image';
 import { Star, Clock, Calendar, Globe, User, Plus, Share2, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -48,7 +46,7 @@ export default async function MovieDetailsPage({ params }: MovieDetailsPageProps
 
   return (
     <main className="min-h-screen bg-[#0B0A10] text-white selection:bg-blue-500/30 font-inter">
-      <Navbar />
+
 
       {/* Hero Section with High-Performance Video Background */}
       <div className="relative w-full h-[90vh] lg:h-[100vh] overflow-hidden">

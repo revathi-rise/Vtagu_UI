@@ -21,6 +21,32 @@ export const getToken = (): string | null => {
   return localStorage.getItem('token');
 };
 
+export const getUserId = (): string | null => {
+  if (typeof window === 'undefined') return null;
+
+  // 1. Try to get from localStorage 'user' object
+  try {
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      const user = JSON.parse(userJson);
+      if (user.userId) return user.userId.toString();
+      if (user.id) return user.id.toString();
+    }
+  } catch (e) {
+    logger.error('Error parsing user from localStorage:', e);
+  }
+
+  // 2. Try to get from cookie
+  const cookies = document.cookie.split(';');
+  const userIdCookie = cookies.find(c => c.trim().startsWith('userId='));
+  if (userIdCookie) {
+    return userIdCookie.split('=')[1];
+  }
+
+  // 3. Fallback to 'userId' key in localStorage
+  return localStorage.getItem('userId');
+};
+
 export const setToken = (token: string) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('token', token);

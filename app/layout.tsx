@@ -22,6 +22,9 @@ export const metadata: Metadata = {
   description: 'Premium streaming entertainment platform.',
 };
 
+import { ReduxProvider } from './providers';
+import NewsPopup from '@/components/shared/NewsPopup';
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -40,9 +43,14 @@ export default async function RootLayout({
 
     <html lang="en" className={`${montserrat.variable} ${inter.variable}`}>
       <body className={`${montserrat.className} antialiased`}>
-        <Navbar genres={genres} />
-        {children}
-        <Footer />
+        <ReduxProvider>
+          <Navbar genres={genres} />
+          <div className="pt-24 min-h-screen">
+            {children}
+          </div>
+          <NewsPopup />
+          <Footer />
+        </ReduxProvider>
       </body>
     </html>
   );

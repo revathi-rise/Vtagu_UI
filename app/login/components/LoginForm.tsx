@@ -4,11 +4,14 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useDispatch } from 'react-redux';
+import { setUser } from '@/store/slices/authSlice';
 import { authApi } from '../../../lib/api/auth.api';
 import { setToken } from '../../../lib/api-client';
 
 export default function LoginForm() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const { register, handleSubmit, formState: { errors }, setError } = useForm();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -21,12 +24,25 @@ export default function LoginForm() {
       const res = await authApi.login({ email: data.email, password: data.password });
       if (res.status && res.token) {
         setToken(res.token);
-        if (res.data) {
-          localStorage.setItem('user', JSON.stringify(res.data));
-          document.cookie = `userId=${res.data.userId}; path=/; max-age=86400; SameSite=Lax`;
+        
+        // Handle variations in where user data is returned
+        const userData = res.data || res.user || (res as any).userData;
+        
+        if (userData) {
+          localStorage.setItem('user', JSON.stringify(userData));
+          const userId = userData.userId || userData.id;
+          if (userId) {
+            localStorage.setItem('userId', userId.toString());
+            document.cookie = `userId=${userId}; path=/; max-age=86400; SameSite=Lax`;
+          }
+          
+          console.log('[DEBUG] Login successful, user saved:', userData);
+          dispatch(setUser(userData));
+        } else {
+          console.warn('[DEBUG] Login successful but no user data returned in res.data or res.user');
         }
-        // We could also store user details in a context here if we had one
-        router.push('/browse'); // or wherever they should go
+        
+        router.push('/browse');
       } else {
         setApiError(res.message || 'Login failed. Please try again.');
       }

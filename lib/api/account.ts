@@ -10,7 +10,7 @@ export async function getAccountDetails() {
   if (token && userId) {
     try {
       // Fetch user profile
-      const profileRes = await fetch(`${API_BASE}/users/${userId}`, {
+      const profileRes = await fetch(`${API_BASE}/users/get-profile/${userId}`, {
         headers: { 'Authorization': `Bearer ${token}` },
         next: { revalidate: 0 }
       });
@@ -37,15 +37,19 @@ export async function getAccountDetails() {
 
         return {
           profile: {
+            id: user.userId,
             name: user.user_name || "User",
             email: user.email,
             avatarUrl: user.profile_picture || "https://images.unsplash.com/photo-1542204165-65bf26472b9b?q=80&w=300&auto=format&fit=crop",
-            badges: [user.plan ? `${user.plan} Member` : "Free Member"],
+            badges: [user.plan || "Free Member"],
+            age: user.age,
+            gender: user.gender,
+            mobile: user.mobile,
           },
           billing: {
             planName: sub?.planId ? `Plan ID: ${sub.planId}` : "No Active Plan",
-            planDescription: "Manage your subscription plan",
-            nextBillingDate: sub?.timestamp_to ? new Date(sub.timestamp_to).toLocaleDateString() : "N/A",
+            planDescription: user.plan || "Manage your subscription plan",
+            nextBillingDate: sub?.timestamp_to ? new Date(sub.timestamp_to * 1000).toLocaleDateString() : "N/A",
             amount: sub?.price_amount ? `${sub.currency} ${sub.price_amount}` : "Free",
             paymentMethod: {
               type: sub?.payment_method || "N/A",
@@ -68,32 +72,27 @@ export async function getAccountDetails() {
     }
   }
 
-  // Fallback to mock if not logged in or fetch failed
-  await new Promise((resolve) => setTimeout(resolve, 800));
-
+  // Guest data if not logged in or fetch failed
   return {
     profile: {
-      name: "Alex Thompson",
-      email: "alex.thompson@cinemamail.com",
+      name: "Guest",
+      email: "Sign in to access your profile",
       avatarUrl: "https://images.unsplash.com/photo-1542204165-65bf26472b9b?q=80&w=300&auto=format&fit=crop",
-      badges: ["Premium Member", "Since 2022"],
+      badges: ["Guest Account"],
+      isGuest: true
     },
     billing: {
-      planName: "Ultra 4K + HDR",
-      planDescription: "Unlimited streaming on 4 screens",
-      nextBillingDate: "Oct 12, 2024",
-      amount: "$18.99/mo",
+      planName: "No Plan",
+      planDescription: "Sign in to see your subscription",
+      nextBillingDate: "N/A",
+      amount: "N/A",
       paymentMethod: {
-        type: "VISA",
-        last4: "4242",
-        nameOnCard: "Alex Thompson",
-        expiry: "12/26",
+        type: "N/A",
+        last4: "N/A",
+        nameOnCard: "N/A",
+        expiry: "N/A",
       }
     },
-    devices: [
-      { id: 1, name: "MacBook Pro 16\"", type: "laptop", status: "Current Device", statusColor: "gray" },
-      { id: 2, name: "Samsung QLED TV", type: "tv", status: "Active Now", statusColor: "purple" },
-      { id: 3, name: "iPhone 15 Pro", type: "mobile", status: "3 hours ago", statusColor: "gray" },
-    ]
+    devices: []
   };
 }

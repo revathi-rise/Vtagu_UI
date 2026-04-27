@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import UniversalVideoPlayer, { UniversalVideoPlayerHandle } from './UniversalVideoPlayer';
 import { useWatchProgress } from '@/hooks/useWatchProgress';
+import { getUserId } from '@/lib/api-client';
 
 // For backward compatibility
 export type VideoPlayerHandle = UniversalVideoPlayerHandle;
@@ -55,9 +56,9 @@ const WatchTrackingVideoPlayer = React.forwardRef<
     // Get userId from localStorage if not provided
     useEffect(() => {
       if (!userId) {
-        const storedUserId = localStorage.getItem('userId');
-        if (storedUserId) {
-          setLocalUserId(storedUserId);
+        const id = getUserId();
+        if (id) {
+          setLocalUserId(id);
         }
       } else {
         setLocalUserId(userId);
