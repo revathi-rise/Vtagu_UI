@@ -119,25 +119,68 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
         const handleWaiting = () => setIsBuffering(true);
         const handlePlaying = () => setIsBuffering(false);
+        
+        const handleError = () => {
+            const video = videoRef.current;
+            if (!video?.error) {
+                setError('Unknown video error occurred');
+                return;
+            }
+
+            const errorCode = video.error.code;
+            const errorMessage = video.error.message;
+            
+            const errorMap: { [key: number]: string } = {
+                1: '❌ Video loading was aborted',
+                2: '🌐 Network error - Check your connection',
+                3: '⚠️ Video decoding failed - Format may not be supported',
+                4: '📁 Video format not supported by your browser',
+            };
+
+            const message = errorMap[errorCode] || errorMessage || 'Failed to load video';
+            console.error('Video playback error:', {
+                code: errorCode,
+                message: errorMessage,
+                src: src,
+            });
+            setError(message);
+        };
 
         video.addEventListener('waiting', handleWaiting);
         video.addEventListener('playing', handlePlaying);
+        video.addEventListener('error', handleError);
 
         if (src.endsWith('.m3u8')) {
             const Hls = window.Hls;
             if (Hls.isSupported()) {
-                const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+                const hls = new Hls({ 
+                    enableWorker: true, 
+                    lowLatencyMode: true,
+                    xhrSetup: function(xhr: any) {
+                        xhr.withCredentials = false; // Prevent CORS issues
+                    }
+                });
                 hls.loadSource(src);
                 hls.attachMedia(video);
                 hlsRef.current = hls;
+                
                 hls.on(Hls.Events.MANIFEST_PARSED, handleCanPlay);
+                hls.on(Hls.Events.ERROR, (event: any, data: any) => {
+                    console.error('HLS Error:', data);
+                    if (data.fatal) {
+                        setError('HLS stream error. Please try again.');
+                    }
+                });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = src;
+                video.crossOrigin = 'anonymous';
                 video.addEventListener('loadedmetadata', handleCanPlay);
             } else {
-                setError('HLS playback is not supported.');
+                setError('🎬 HLS playback is not supported in your browser. Please try a different video format.');
             }
         } else {
+            // Try multiple CORS settings
+            video.crossOrigin = crossOrigin || 'anonymous';
             video.src = src;
             video.load();
             video.addEventListener('canplay', handleCanPlay);
@@ -149,6 +192,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             video.removeEventListener('canplay', handleCanPlay);
             video.removeEventListener('waiting', handleWaiting);
             video.removeEventListener('playing', handlePlaying);
+            video.removeEventListener('error', handleError);
         };
     }, [src, hlsLoaded, autoPlay]);
 

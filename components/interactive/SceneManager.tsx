@@ -3,7 +3,8 @@
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Target, ChevronRight, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { Scene, Choice } from '@/lib/vtagu.api';
-import VideoPlayer, { VideoPlayerHandle } from '@/components/ui/VideoPlayer';
+import WatchTrackingVideoPlayer from '@/components/ui/WatchTrackingVideoPlayer';
+import { VideoPlayerHandle } from '@/components/ui/VideoPlayer';
 
 interface SceneManagerProps {
     currentScene: Scene | null;
@@ -53,9 +54,11 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
             <div className="relative aspect-video rounded-[2.5rem] bg-black border border-white/5 overflow-hidden shadow-2xl group ring-1 ring-white/10">
                 {currentScene ? (
                     <>
-                        <VideoPlayer
+                        <WatchTrackingVideoPlayer
                             ref={playerRef}
                             src={videoUrl}
+                            contentId={currentScene.scene_id?.toString() || currentScene.title || 'scene'}
+                            contentType="episode"
                             autoPlay={true}
                             showControls={!showChoices}
                             onEnded={() => setShowChoices(true)}

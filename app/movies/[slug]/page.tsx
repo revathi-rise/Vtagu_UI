@@ -121,7 +121,13 @@ export default async function MovieDetailsPage({ params }: MovieDetailsPageProps
               transition={{ delay: 0.6, duration: 0.8 }}
               className="flex flex-wrap items-center gap-5"
             >
-              <WatchNowButton url={movie.videoUrl} />
+              <WatchNowButton 
+                url={movie.videoUrl}
+                title={movie.title}
+                contentId={movie.id.toString()}
+                contentType="movie"
+                internal={true}
+              />
 
               <button className="flex items-center justify-center w-16 h-16 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/20 transition-all group">
                 <Plus size={28} className="group-hover:scale-110 transition-transform" />
