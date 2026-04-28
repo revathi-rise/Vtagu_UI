@@ -4,6 +4,8 @@ export interface AuthResponse {
   status: boolean;
   message: string;
   data?: any;
+  user?: any;
+  userData?: any;
   token?: string;
 }
 

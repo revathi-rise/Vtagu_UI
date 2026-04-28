@@ -28,7 +28,7 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
     onEnded,
   }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const iframeRef = useRef<HTMLIFramElement>(null);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
     const playerRef = useRef<any>(null);
     const [error, setError] = useState<string | null>(null);
     const [isReady, setIsReady] = useState(false);
