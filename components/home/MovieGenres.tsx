@@ -35,8 +35,8 @@ export default function MovieGenres({ genres = [] }: MovieGenresProps) {
     const displayGenres = genres.filter(g => g.in_home === 'Y' || !g.in_home).slice(0, 12);
 
     return (
-        <section className="w-full py-16 overflow-visible">
-            <div className="max-w-[94%] mx-auto overflow-visible">
+        <section className="w-full py-10 sm:py-16 overflow-hidden">
+            <div className="max-w-[90%] mx-auto">
 
                 {/* Section Header */}
                 <div className="mb-12">
@@ -50,22 +50,23 @@ export default function MovieGenres({ genres = [] }: MovieGenresProps) {
                 </div>
 
                 {/* Genre Slider */}
-                <div className="relative group/slider overflow-visible">
+                <div className="relative group/slider -mx-4 sm:mx-0">
                     <Swiper
                         modules={[Navigation, Autoplay, FreeMode]}
-                        spaceBetween={30}
-                        slidesPerView={1.2}
+                        spaceBetween={16}
+                        slidesPerView={1.5}
                         freeMode={true}
                         navigation={{
                             prevEl: '.genre-prev',
                             nextEl: '.genre-next',
                         }}
                         breakpoints={{
-                            640: { slidesPerView: 2.2 },
-                            1024: { slidesPerView: 3.2 },
-                            1440: { slidesPerView: 4 },
+                            480: { slidesPerView: 2.2, spaceBetween: 20 },
+                            640: { slidesPerView: 2.5, spaceBetween: 24 },
+                            1024: { slidesPerView: 3.5, spaceBetween: 28 },
+                            1440: { slidesPerView: 4, spaceBetween: 30 },
                         }}
-                        className="!overflow-visible !px-4"
+                        className="!px-4"
                     >
                         {displayGenres.map((genre) => (
                             <SwiperSlide key={genre.genre_id} className="!overflow-visible">

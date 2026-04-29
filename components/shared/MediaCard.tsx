@@ -162,8 +162,8 @@ export const MediaCard = ({
 
         {/* Content Section */}
         <div className={cn(
-          "p-4 flex flex-col flex-grow bg-card",
-          isPortrait ? "gap-2" : "gap-1"
+          "p-3 sm:p-4 flex flex-col flex-grow bg-card",
+          isPortrait ? "gap-1 sm:gap-2" : "gap-0.5 sm:gap-1"
         )}>
           {/* Metadata Row */}
           <div className="flex items-center justify-between">
@@ -179,15 +179,15 @@ export const MediaCard = ({
 
           <h3 className={cn(
             "text-white font-bold leading-tight line-clamp-1 transition-colors group-hover/card:text-primary",
-            isPortrait ? "text-lg" : "text-base"
+            isPortrait ? "text-sm sm:text-lg" : "text-xs sm:text-base"
           )}>
             {title}
           </h3>
 
-          {/* Short Description (Conditional) */}
+          {/* Short Description (Conditional) - Hidden on mobile unless space permits */}
           {description && (
-            <div className="overflow-hidden transition-all duration-300 max-h-0 group-hover/card:max-h-[80px] group-hover/card:mt-2">
-              <p className="text-[11px] text-white/40 line-clamp-2 leading-relaxed font-medium">
+            <div className="overflow-hidden transition-all duration-300 max-h-0 sm:group-hover/card:max-h-[80px] sm:group-hover/card:mt-2">
+              <p className="hidden sm:block text-[11px] text-white/40 line-clamp-2 leading-relaxed font-medium">
                 {description}
               </p>
             </div>

@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Search as SearchIcon, X, Play } from 'lucide-react';
 import Link from 'next/link';
+import ResponsiveGrid from '@/components/shared/ResponsiveGrid';
+import { MediaCard } from '@/components/shared/MediaCard';
 
 const MOCK_RESULTS = [
   { id: 1, title: 'The Obsidian Horizon', type: 'Movie', year: '2024', image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=500&auto=format&fit=crop' },
@@ -18,15 +20,15 @@ export default function SearchClient() {
             
             {/* Massive Search Bar */}
             <div className="relative group mb-12">
-               <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
-                  <SearchIcon size={32} className="text-gray-500 group-focus-within:text-[#9248FF] transition-colors" />
+               <div className="absolute inset-y-0 left-4 sm:left-6 flex items-center pointer-events-none">
+                  <SearchIcon size={24} className="sm:w-8 sm:h-8 text-gray-500 group-focus-within:text-[#9248FF] transition-colors" />
                </div>
-               <input 
+                <input 
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Titles, people, genres"
-                  className="w-full bg-[#1a1329]/80 border-2 border-white/5 focus:border-[#9248FF] rounded-3xl pl-20 pr-16 py-8 text-3xl font-bold text-white shadow-2xl transition-all outline-none placeholder:text-gray-600 focus:bg-[#1a1329]"
+                  className="w-full bg-[#1a1329]/80 border-2 border-white/5 focus:border-[#9248FF] rounded-3xl pl-12 sm:pl-20 pr-12 sm:pr-16 py-4 sm:py-8 text-lg sm:text-3xl font-bold text-white shadow-2xl transition-all outline-none placeholder:text-gray-600 focus:bg-[#1a1329]"
                   autoFocus
                />
                {query && (
@@ -45,25 +47,21 @@ export default function SearchClient() {
                   <h2 className="text-xl font-bold text-gray-400 mb-6 tracking-wide">
                      Top Results for "{query}"
                   </h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  <ResponsiveGrid gridCols={{ desktop: 5 }}>
                      {MOCK_RESULTS.map((item) => (
-                        <div key={item.id} className="group relative rounded-xl overflow-hidden aspect-[2/3] bg-[#1a1329] border border-white/5 cursor-pointer shadow-lg hover:shadow-[0_10px_30px_rgba(146,72,255,0.3)] hover:-translate-y-2 transition-all duration-300">
-                           <img src={item.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100" alt={item.title} />
-                           
-                           {/* Hover Play Button */}
-                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                              <div className="w-14 h-14 rounded-full bg-[#b28cff] flex items-center justify-center shadow-[0_0_20px_rgba(146,72,255,0.6)] translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                                 <Play size={24} className="text-[#0f0a19] ml-1" fill="currentColor" />
-                              </div>
-                           </div>
-
-                           <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/80 to-transparent">
-                              <h3 className="text-white font-bold tracking-wide truncate">{item.title}</h3>
-                              <p className="text-xs text-[#b28cff] font-semibold mt-1 uppercase tracking-wider">{item.year} • {item.type}</p>
-                           </div>
-                        </div>
+                        <Link key={item.id} href={`/movie/${item.id}`} className="block">
+                           <MediaCard
+                              variant="portrait"
+                              title={item.title}
+                              image={item.image}
+                              year={parseInt(item.year)}
+                              subtitle={item.type}
+                              rating={9.0}
+                              description={`Experience the thrill of ${item.title}.`}
+                           />
+                        </Link>
                      ))}
-                  </div>
+                  </ResponsiveGrid>
                </div>
             ) : (
                <div className="flex flex-col items-center justify-center py-32 opacity-50 text-center px-4">

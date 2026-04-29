@@ -44,7 +44,7 @@ export default function ListingHero({ items, basePath }: ListingHeroProps) {
   const currentItem = items[activeIndex];
 
   return (
-    <section className="relative h-[65vh] md:h-[75vh] w-full overflow-hidden flex items-end group/hero">
+    <section className="relative h-[60vh] sm:h-[65vh] md:h-[75vh] w-full overflow-hidden flex items-end group/hero">
       {/* Background Image Layer */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -70,7 +70,7 @@ export default function ListingHero({ items, basePath }: ListingHeroProps) {
       </AnimatePresence>
 
       {/* Content Layer */}
-      <div className="relative z-20 max-w-[90%] mx-auto pb-16 w-full">
+      <div className="relative z-20 max-w-[90%] mx-auto pb-10 sm:pb-16 w-full">
         <div className="flex flex-col gap-6 max-w-3xl">
           <AnimatePresence mode="wait">
             <motion.div
@@ -94,7 +94,7 @@ export default function ListingHero({ items, basePath }: ListingHeroProps) {
                 )}
               </div>
 
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-white uppercase drop-shadow-2xl">
+              <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold tracking-tighter text-white uppercase drop-shadow-2xl">
                 {currentItem.title}
               </h1>
 
@@ -113,19 +113,19 @@ export default function ListingHero({ items, basePath }: ListingHeroProps) {
                 <span className="border border-white/20 px-2 py-0.5 rounded text-[10px]">4K HDR</span>
               </div>
 
-              <p className="text-sm md:text-base text-white/50 line-clamp-3 leading-relaxed max-w-2xl font-medium">
+              <p className="text-[11px] sm:text-sm md:text-base text-white/50 line-clamp-3 leading-relaxed max-w-2xl font-medium">
                 {currentItem.description}
               </p>
 
               <div className="flex items-center gap-4 pt-4">
                 <Link
                   href={`${basePath}/${currentItem.slug}`}
-                  className="bg-primary hover:bg-primary/80 text-black px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2 active:scale-95"
+                  className="bg-primary hover:bg-primary/80 text-black px-5 sm:px-8 py-3 sm:py-4 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all flex items-center gap-2 active:scale-95"
                 >
-                  <Play size={18} fill="currentColor" /> Watch Now
+                  <Play size={16} fill="currentColor" /> Watch Now
                 </Link>
-                <button className="bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 text-white px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2 active:scale-95">
-                  <Info size={18} /> More Info
+                <button className="bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 text-white px-5 sm:px-8 py-3 sm:py-4 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all flex items-center gap-2 active:scale-95">
+                  <Info size={16} /> Info
                 </button>
               </div>
             </motion.div>

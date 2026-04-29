@@ -4,6 +4,7 @@ import { MediaCard } from '@/components/shared/MediaCard';
 import Link from 'next/link';
 
 import ListingHero from '@/components/shared/ListingHero';
+import ResponsiveGrid from '@/components/shared/ResponsiveGrid';
 
 export const metadata = {
   title: 'Movies - PrimeTime',
@@ -40,7 +41,7 @@ export default async function MoviesPage() {
             </h2>
             <div className="w-20 h-1 bg-brand-gradient rounded-full" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-y-16 gap-x-8">
+          <ResponsiveGrid gridCols={{ desktop: 5 }}>
             {movies.map((movie, index) => (
               <div key={movie.id} className="relative group">
                 <div className="relative z-10">
@@ -61,7 +62,7 @@ export default async function MoviesPage() {
                 </div>
               </div>
             ))}
-          </div>
+          </ResponsiveGrid>
         </div>
       </section>
 

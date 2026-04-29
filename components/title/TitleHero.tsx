@@ -21,7 +21,7 @@ export default function TitleHero({ title, year, rating, seasons, description, b
   const episodeNumber = isEpisode ? title.match(/EPISODE\s*(\d+)/i)?.[0] : null;
 
   return (
-    <section className="relative w-full h-[90vh] min-h-[800px] overflow-hidden bg-[#0B0A10]">
+    <section className="relative w-full h-[80vh] md:h-[90vh] min-h-[500px] md:min-h-[800px] overflow-hidden bg-[#0B0A10]">
       {/* Background with Ken Burns & Enhanced Gradients */}
       <div className="absolute inset-0">
         <Image 
@@ -36,7 +36,7 @@ export default function TitleHero({ title, year, rating, seasons, description, b
       </div>
 
       {/* Content Layer */}
-      <div className="relative z-20 h-full tv-container px-6 md:px-12 lg:px-20 pt-44 pb-20 flex flex-col justify-start">
+      <div className="relative z-20 h-full tv-container px-6 md:px-12 lg:px-20 pt-32 md:pt-44 pb-12 md:pb-20 flex flex-col justify-start md:justify-center">
         <div className="max-w-4xl space-y-8 reveal-visible">
           
           {/* Subtitle / Episode Badge */}
@@ -49,7 +49,7 @@ export default function TitleHero({ title, year, rating, seasons, description, b
 
           {/* Main Title - Skeuomorphic 3D Look */}
           <div className="space-y-2">
-            <h1 className="text-[28px] md:text-[35px] font-black text-white leading-[0.9] tracking-tighter uppercase italic skeuo-title-3d">
+            <h1 className="text-[24px] sm:text-[28px] md:text-[35px] font-black text-white leading-[0.9] tracking-tighter uppercase italic skeuo-title-3d">
               {mainTitle}
             </h1>
           </div>
@@ -77,7 +77,7 @@ export default function TitleHero({ title, year, rating, seasons, description, b
           </div>
 
           {/* Description */}
-          <p className="text-xl md:text-[24px] text-white/70 max-w-2xl leading-relaxed font-semibold drop-shadow-lg">
+          <p className="text-base sm:text-lg md:text-[24px] text-white/70 max-w-2xl leading-relaxed font-semibold drop-shadow-lg">
             {description}
           </p>
 
@@ -88,20 +88,20 @@ export default function TitleHero({ title, year, rating, seasons, description, b
                 const player = document.getElementById('episode-player');
                 if (player) player.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }}
-              className="skeuo-button-cyan h-18 px-[2rem] rounded-[2rem] text-[18px] active:skeuo-pressed transition-all duration-300 group relative overflow-hidden flex items-center gap-3"
+              className="skeuo-button-cyan h-14 sm:h-18 px-6 sm:px-[2rem] rounded-[1.5rem] sm:rounded-[2rem] text-sm sm:text-[18px] active:skeuo-pressed transition-all duration-300 group relative overflow-hidden flex items-center gap-3"
             >
               <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Play size={24} fill="black" className="group-hover:scale-110 transition-transform relative z-10" />
+              <Play size={20} fill="black" className="group-hover:scale-110 transition-transform relative z-10" />
               <span className="relative z-10">EXECUTE PLAY</span>
             </button>
 
             
-            <button className="skeuo-icon-btn w-18 h-18 rounded-[2.5rem] active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparen flex justify-center items-center">
-              <Plus size={24} />
+            <button className="skeuo-icon-btn w-14 h-14 sm:w-18 sm:h-18 rounded-[1.5rem] sm:rounded-[2.5rem] active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparen flex justify-center items-center">
+              <Plus size={20} className="sm:w-6 sm:h-6" />
             </button>
             
-            <button className="skeuo-icon-btn w-18 h-18 rounded-[2.5rem] active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparent flex justify-center items-center">
-              <Share2 size={24} />
+            <button className="skeuo-icon-btn w-14 h-14 sm:w-18 sm:h-18 rounded-[1.5rem] sm:rounded-[2.5rem] active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparent flex justify-center items-center">
+              <Share2 size={20} className="sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>

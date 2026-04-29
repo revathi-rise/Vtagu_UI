@@ -61,7 +61,7 @@ export default function HeroSection({ posters = [] }: HeroSectionProps) {
   };
 
   return (
-    <section className="relative w-full h-[80vh] md:h-screen overflow-hidden bg-[#0f0a10]">
+    <section className="relative w-full h-[70vh] sm:h-[80vh] md:h-screen overflow-hidden bg-[#0f0a10]">
       {/* 1. Background Image with Transition */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -100,7 +100,7 @@ export default function HeroSection({ posters = [] }: HeroSectionProps) {
             nextSlide();
           }
         }}
-        className="relative z-20 h-full w-full max-w-[1440px] mx-auto px-6 md:px-12 lg:px-20 flex flex-col justify-center cursor-grab active:cursor-grabbing"
+        className="relative z-20 h-full w-full max-w-[1440px] mx-auto px-5 sm:px-8 md:px-12 lg:px-20 flex flex-col justify-center cursor-grab active:cursor-grabbing"
       >
         <div className="max-w-2xl space-y-6">
           <AnimatePresence mode="wait">
@@ -136,16 +136,16 @@ export default function HeroSection({ posters = [] }: HeroSectionProps) {
               </p>
 
               {/* Actions */}
-              <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
+              <div className="flex flex-row items-center gap-3 pt-4">
                 <Link
                   href={currentItem.link}
-                  className="w-full sm:w-auto h-14 px-10 flex items-center justify-center gap-3 rounded-full bg-primary text-black font-bold uppercase tracking-widest transition-all hover:scale-105 hover:bg-primary/90 hover:shadow-[0_10px_20px_rgba(50,153,255,0.4)] active:scale-95"
+                  className="flex-1 sm:flex-none h-11 sm:h-14 px-6 sm:px-10 flex items-center justify-center gap-2 sm:gap-3 rounded-full bg-primary text-black font-bold uppercase tracking-widest transition-all hover:scale-105 hover:bg-primary/90 hover:shadow-[0_10px_20px_rgba(50,153,255,0.4)] active:scale-95 text-sm sm:text-base"
                 >
-                  <Play className="w-5 h-5 fill-black" />
+                  <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-black" />
                   Watch Now
                 </Link>
-                <button className="w-full sm:w-auto h-14 px-10 flex items-center justify-center gap-3 rounded-full glass-panel text-white font-bold uppercase tracking-widest transition-all hover:bg-white/10 active:scale-95 border-white/20">
-                  <Plus className="w-5 h-5" />
+                <button className="flex-1 sm:flex-none h-11 sm:h-14 px-6 sm:px-10 flex items-center justify-center gap-2 sm:gap-3 rounded-full glass-panel text-white font-bold uppercase tracking-widest transition-all hover:bg-white/10 active:scale-95 border-white/20 text-sm sm:text-base">
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                   Watchlist
                 </button>
               </div>
@@ -155,20 +155,21 @@ export default function HeroSection({ posters = [] }: HeroSectionProps) {
       </motion.div>
 
       {/* 3. Navigation Controls & Thumbnails */}
-      <div className="absolute bottom-8 right-8 z-40 flex flex-col items-end gap-6">
-        {/* Manual Navigation Arrows */}
-        <div className="flex gap-3">
+      {/* Mobile: bottom-center dots/arrows, Desktop: bottom-right with thumbnails */}
+      <div className="absolute bottom-6 right-4 sm:bottom-8 sm:right-8 z-40 flex flex-col items-end gap-4 sm:gap-6">
+        {/* Navigation Arrows */}
+        <div className="flex gap-2 sm:gap-3">
           <button 
             onClick={prevSlide}
-            className="w-12 h-12 rounded-full glass-morphism flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all border border-white/10 shadow-xl"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass-morphism flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all border border-white/10 shadow-xl"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={20} />
           </button>
           <button 
             onClick={nextSlide}
-            className="w-12 h-12 rounded-full glass-morphism flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all border border-white/10 shadow-xl"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass-morphism flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all border border-white/10 shadow-xl"
           >
-            <ChevronRight size={24} />
+            <ChevronRight size={20} />
           </button>
         </div>
 

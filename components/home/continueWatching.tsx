@@ -53,8 +53,8 @@ export default function ContinueWatching() {
 
 
     return (
-        <section className="w-full py-16 overflow-visible">
-            <div className="max-w-[90%] mx-auto overflow-visible">
+        <section className="w-full py-10 sm:py-16 overflow-hidden">
+            <div className="max-w-[90%] mx-auto">
                 <div className="flex items-center justify-between mb-10 px-4">
                     <SectionTitle
                         title="Continue "
@@ -75,22 +75,23 @@ export default function ContinueWatching() {
                         </div>
                     </div>
                 ) : (
-                    <div className="relative group/slider overflow-visible">
+                    <div className="relative group/slider -mx-4 sm:mx-0">
                         <Swiper
                             modules={[Navigation, Autoplay, FreeMode]}
-                            spaceBetween={24}
-                            slidesPerView={1.2}
+                            spaceBetween={16}
+                            slidesPerView={1.3}
                             freeMode={true}
                             navigation={{
                                 prevEl: '.continue-prev',
                                 nextEl: '.continue-next',
                             }}
                             breakpoints={{
-                                640: { slidesPerView: 2.2 },
-                                1024: { slidesPerView: 3.2 },
-                                1440: { slidesPerView: 4 },
+                                480: { slidesPerView: 1.8, spaceBetween: 20 },
+                                640: { slidesPerView: 2.2, spaceBetween: 24 },
+                                1024: { slidesPerView: 3.2, spaceBetween: 28 },
+                                1440: { slidesPerView: 4, spaceBetween: 24 },
                             }}
-                            className="!overflow-visible !px-4"
+                            className="!px-4"
                         >
                             {movies.map((movie, index) => (
                                 <SwiperSlide key={movie.id} className="!overflow-visible">
