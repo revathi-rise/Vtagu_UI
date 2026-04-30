@@ -27,7 +27,7 @@ export default function RegisterForm() {
         user_name: data.name,
         password: data.password,
         mobile: data.mobile || '',
-        type: 'email'
+        type: 'U'
       };
       const res = await authApi.register(payload);
       if (res.status) {
