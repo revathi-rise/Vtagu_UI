@@ -93,6 +93,7 @@ export default function RegisterForm() {
               {...register("name", { required: true })}
               className={`w-full bg-[#161224] border ${errors.name ? 'border-red-500/50' : 'border-transparent'} rounded-xl px-5 py-4 text-white focus:outline-none focus:ring-1 focus:ring-[#b28cff] transition-all text-sm placeholder:text-gray-600 shadow-inner`}
               placeholder="Enter your full name"
+              autoComplete="name"
             />
           </div>
 
@@ -102,6 +103,7 @@ export default function RegisterForm() {
                {...register("email", { required: true, pattern: /^\S+@\S+$/i })}
                className={`w-full bg-[#161224] border ${errors.email ? 'border-red-500/50' : 'border-transparent'} rounded-xl px-5 py-4 text-white focus:outline-none focus:ring-1 focus:ring-[#b28cff] transition-all text-sm placeholder:text-gray-600 shadow-inner`}
                placeholder="name@example.com"
+               autoComplete="email"
              />
           </div>
 
@@ -121,6 +123,7 @@ export default function RegisterForm() {
                {...register("password", { required: true })}
                className={`w-full bg-[#161224] border ${errors.password ? 'border-red-500/50' : 'border-transparent'} rounded-xl px-5 py-4 text-white focus:outline-none focus:ring-1 focus:ring-[#b28cff] transition-all text-sm placeholder:text-gray-600 shadow-inner pr-12`}
                placeholder="••••••••"
+               autoComplete="new-password"
              />
              <button 
                type="button" 
@@ -143,9 +146,12 @@ export default function RegisterForm() {
           <div>
              <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 ml-1">Enter OTP sent to {userEmail}</label>
              <input 
+               key="otp-input"
+               id="otp"
                {...register("otp", { required: true, minLength: 6, maxLength: 6 })}
                className={`w-full bg-[#161224] border ${errors.otp ? 'border-red-500/50' : 'border-transparent'} rounded-xl px-5 py-4 text-white focus:outline-none focus:ring-1 focus:ring-[#b28cff] transition-all text-sm placeholder:text-gray-600 shadow-inner tracking-[0.5em] text-center`}
                placeholder="123456"
+               autoComplete="one-time-code"
              />
           </div>
           

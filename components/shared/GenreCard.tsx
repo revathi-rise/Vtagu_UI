@@ -40,7 +40,7 @@ export const GenreCard = ({
         {/* Background Image with Darkening Overlay */}
         <Image
           src={image || "https://picsum.photos/seed/genre/800/500"}
-          alt={title}
+          alt={title || "Genre Image"}
           fill
           className="object-cover transition-transform duration-1000 group-hover:scale-110 group-hover:rotate-1"
           unoptimized
