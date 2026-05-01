@@ -20,9 +20,6 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'VTAGU Primetime | TV Optimized',
   description: 'Premium streaming entertainment platform.',
-  icons: {
-    icon: '/vtagu_primetime_logo.png',
-  }
 };
 
 import { ReduxProvider } from './providers';
