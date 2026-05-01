@@ -16,7 +16,7 @@ export const getToken = (): string | null => {
   if (typeof window === 'undefined') {
     // In server components, token should be passed manually or extracted from headers/cookies
     // This function primarily handles client-side retrieval
-    return null; 
+    return null;
   }
   return localStorage.getItem('token');
 };
@@ -65,12 +65,12 @@ export const removeToken = () => {
 // Fetch wrapper
 export async function fetchWithAuth(url: string, options: RequestInit = {}, retries = 2): Promise<Response> {
   const token = getToken();
-  
+
   const headers = new Headers(options.headers || {});
   if (!headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
-  
+
   if (token && !headers.has('Authorization')) {
     headers.set('Authorization', `Bearer ${token}`);
   }
@@ -82,18 +82,18 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}, retr
 
   try {
     const res = await fetch(url, enhancedOptions);
-    
+
     // Auto-logout on unauthorized if it's an API route that requires auth
     // if (res.status === 401) {
     //   removeToken();
     //   window.location.href = '/login';
     // }
-    
+
     if (!res.ok && retries > 0 && res.status >= 500) {
       logger.debug(`Retrying fetch for ${url}. Status: ${res.status}. Retries left: ${retries}`);
       return fetchWithAuth(url, options, retries - 1);
     }
-    
+
     return res;
   } catch (err: any) {
     if (retries > 0) {

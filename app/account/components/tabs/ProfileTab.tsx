@@ -15,6 +15,7 @@ export default function ProfileTab({ profile }: { profile: any }) {
     age: profile.age || '',
     gender: profile.gender || '',
     mobile: profile.mobile || '',
+    profile_picture: profile.avatarUrl || '',
   });
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -23,7 +24,11 @@ export default function ProfileTab({ profile }: { profile: any }) {
     
     setIsLoading(true);
     try {
-      const res = await authApi.updateProfile(profile.id, formData);
+      const payload = {
+        ...formData,
+        age: formData.age ? parseInt(formData.age.toString(), 10) : undefined
+      };
+      const res = await authApi.updateProfile(profile.id, payload);
       if (res.status) {
         setIsEditing(false);
         router.refresh(); // Refresh server component data
@@ -94,11 +99,22 @@ export default function ProfileTab({ profile }: { profile: any }) {
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white focus:outline-none focus:border-[#b28cff] transition-all appearance-none"
               >
                 <option value="">Select</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
               </select>
             </div>
+          </div>
+
+          <div className="md:col-span-2 space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">Profile Picture URL</label>
+            <input 
+              type="text"
+              value={formData.profile_picture}
+              onChange={(e) => setFormData({...formData, profile_picture: e.target.value})}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white focus:outline-none focus:border-[#b28cff] transition-all"
+              placeholder="https://example.com/avatar.jpg"
+            />
           </div>
 
           <div className="md:col-span-2 flex justify-end gap-4 mt-4">

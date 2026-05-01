@@ -98,7 +98,7 @@ export const authApi = {
     logger.debug(`Calling updateProfile API: ${url}`);
     
     const res = await fetchWithAuth(url, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(data),
     });
     return res.json();
