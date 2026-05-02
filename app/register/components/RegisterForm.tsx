@@ -69,9 +69,9 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="w-full max-w-[400px]">
+    <div className="w-full max-w-[500px]">
       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-3">Step into the spotlight</p>
-      <h1 className="text-4xl lg:text-5xl font-bold text-white mb-10 tracking-tight drop-shadow-sm">Create Account</h1>
+      <h1 className="text-4xl font-bold text-white mb-10 tracking-tight drop-shadow-sm">Join PrimeTime</h1>
 
       {apiError && (
         <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm">

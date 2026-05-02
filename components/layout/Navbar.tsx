@@ -87,21 +87,12 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
       >
         {/* Logo */}
         <Link href="/" className="flex items-center hover:scale-105 transition-transform duration-300">
-          {/* <Image
-            src="/vtagu_primetime_logo.png"
-            alt="PrimeTime Logo"
-            width={600}
-            height={120}
-            className={`w-full transition-all duration-500 ${scrolled ? 'h-10 sm:h-12 md:h-14' : 'h-14 sm:h-16 md:h-20'
-              } object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]`}
-            priority
-          /> */}
           <Image
             src="/vtagu_logo.png"
             alt="PrimeTime Logo"
             width={160}
             height={80}
-            className="h-[95px] w-auto object-cover scale-150"
+            className={`${scrolled ? 'h-[70px] w-auto object-cover scale-200 px-5' : 'h-[90px] w-auto object-cover scale-150'}`}
             priority
           />
         </Link>
@@ -187,7 +178,7 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
               href="/login"
               className={`
                 relative flex items-center gap-3 rounded-full overflow-hidden transition-all duration-500 group active:scale-95
-                ${scrolled ? 'px-4 sm:px-6 py-2 text-[9px] sm:text-[10px]' : 'px-6 sm:px-9 py-2.5 sm:py-3.5 text-[10px] sm:text-xs'} 
+                ${scrolled ? 'px-4 sm:px-6 py-4 text-[9px] sm:text-[10px]' : 'px-6 sm:px-9 py-2.5 sm:py-3.5 text-[10px] sm:text-xs'} 
                 font-black uppercase tracking-[0.25em] text-white shadow-2xl
               `}
             >

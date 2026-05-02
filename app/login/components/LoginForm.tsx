@@ -24,10 +24,10 @@ export default function LoginForm() {
       const res = await authApi.login({ email: data.email, password: data.password });
       if (res.status && res.token) {
         setToken(res.token);
-        
+
         // Handle variations in where user data is returned
         const userData = res.data || res.user || (res as any).userData;
-        
+
         if (userData) {
           localStorage.setItem('user', JSON.stringify(userData));
           const userId = userData.userId || userData.id;
@@ -35,13 +35,13 @@ export default function LoginForm() {
             localStorage.setItem('userId', userId.toString());
             document.cookie = `userId=${userId}; path=/; max-age=86400; SameSite=Lax`;
           }
-          
+
           console.log('[DEBUG] Login successful, user saved:', userData);
           dispatch(setUser(userData));
         } else {
           console.warn('[DEBUG] Login successful but no user data returned in res.data or res.user');
         }
-        
+
         router.push('/browse');
       } else {
         setApiError(res.message || 'Login failed. Please try again.');
@@ -54,71 +54,72 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-[400px]">
+    <div className="w-full]">
       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-3">Welcome Back</p>
-      <h1 className="text-4xl lg:text-5xl font-bold text-white mb-10 tracking-tight drop-shadow-sm">Sign In</h1>
+      <h1 className="text-4xl font-bold text-white mb-10 tracking-tight drop-shadow-sm">
+        Resume the Experience
+      </h1>
+        {apiError && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm">
+            {apiError}
+          </div>
+        )}
 
-      {apiError && (
-        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm">
-          {apiError}
-        </div>
-      )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div>
+            <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 ml-1">Email Address</label>
+            <input
+              {...register("email", { required: true, pattern: /^\S+@\S+$/i })}
+              className={`w-full bg-[#161224] border ${errors.email ? 'border-red-500/50' : 'border-transparent'} rounded-xl px-5 py-4 text-white focus:outline-none focus:ring-1 focus:ring-[#b28cff] transition-all text-sm placeholder:text-gray-600 shadow-inner`}
+              placeholder="name@example.com"
+            />
+          </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div>
-           <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 ml-1">Email Address</label>
-           <input 
-             {...register("email", { required: true, pattern: /^\S+@\S+$/i })}
-             className={`w-full bg-[#161224] border ${errors.email ? 'border-red-500/50' : 'border-transparent'} rounded-xl px-5 py-4 text-white focus:outline-none focus:ring-1 focus:ring-[#b28cff] transition-all text-sm placeholder:text-gray-600 shadow-inner`}
-             placeholder="name@example.com"
-           />
-        </div>
+          <div className="relative">
+            <div className="flex items-center justify-between mb-2 ml-1 pr-1">
+              <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-widest">Password</label>
+              <Link href="#" className="text-[10px] text-[#b28cff] font-bold hover:text-white transition-colors">Forgot Password?</Link>
+            </div>
 
-        <div className="relative">
-           <div className="flex items-center justify-between mb-2 ml-1 pr-1">
-             <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-widest">Password</label>
-             <Link href="#" className="text-[10px] text-[#b28cff] font-bold hover:text-white transition-colors">Forgot Password?</Link>
-           </div>
-           
-           <input 
-             type={showPassword ? "text" : "password"}
-             {...register("password", { required: true })}
-             className={`w-full bg-[#161224] border ${errors.password ? 'border-red-500/50' : 'border-transparent'} rounded-xl px-5 py-4 text-white focus:outline-none focus:ring-1 focus:ring-[#b28cff] transition-all text-sm placeholder:text-gray-600 shadow-inner pr-12`}
-             placeholder="••••••••"
-           />
-           <button 
-             type="button" 
-             onClick={() => setShowPassword(!showPassword)}
-             className="absolute right-5 bottom-[14px] text-gray-500 hover:text-white transition-colors"
-           >
+            <input
+              type={showPassword ? "text" : "password"}
+              {...register("password", { required: true })}
+              className={`w-full bg-[#161224] border ${errors.password ? 'border-red-500/50' : 'border-transparent'} rounded-xl px-5 py-4 text-white focus:outline-none focus:ring-1 focus:ring-[#b28cff] transition-all text-sm placeholder:text-gray-600 shadow-inner pr-12`}
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-5 bottom-[14px] text-gray-500 hover:text-white transition-colors"
+            >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-           </button>
+            </button>
+          </div>
+
+          <button
+            disabled={isLoading}
+            className="w-full bg-[#b28cff] hover:bg-[#c3a5ff] text-[#0B0914] font-bold py-4 rounded-xl transition-all shadow-lg mt-8 flex justify-center items-center gap-2 hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:translate-y-0"
+          >
+            {isLoading ? <Loader2 size={20} className="animate-spin" /> : 'Sign In'}
+          </button>
+        </form>
+
+        <div className="flex items-center gap-4 my-8 opacity-70">
+          <div className="h-px flex-1 bg-white/10" />
+          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.15em]">Or sign in with</span>
+          <div className="h-px flex-1 bg-white/10" />
         </div>
 
-        <button 
-          disabled={isLoading}
-          className="w-full bg-[#b28cff] hover:bg-[#c3a5ff] text-[#0B0914] font-bold py-4 rounded-xl transition-all shadow-lg mt-8 flex justify-center items-center gap-2 hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:translate-y-0"
-        >
-          {isLoading ? <Loader2 size={20} className="animate-spin" /> : 'Sign In'}
-        </button>
-      </form>
-
-      <div className="flex items-center gap-4 my-8 opacity-70">
-         <div className="h-px flex-1 bg-white/10" />
-         <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.15em]">Or sign in with</span>
-         <div className="h-px flex-1 bg-white/10" />
-      </div>
-
-      <button className="w-full flex items-center justify-center gap-3 bg-[#161224] hover:bg-[#1f1a30] text-white font-bold py-4 rounded-xl transition-all shadow-inner border border-white/5 hover:-translate-y-0.5">
-         <svg className="w-5 h-5 text-white fill-current" viewBox="0 0 24 24">
+        <button className="w-full flex items-center justify-center gap-3 bg-[#161224] hover:bg-[#1f1a30] text-white font-bold py-4 rounded-xl transition-all shadow-inner border border-white/5 hover:-translate-y-0.5">
+          <svg className="w-5 h-5 text-white fill-current" viewBox="0 0 24 24">
             <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.64 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-         </svg>
-         Continue with Google
-      </button>
+          </svg>
+          Continue with Google
+        </button>
 
-      <p className="text-center text-sm text-gray-400 mt-10">
-        New to PrimeTime? <Link href="/register" className="text-[#b28cff] font-bold hover:text-white transition-colors">Create Account</Link>
-      </p>
+        <p className="text-center text-sm text-gray-400 mt-10">
+          New to PrimeTime? <Link href="/register" className="text-[#b28cff] font-bold hover:text-white transition-colors">Create Account</Link>
+        </p>
     </div>
   );
 }
