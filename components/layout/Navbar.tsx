@@ -71,7 +71,7 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
   }, [isMobileMenuOpen]);
 
   return (
-    <header className={`fixed top-0 left-0 w-full z-50 flex justify-center transition-all duration-500 ${scrolled ? 'px-4' : 'px-0'}`}>
+    <header className={`fixed top-0 left-0 w-full z-50 flex overflow-hidden justify-center transition-all duration-500 ${scrolled ? 'px-4' : 'px-0'}`}>
       {/* Top Gradient Overlay for readability against bright images */}
       <div className={`absolute top-0 left-0 w-full bg-gradient-to-b from-background/90 to-transparent pointer-events-none transition-all duration-500 ${scrolled ? 'h-[100px] opacity-0' : 'h-[140px] opacity-100'}`} />
 
@@ -80,20 +80,28 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
           flex items-center justify-between gap-2 sm:gap-6 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]
           ${scrolled
             ? "relative mt-2 sm:mt-6 px-3 sm:px-6 overflow-hidden py-1.5 sm:py-2 rounded-full bg-secondary/85 backdrop-blur-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.15),0_0_0_1px_rgba(255,255,255,0.05)] w-[94%] lg:w-full max-w-[1440px]"
-            : "relative mt-0 px-4 sm:px-12 py-3 sm:py-5 rounded-none bg-transparent w-full border-b border-white/5"
+            : "relative mt-0 px-4 sm:px-18 rounded-none bg-transparent w-full border-b border-white/5"
           }
           before:absolute before:inset-0 before:rounded-inherit before:bg-gradient-to-b before:from-white/5 before:to-transparent before:pointer-events-none
         `}
       >
         {/* Logo */}
         <Link href="/" className="flex items-center hover:scale-105 transition-transform duration-300">
-          <Image
+          {/* <Image
             src="/vtagu_primetime_logo.png"
             alt="PrimeTime Logo"
-            width={400}
+            width={600}
             height={120}
-            className={`w-auto max-w-[140px] sm:max-w-none transition-all duration-500 ${scrolled ? 'h-7 sm:h-10 md:h-12' : 'h-9 sm:h-14 md:h-16'
+            className={`w-full transition-all duration-500 ${scrolled ? 'h-10 sm:h-12 md:h-14' : 'h-14 sm:h-16 md:h-20'
               } object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]`}
+            priority
+          /> */}
+          <Image
+            src="/vtagu_logo.png"
+            alt="PrimeTime Logo"
+            width={160}
+            height={80}
+            className="h-[95px] w-auto object-cover scale-150"
             priority
           />
         </Link>
@@ -158,7 +166,7 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
                   {userName}
                 </span>
               </Link>
-              <button 
+              <button
                 onClick={() => {
                   removeToken();
                   localStorage.removeItem('user');
@@ -171,7 +179,7 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
                 className={`flex items-center justify-center rounded-full bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white transition-all border border-red-500/20 active:scale-95 ${scrolled ? 'w-8 h-8 sm:w-9 sm:h-9' : 'w-10 h-10 sm:w-11 sm:h-11'}`}
                 title="Logout"
               >
-                <svg className={scrolled ? "w-3.5 h-3.5" : "w-4.5 h-4.5"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <svg className={scrolled ? "w-3.5 h-3.5" : "w-4.5 h-4.5"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
               </button>
             </div>
           ) : (
@@ -186,24 +194,24 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
               {/* Animated Gradient Background */}
               <div className="absolute inset-0 bg-brand-gradient opacity-90 group-hover:opacity-100 transition-opacity" />
               <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-              
+
               {/* Border Glow Effect */}
               <div className="absolute inset-0 rounded-full border border-white/20 group-hover:border-white/40 transition-colors" />
-              
+
               {/* Inner Gloss */}
               <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
 
               <span className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
                 Sign In
               </span>
-              
+
               {/* Shine Animation */}
               <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-25deg] group-hover:left-full transition-all duration-1000 ease-in-out" />
             </Link>
           )}
 
           {/* Mobile Menu Button */}
-          <button 
+          <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="lg:hidden relative z-[70] w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 shadow-lg active:scale-90 transition-all hover:bg-white/20"
           >
@@ -238,31 +246,31 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
             {/* Mobile Menu Links */}
             <div className="flex-1 overflow-y-auto px-6 py-8 space-y-1">
               <MobileNavItem href="/" label="HOME" active={pathname === "/"} onClick={() => setIsMobileMenuOpen(false)} />
-              
-              <MobileDropdownNavItem 
-                label="MOVIES" 
-                href="/movies" 
+
+              <MobileDropdownNavItem
+                label="MOVIES"
+                href="/movies"
                 items={genres.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
                 onClick={() => setIsMobileMenuOpen(false)}
               />
 
-              <MobileDropdownNavItem 
-                label="EPISODES" 
-                href="/episodes" 
+              <MobileDropdownNavItem
+                label="EPISODES"
+                href="/episodes"
                 items={genres.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
                 onClick={() => setIsMobileMenuOpen(false)}
               />
 
-              <MobileDropdownNavItem 
-                label="INTERACTIVE" 
-                href="/interactive" 
+              <MobileDropdownNavItem
+                label="INTERACTIVE"
+                href="/interactive"
                 items={interactiveMovies.map(m => ({ id: m.interactive_movie_id, name: m.title, path: m.interactive_movie_id.toString() }))}
                 isInteractive
                 onClick={() => setIsMobileMenuOpen(false)}
               />
 
               <MobileNavItem href="/pricing" label="PRICING" active={pathname === "/pricing"} onClick={() => setIsMobileMenuOpen(false)} />
-              
+
               <div className="py-4 px-4 mt-4 border-t border-white/5 flex items-center justify-between group">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
@@ -281,8 +289,8 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
             <div className="p-6 border-t border-white/5 bg-white/5">
               {userName ? (
                 <div className="space-y-4">
-                  <Link 
-                    href="/account" 
+                  <Link
+                    href="/account"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10"
                   >
@@ -295,7 +303,7 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
                     </div>
                     <ChevronRight className="w-5 h-5 text-white/20" />
                   </Link>
-                  <button 
+                  <button
                     onClick={() => {
                       removeToken();
                       localStorage.removeItem('user');
@@ -313,8 +321,8 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
                   </button>
                 </div>
               ) : (
-                <Link 
-                  href="/login" 
+                <Link
+                  href="/login"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="w-full relative flex items-center justify-center py-4 rounded-2xl overflow-hidden group active:scale-95 transition-all shadow-xl"
                 >

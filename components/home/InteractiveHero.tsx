@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { LayoutGrid, Zap, ChevronRight } from 'lucide-react';
 import SectionTitle from './SectionTitle';
 import { MediaCard } from '../shared/MediaCard';
@@ -12,6 +12,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/free-mode';
+import { PasswordModal } from '../shared/PasswordModal';
 
 interface InteractiveHeroProps {
     interactiveMovies: InteractiveMovie[];
@@ -21,6 +22,9 @@ import { useRouter } from 'next/navigation';
 
 export default function InteractiveGridHero({ interactiveMovies }: InteractiveHeroProps) {
     const router = useRouter();
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [pendingMovieId, setPendingMovieId] = useState<number | null>(null);
+
     if (!interactiveMovies || interactiveMovies.length === 0) return null;
     console.log(interactiveMovies);
 
@@ -90,7 +94,14 @@ export default function InteractiveGridHero({ interactiveMovies }: InteractiveHe
                                         year={movie.created_at ? new Date(movie.created_at).getFullYear() : undefined}
                                         badge="USB READY"
                                         badgeColor="blue"
-                                        onClick={() => router.push(`/interactive/${movie.interactive_movie_id}`)}
+                                        onClick={() => {
+                                            if (typeof window !== 'undefined' && sessionStorage.getItem('vtagu_authorized') === 'true') {
+                                                router.push(`/interactive/${movie.interactive_movie_id}`);
+                                            } else {
+                                                setPendingMovieId(movie.interactive_movie_id);
+                                                setIsPasswordModalOpen(true);
+                                            }
+                                        }}
                                         className="cursor-pointer"
                                         variant="portrait"
                                     />
@@ -108,6 +119,17 @@ export default function InteractiveGridHero({ interactiveMovies }: InteractiveHe
                     </div>
                 </div>
             </div>
+
+            <PasswordModal
+                isOpen={isPasswordModalOpen}
+                onClose={() => setIsPasswordModalOpen(false)}
+                onSuccess={() => {
+                    if (pendingMovieId) {
+                        router.push(`/interactive/${pendingMovieId}`);
+                    }
+                    setIsPasswordModalOpen(false);
+                }}
+            />
         </section>
     );
 }

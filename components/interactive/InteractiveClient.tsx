@@ -5,6 +5,7 @@ import { Scene, Choice, InteractiveMovie, getChoices } from '@/lib/vtagu.api';
 import { Play, ChevronRight, Zap, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import SceneManager, { SceneManagerHandle } from './SceneManager';
+import { PasswordModal } from '../shared/PasswordModal';
 
 interface InteractiveClientProps {
     movie: InteractiveMovie;
@@ -20,6 +21,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
 
     const [choices, setChoices] = useState<Choice[]>([]);
     const [loadingChoices, setLoadingChoices] = useState(false);
+    const [isAuthorized, setIsAuthorized] = useState(false);
 
     const fetchChoicesForScene = async (scene: Scene) => {
         if (scene.choices && scene.choices.length > 0) {
@@ -62,7 +64,15 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
     };
 
     return (
-        <main className="min-h-screen bg-[#0c0816] text-white overflow-x-hidden">
+        <>
+            <PasswordModal
+                isOpen={!isAuthorized}
+                onClose={() => {}} // Direct access requires password, no closing without auth
+                onSuccess={() => setIsAuthorized(true)}
+            />
+
+            {isAuthorized && (
+                <main className="min-h-screen bg-[#0c0816] text-white overflow-x-hidden ">
             {/* Hero Section */}
             <div className="relative h-[65vh] w-full overflow-hidden">
                 <div className="absolute inset-0 z-0">
@@ -159,6 +169,8 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                     -webkit-text-fill-color: transparent;
                 }
             `}</style>
-        </main>
+                </main>
+            )}
+        </>
     );
 }
