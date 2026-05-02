@@ -71,7 +71,7 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
   }, [isMobileMenuOpen]);
 
   return (
-    <header className={`fixed top-0 left-0 w-full z-50 flex overflow-hidden justify-center transition-all duration-500 ${scrolled ? 'px-4' : 'px-0'}`}>
+    <header className={`fixed top-0 left-0 w-full z-50 flex justify-center transition-all duration-500 ${scrolled ? 'px-4' : 'px-0'}`}>
       {/* Top Gradient Overlay for readability against bright images */}
       <div className={`absolute top-0 left-0 w-full bg-gradient-to-b from-background/90 to-transparent pointer-events-none transition-all duration-500 ${scrolled ? 'h-[100px] opacity-0' : 'h-[140px] opacity-100'}`} />
 
