@@ -62,7 +62,7 @@ export default function MovieSection({ movies }: MovieSectionProps) {
               1024: { slidesPerView: 3.5, spaceBetween: 28 },
               1440: { slidesPerView: 4, spaceBetween: 30 },
             }}
-            className="!px-4"
+            className="!px-4 !py-6 -my-6"
           >
             {movies.map((movie, index) => (
               <SwiperSlide key={movie.id} className="!overflow-visible">

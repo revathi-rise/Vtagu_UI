@@ -91,7 +91,7 @@ export default function ContinueWatching() {
                                 1024: { slidesPerView: 3.2, spaceBetween: 28 },
                                 1440: { slidesPerView: 4, spaceBetween: 24 },
                             }}
-                            className="!px-4"
+                            className="!px-4 !py-6 -my-6"
                         >
                             {movies.map((movie, index) => (
                                 <SwiperSlide key={movie.id} className="!overflow-visible">

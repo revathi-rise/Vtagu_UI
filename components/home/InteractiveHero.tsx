@@ -82,7 +82,7 @@ export default function InteractiveGridHero({ interactiveMovies }: InteractiveHe
                                 1024: { slidesPerView: 3.5, spaceBetween: 28 },
                                 1440: { slidesPerView: 4, spaceBetween: 24 },
                             }}
-                            className="!px-1"
+                            className="!px-1 !py-6 -my-6"
                         >
                             {displayMovies.map((movie) => (
                                 <SwiperSlide key={movie.interactive_movie_id} className="!overflow-visible">

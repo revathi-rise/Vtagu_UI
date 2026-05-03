@@ -34,10 +34,32 @@ export const authApi = {
     return res.json();
   },
 
+  // Resend OTP
+  resendOtp: async (data: { email: string }): Promise<AuthResponse> => {
+    const url = `${API_BASE}/users/resend-otp`;    
+    const res = await fetchWithAuth(url, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+
   // Login
   login: async (data: { email: string; password: string }): Promise<AuthResponse> => {
     const url = `${API_BASE}/users/login`;
     logger.debug(`Calling login API: ${url}`);
+    
+    const res = await fetchWithAuth(url, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+
+  // Google Login
+  googleLogin: async (data: { email: string; user_name: string; login_oauth_uid: string; profile_picture?: string }): Promise<AuthResponse> => {
+    const url = `${API_BASE}/users/google-login`;
+    logger.debug(`Calling google-login API: ${url}`);
     
     const res = await fetchWithAuth(url, {
       method: 'POST',
