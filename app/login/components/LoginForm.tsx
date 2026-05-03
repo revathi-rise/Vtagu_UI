@@ -43,7 +43,7 @@ export default function LoginForm() {
           console.warn('[DEBUG] Login successful but no user data returned in res.data or res.user');
         }
 
-        router.push('/browse');
+        router.push('/');
       } else {
         if (res.message === 'Please verify OTP first') {
           setApiError('Account not verified. Sending a new OTP and redirecting...');
@@ -94,7 +94,7 @@ export default function LoginForm() {
             }
             dispatch(setUser(userData));
           }
-          router.push('/browse');
+          router.push('/');
         } else {
           setApiError(res.message || 'Google Login failed. Please try again.');
         }

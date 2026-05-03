@@ -114,7 +114,7 @@ export default function RegisterForm() {
             dispatch(setUser(userData));
           }
           setTimeout(() => {
-            router.push('/browse');
+            router.push('/');
           }, 1500);
         } else {
           setApiError(res.message || 'Google Registration failed. Please try again.');

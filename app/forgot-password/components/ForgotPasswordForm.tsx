@@ -108,11 +108,20 @@ export default function ForgotPasswordForm() {
           <div>
              <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 ml-1">Enter OTP sent to {userEmail}</label>
              <input 
+               type="text" 
+               name="hidden-username" 
+               autoComplete="username" 
+               className="hidden" 
+               style={{ display: 'none' }} 
+             />
+             <input 
+               type="text"
+               inputMode="numeric"
                id="otp"
                {...register("otp", { required: true, minLength: 6, maxLength: 6 })}
                className={`w-full bg-[#161224] border ${errors.otp ? 'border-red-500/50' : 'border-transparent'} rounded-xl px-5 py-4 text-white focus:outline-none focus:ring-1 focus:ring-[#b28cff] transition-all text-sm placeholder:text-gray-600 shadow-inner tracking-[0.5em] text-center`}
                placeholder="123456"
-               autoComplete="one-time-code"
+               autoComplete="off"
              />
              {errors.otp && <span className="text-red-500 text-xs mt-1 ml-1 block text-center">OTP must be 6 digits.</span>}
           </div>
