@@ -13,6 +13,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 export default function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const planId = searchParams.get('plan');
   const dispatch = useDispatch();
   const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
   const [showPassword, setShowPassword] = useState(false);
@@ -29,6 +30,12 @@ export default function RegisterForm() {
       setValue('email', verifyEmail);
       setStep(2);
       setApiSuccess(`Verification code has been sent to ${verifyEmail}`);
+    }
+
+    // New logic: if already logged in and plan is present, go to checkout
+    const storedUser = localStorage.getItem('user');
+    if (storedUser && planId) {
+      router.push(`/checkout?plan=${planId}`);
     }
   }, [searchParams, setValue]);
 
@@ -71,7 +78,11 @@ export default function RegisterForm() {
       if (res.status) {
         setApiSuccess('OTP verified successfully! Redirecting to login...');
         setTimeout(() => {
-          router.push('/login');
+          if (planId) {
+            router.push(`/login?plan=${planId}`);
+          } else {
+            router.push('/login');
+          }
         }, 1500);
       } else {
         setApiError(res.message || 'OTP verification failed.');
@@ -114,7 +125,11 @@ export default function RegisterForm() {
             dispatch(setUser(userData));
           }
           setTimeout(() => {
-            router.push('/');
+            if (planId) {
+              router.push(`/checkout?plan=${planId}`);
+            } else {
+              router.push('/');
+            }
           }, 1500);
         } else {
           setApiError(res.message || 'Google Registration failed. Please try again.');
@@ -258,7 +273,7 @@ export default function RegisterForm() {
       )}
 
       <p className="text-center text-sm text-gray-400 mt-10">
-        Already have an account? <Link href="/login" className="text-[#b28cff] font-bold hover:text-white transition-colors">Sign In</Link>
+        Already have an account? <Link href={`/login${planId ? `?plan=${planId}` : ''}`} className="text-[#b28cff] font-bold hover:text-white transition-colors">Sign In</Link>
       </p>
     </div>
   );

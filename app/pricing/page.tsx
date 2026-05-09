@@ -1,5 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import { Check, Zap, Crown, Sparkles, Star, Play, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -47,6 +48,8 @@ const planStyles: Record<string, any> = {
 
 export default async function PricingPage() {
   const plans = await getPlans();
+  const cookieStore = await cookies();
+  const isLoggedIn = cookieStore.has('token');
 
   return (
     <main className="min-h-screen bg-[#0a0a0c] text-white selection:bg-cyan-500/30">
@@ -180,7 +183,7 @@ export default async function PricingPage() {
 
                 {/* CTA */}
                 <Link
-                  href={`/register?plan=${plan.planId}`}
+                  href={isLoggedIn ? `/checkout?plan=${plan.planId}` : `/register?plan=${plan.planId}`}
                   className={`
                     w-full py-5 rounded-[1.5rem] text-xs font-black uppercase tracking-[0.2em] text-center transition-all duration-300 flex items-center justify-center gap-2 group/btn
                     ${style.featured 

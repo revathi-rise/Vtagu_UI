@@ -165,7 +165,7 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
                   document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                   document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                   dispatch(setUser(null));
-                  window.location.href = '/';
+                  window.location.href = '/login';
                 }}
                 className={`flex items-center justify-center rounded-full bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white transition-all border border-red-500/20 active:scale-95 ${scrolled ? 'w-8 h-8 sm:w-9 sm:h-9' : 'w-10 h-10 sm:w-11 sm:h-11'}`}
                 title="Logout"
@@ -303,7 +303,7 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
                       document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                       dispatch(setUser(null));
                       setIsMobileMenuOpen(false);
-                      window.location.href = '/';
+                      window.location.href = '/login';
                     }}
                     className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-red-500/10 text-red-500 font-bold uppercase tracking-widest text-xs border border-red-500/20 active:scale-95 transition-all"
                   >

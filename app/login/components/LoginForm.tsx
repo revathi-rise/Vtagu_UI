@@ -1,9 +1,9 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { setUser } from '@/store/slices/authSlice';
 import { authApi } from '../../../lib/api/auth.api';
@@ -12,11 +12,20 @@ import { useGoogleLogin } from '@react-oauth/google';
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const planId = searchParams.get('plan');
   const dispatch = useDispatch();
   const { register, handleSubmit, formState: { errors }, setError } = useForm();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser && planId) {
+      router.push(`/checkout?plan=${planId}`);
+    }
+  }, [planId, router]);
 
   const onSubmit = async (data: any) => {
     setIsLoading(true);
@@ -43,7 +52,11 @@ export default function LoginForm() {
           console.warn('[DEBUG] Login successful but no user data returned in res.data or res.user');
         }
 
-        router.push('/');
+        if (planId) {
+          router.push(`/checkout?plan=${planId}`);
+        } else {
+          router.push('/');
+        }
       } else {
         if (res.message === 'Please verify OTP first') {
           setApiError('Account not verified. Sending a new OTP and redirecting...');
@@ -94,7 +107,11 @@ export default function LoginForm() {
             }
             dispatch(setUser(userData));
           }
-          router.push('/');
+          if (planId) {
+            router.push(`/checkout?plan=${planId}`);
+          } else {
+            router.push('/');
+          }
         } else {
           setApiError(res.message || 'Google Login failed. Please try again.');
         }
@@ -180,7 +197,7 @@ export default function LoginForm() {
         </button>
 
         <p className="text-center text-sm text-gray-400 mt-10">
-          New to PrimeTime? <Link href="/register" className="text-[#b28cff] font-bold hover:text-white transition-colors">Create Account</Link>
+          New to PrimeTime? <Link href={`/register${planId ? `?plan=${planId}` : ''}`} className="text-[#b28cff] font-bold hover:text-white transition-colors">Create Account</Link>
         </p>
     </div>
   );
