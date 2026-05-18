@@ -7,8 +7,8 @@ import ListingHero from '@/components/shared/ListingHero';
 import ResponsiveGrid from '@/components/shared/ResponsiveGrid';
 
 export const metadata = {
-  title: 'Episodes - PrimeTime',
-  description: 'Catch up on the latest episodes of your favorite originals and series.',
+  title: 'Web Series - PrimeTime',
+  description: 'Catch up on the latest web series and episodes of your favorite originals.',
 };
 
 export default async function EpisodesPage() {
@@ -37,7 +37,7 @@ export default async function EpisodesPage() {
         <div className="flex flex-col gap-12">
           <div className="flex flex-col gap-2">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase">
-              Latest <span className="text-gradient">Episodes</span>
+              Latest <span className="text-gradient">Web Series</span>
             </h2>
             <div className="w-20 h-1 bg-brand-gradient rounded-full" />
           </div>

@@ -110,7 +110,7 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
           />
 
           <DropdownNavItem
-            label="EPISODES"
+            label="WEB SERIES"
             href="/episodes"
             items={genres.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
             active={pathname === "/episodes"}
@@ -246,7 +246,7 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
               />
 
               <MobileDropdownNavItem
-                label="EPISODES"
+                label="WEB SERIES"
                 href="/episodes"
                 items={genres.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
                 onClick={() => setIsMobileMenuOpen(false)}

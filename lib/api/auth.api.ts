@@ -124,5 +124,29 @@ export const authApi = {
       body: JSON.stringify(data),
     });
     return res.json();
+  },
+
+  // Mobile Login - Request OTP
+  mobileLogin: async (data: { mobile: string }): Promise<AuthResponse> => {
+    const url = `${API_BASE}/users/mobile-login`;
+    logger.debug(`Calling mobile-login API: ${url}`);
+    
+    const res = await fetchWithAuth(url, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+
+  // Verify Mobile Login - Verify OTP
+  verifyMobileLogin: async (data: { mobile: string; otp: string }): Promise<AuthResponse> => {
+    const url = `${API_BASE}/users/verify-mobile-login`;
+    logger.debug(`Calling verify-mobile-login API: ${url}`);
+    
+    const res = await fetchWithAuth(url, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res.json();
   }
 };

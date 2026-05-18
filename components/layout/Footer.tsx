@@ -39,7 +39,7 @@ export default function Footer() {
             <h4 className="font-black text-white text-[10px] uppercase tracking-[0.3em] opacity-40">Library</h4>
             <ul className="space-y-4">
               <FooterLink href="/movies" Icon={Film}>Movies</FooterLink>
-              <FooterLink href="/episodes" Icon={Play}>Episodes</FooterLink>
+              <FooterLink href="/episodes" Icon={Play}>Web Series</FooterLink>
               <FooterLink href="/interactive" Icon={Sparkles}>Interactive</FooterLink>
               <FooterLink href="/pricing" Icon={ShieldCheck}>Membership</FooterLink>
             </ul>

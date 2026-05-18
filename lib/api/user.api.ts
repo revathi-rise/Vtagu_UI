@@ -25,5 +25,20 @@ export const userApi = {
       console.error('Error updating profile:', error);
       return { status: false, message: 'Failed to update profile' };
     }
+  },
+  uploadImage: async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch(`${API_BASE}/upload-image`, {
+        method: 'POST',
+        body: formData,
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return { status: false, message: 'Failed to upload image' };
+    }
   }
 };

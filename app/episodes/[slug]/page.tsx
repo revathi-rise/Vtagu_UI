@@ -38,8 +38,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${episode.title} | Episodes | PrimeTime`,
-    description: `Watch ${episode.title} — Season ${episode.seasonId} episode exclusively on PrimeTime.`,
+    title: `${episode.title} | Web Series | PrimeTime`,
+    description: `Watch ${episode.title} — Season ${episode.seasonId} exclusively on PrimeTime.`,
   };
 }
 

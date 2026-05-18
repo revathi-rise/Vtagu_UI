@@ -41,7 +41,7 @@ export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
             title="FEATURED "
             subtitle="Premium Collection"
             Icon={Film}
-            gradientText="EPISODES"
+            gradientText="WEB SERIES"
             viewAllHref="#"
           />
         </div>
