@@ -6,21 +6,35 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Search, Menu, X, ChevronRight, LogOut, User, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Genre, InteractiveMovie, getInteractiveMovies } from "@/lib/vtagu.api";
+import { Genre, InteractiveMovie, getInteractiveMovies, Language, getLanguages, getGenres } from "@/lib/vtagu.api";
 import { removeToken } from "@/lib/api-client";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
 import { setUser } from "@/store/slices/authSlice";
 
-export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
+export default function Navbar({ genres = [], languages = [] }: { genres?: Genre[]; languages?: Language[] }) {
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [interactiveMovies, setInteractiveMovies] = useState<InteractiveMovie[]>([]);
+  const [genresList, setGenresList] = useState<Genre[]>(genres);
+  const [languagesList, setLanguagesList] = useState<Language[]>(languages);
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
   const pathname = usePathname();
 
   const userName = user?.user_name || user?.name || null;
+
+  useEffect(() => {
+    if (genres && genres.length > 0) {
+      setGenresList(genres);
+    }
+  }, [genres]);
+
+  useEffect(() => {
+    if (languages && languages.length > 0) {
+      setLanguagesList(languages);
+    }
+  }, [languages]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,6 +44,29 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
     const fetchInteractive = async () => {
       const data = await getInteractiveMovies();
       setInteractiveMovies(data);
+    };
+
+    const fetchDropdownData = async () => {
+      try {
+        const shouldFetchLanguages = languagesList.length === 0;
+        const shouldFetchGenres = genresList.length === 0;
+
+        if (shouldFetchLanguages || shouldFetchGenres) {
+          const results = await Promise.all([
+            shouldFetchLanguages ? getLanguages() : Promise.resolve(languagesList),
+            shouldFetchGenres ? getGenres() : Promise.resolve(genresList)
+          ]);
+          
+          if (shouldFetchLanguages && results[0]?.length > 0) {
+            setLanguagesList(results[0]);
+          }
+          if (shouldFetchGenres && results[1]?.length > 0) {
+            setGenresList(results[1]);
+          }
+        }
+      } catch (e) {
+        console.error("Error fetching header dropdown data:", e);
+      }
     };
 
     const loadUser = () => {
@@ -48,12 +85,13 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
 
     window.addEventListener("scroll", handleScroll);
     fetchInteractive();
+    fetchDropdownData();
     loadUser();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [dispatch]);
+  }, [dispatch, languagesList.length, genresList.length]);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -104,7 +142,7 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
           <DropdownNavItem
             label="MOVIES"
             href="/movies"
-            items={genres.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
+            items={genresList.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
             active={pathname === "/movies"}
             scrolled={scrolled}
           />
@@ -112,7 +150,7 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
           <DropdownNavItem
             label="WEB SERIES"
             href="/episodes"
-            items={genres.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
+            items={genresList.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
             active={pathname === "/episodes"}
             scrolled={scrolled}
           />
@@ -128,12 +166,14 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
 
           <NavItem href="/pricing" label="PRICING" active={pathname === "/pricing"} scrolled={scrolled} />
 
-          <div className="relative group ml-1">
-            <button className={`font-medium px-4 py-2 text-white/70 hover:text-white transition-all uppercase flex items-center gap-1 group ${scrolled ? 'text-sm xl:text-base' : 'text-base xl:text-lg'}`}>
-              LANGUAGES
-              <svg className="w-3 h-3 transition-transform group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
-            </button>
-          </div>
+          <DropdownNavItem
+            label="LANGUAGES"
+            href="/languages"
+            items={languagesList.map(l => ({ id: l.slug, name: l.name, path: l.slug }))}
+            active={pathname?.startsWith("/languages")}
+            scrolled={scrolled}
+            isLanguage
+          />
         </nav>
 
         {/* Right Actions */}
@@ -241,14 +281,14 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
               <MobileDropdownNavItem
                 label="MOVIES"
                 href="/movies"
-                items={genres.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
+                items={genresList.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
                 onClick={() => setIsMobileMenuOpen(false)}
               />
 
               <MobileDropdownNavItem
                 label="WEB SERIES"
                 href="/episodes"
-                items={genres.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
+                items={genresList.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
                 onClick={() => setIsMobileMenuOpen(false)}
               />
 
@@ -262,18 +302,13 @@ export default function Navbar({ genres = [] }: { genres?: Genre[] }) {
 
               <MobileNavItem href="/pricing" label="PRICING" active={pathname === "/pricing"} onClick={() => setIsMobileMenuOpen(false)} />
 
-              <div className="py-4 px-4 mt-4 border-t border-white/5 flex items-center justify-between group">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                    <Globe className="w-4 h-4 text-white/60" />
-                  </div>
-                  <span className="text-sm font-bold text-white/60 uppercase tracking-widest">Languages</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black text-primary">ENGLISH</span>
-                  <ChevronRight className="w-4 h-4 text-white/20" />
-                </div>
-              </div>
+              <MobileDropdownNavItem
+                label="LANGUAGES"
+                href="/languages"
+                items={languagesList.map(l => ({ id: l.slug, name: l.name, path: l.slug }))}
+                isLanguage
+                onClick={() => setIsMobileMenuOpen(false)}
+              />
             </div>
 
             {/* Mobile Menu Footer (Profile/Login) */}
@@ -336,7 +371,8 @@ function DropdownNavItem({
   items,
   active,
   scrolled,
-  isInteractive = false
+  isInteractive = false,
+  isLanguage = false
 }: {
   label: string;
   href: string;
@@ -344,6 +380,7 @@ function DropdownNavItem({
   active?: boolean;
   scrolled: boolean;
   isInteractive?: boolean;
+  isLanguage?: boolean;
 }) {
   return (
     <div className="relative group/dropdown px-1">
@@ -380,7 +417,7 @@ function DropdownNavItem({
               items.map((item) => (
                 <Link
                   key={item.id}
-                  href={isInteractive ? `${href}/${item.id}` : `${href}?genre=${item.path}`}
+                  href={isInteractive ? `${href}/${item.id}` : isLanguage ? `${href}/${item.path}` : `${href}?genre=${item.path}`}
                   className="px-4 py-3 rounded-xl text-xs font-semibold text-white/50 hover:text-white hover:bg-white/5 transition-all uppercase flex items-center justify-between group/item"
                 >
                   {item.name}
@@ -458,12 +495,14 @@ function MobileDropdownNavItem({
   href,
   items,
   isInteractive = false,
+  isLanguage = false,
   onClick
 }: {
   label: string;
   href: string;
   items: { id: number | string, name: string, path: string }[];
   isInteractive?: boolean;
+  isLanguage?: boolean;
   onClick: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -503,7 +542,7 @@ function MobileDropdownNavItem({
               {items.map((item) => (
                 <Link
                   key={item.id}
-                  href={isInteractive ? `${href}/${item.id}` : `${href}?genre=${item.path}`}
+                  href={isInteractive ? `${href}/${item.id}` : isLanguage ? `${href}/${item.path}` : `${href}?genre=${item.path}`}
                   onClick={onClick}
                   className="block px-4 py-3 rounded-xl text-xs font-bold text-white/40 hover:text-white hover:bg-white/5 transition-all uppercase"
                 >

@@ -429,3 +429,52 @@ export async function getPlans(): Promise<Plan[]> {
     return [];
   }
 }
+
+// ----------------------------------------------------
+// Languages Endpoints
+// ----------------------------------------------------
+
+export interface Language {
+  name: string;
+  code: string;
+  slug: string;
+}
+
+export interface LanguageMoviesResponse {
+  language: string;
+  movies: Movie[];
+}
+
+export async function getLanguages(): Promise<Language[]> {
+  const url = `${API_BASE}/languages`;
+  try {
+    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch active languages. Status: ${res.status}`);
+    }
+    const result = await res.json();
+    return Array.isArray(result) ? result : (result.data || []);
+  } catch (err: any) {
+    console.error("Error fetching languages in API:", err);
+    return [];
+  }
+}
+
+export async function getMoviesByLanguage(slug: string): Promise<LanguageMoviesResponse> {
+  const url = `${API_BASE}/languages/${slug}/movies`;
+  try {
+    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch movies by language slug "${slug}". Status: ${res.status}`);
+    }
+    const result = await res.json();
+    return {
+      language: result.language || '',
+      movies: result.movies || [],
+    };
+  } catch (err: any) {
+    console.error(`Error fetching movies by language ${slug} in API:`, err);
+    return { language: '', movies: [] };
+  }
+}
+

@@ -3,7 +3,7 @@ import { Montserrat, Inter } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { getGenres, Genre } from '@/lib/vtagu.api';
+import { getGenres, Genre, getLanguages, Language } from '@/lib/vtagu.api';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -38,13 +38,20 @@ export default async function RootLayout({
     console.error("Error fetching genres in RootLayout:", error);
   }
 
+  let languages: Language[] = [];
+  try {
+    languages = await getLanguages();
+  } catch (error) {
+    console.error("Error fetching languages in RootLayout:", error);
+  }
+
 
   return (
 
     <html lang="en" className={`${montserrat.variable} ${inter.variable}`}>
       <body className={`${montserrat.className} antialiased`}>
         <ReduxProvider>
-          <Navbar genres={genres} />
+          <Navbar genres={genres} languages={languages} />
           <div className="pt-24 min-h-screen">
             {children}
           </div>
