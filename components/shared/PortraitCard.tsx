@@ -128,9 +128,10 @@ export const PortraitCard = ({
             "overflow-hidden transition-all duration-500",
             isHovered ? "max-h-[100px] opacity-100 mt-1" : "max-h-0 opacity-0"
           )}>
-            <p className="text-[12px] text-white/50 line-clamp-3 leading-relaxed">
-              {description || "Experience the next level of immersive storytelling. Watch this original production in stunning quality."}
-            </p>
+            <div 
+              className="text-[12px] text-white/50 line-clamp-3 leading-relaxed [&_p]:inline [&_p]:m-0 [&_p]:p-0"
+              dangerouslySetInnerHTML={{ __html: description || "Experience the next level of immersive storytelling. Watch this original production in stunning quality." }}
+            />
           </div>
 
           {/* Bottom Meta Bar */}

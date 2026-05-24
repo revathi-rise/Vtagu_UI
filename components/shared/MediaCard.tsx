@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Play, Star, Clock, Calendar, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getVideoType, getYouTubeVideoId } from '@/lib/video-utils';
 
 interface MediaCardProps {
   title: string;
@@ -53,18 +54,14 @@ export const MediaCard = ({
 
   const isPortrait = variant === 'portrait';
 
-  const getYoutubeEmbedUrl = (url: string) => {
-    if (!url) return null;
-    let videoId = '';
-    if (url.includes('v=')) {
-      videoId = url.split('v=')[1]?.split('&')[0];
-    } else if (url.includes('youtu.be/')) {
-      videoId = url.split('youtu.be/')[1]?.split('?')[0];
-    }
-    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3` : null;
-  };
+  const videoType = trailerUrl ? getVideoType(trailerUrl) : 'unknown';
 
-  const embedUrl = trailerUrl ? getYoutubeEmbedUrl(trailerUrl) : null;
+  const embedUrl = (trailerUrl && videoType === 'youtube')
+    ? (() => {
+        const videoId = getYouTubeVideoId(trailerUrl);
+        return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3` : null;
+      })()
+    : null;
 
   return (
     <div
@@ -93,7 +90,7 @@ export const MediaCard = ({
           {/* Static Image */}
           <div className={cn(
             "absolute inset-0 transition-opacity duration-500",
-            isHovered && previewGif ? "opacity-0" : "opacity-100"
+            isHovered && (previewGif || embedUrl || videoType === 'native') ? "opacity-0" : "opacity-100"
           )}>
             <Image
               src={image || "https://picsum.photos/seed/media/600/900"}
@@ -105,29 +102,44 @@ export const MediaCard = ({
           </div>
 
           {/* Preview GIF or Full-Screen Background Trailer */}
-          {(previewGif || embedUrl) && (
+          {(previewGif || embedUrl || (trailerUrl && videoType === 'native')) && (
             <div className={cn(
               "absolute inset-0 transition-opacity duration-500",
               isHovered ? "opacity-100" : "opacity-0"
             )}>
-              {isHovered && embedUrl ? (
-                <div className="absolute inset-0 w-full h-full">
-                  <iframe
-                    src={embedUrl}
-                    className="w-full h-full object-cover scale-[1.5] pointer-events-none"
-                    allow="autoplay; encrypted-media"
-                    frameBorder="0"
-                  />
-                </div>
-              ) : previewGif ? (
-                <Image
-                  src={previewGif}
-                  alt={`${title} preview`}
-                  fill
-                  className="object-cover scale-110"
-                  unoptimized
-                />
-              ) : null}
+              {isHovered && (
+                <>
+                  {embedUrl ? (
+                    <div className="absolute inset-0 w-full h-full">
+                      <iframe
+                        src={embedUrl}
+                        className="w-full h-full object-cover scale-[1.5] pointer-events-none"
+                        allow="autoplay; encrypted-media"
+                        frameBorder="0"
+                      />
+                    </div>
+                  ) : videoType === 'native' ? (
+                    <div className="absolute inset-0 w-full h-full">
+                      <video
+                        src={trailerUrl}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : previewGif ? (
+                    <Image
+                      src={previewGif}
+                      alt={`${title} preview`}
+                      fill
+                      className="object-cover scale-110"
+                      unoptimized
+                    />
+                  ) : null}
+                </>
+              )}
             </div>
           )}
 
@@ -186,10 +198,11 @@ export const MediaCard = ({
 
           {/* Short Description (Conditional) - Hidden on mobile unless space permits */}
           {description && (
-            <div className="overflow-hidden transition-all duration-300 max-h-0 sm:group-hover/card:max-h-[80px] sm:group-hover/card:mt-2">
-              <p className="hidden sm:block text-[11px] text-white/40 line-clamp-2 leading-relaxed font-medium">
-                {description}
-              </p>
+            <div className="hidden sm:block overflow-hidden transition-all duration-300 max-h-0 sm:group-hover/card:max-h-[100px] sm:group-hover/card:mt-2">
+              <div 
+                className="text-[11px] text-white/40 line-clamp-4 leading-relaxed font-medium [&_p]:inline [&_p]:m-0 [&_p]:p-0"
+                dangerouslySetInnerHTML={{ __html: description }}
+              />
             </div>
           )}
 

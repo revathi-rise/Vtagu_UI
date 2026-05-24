@@ -70,77 +70,97 @@ export default function NewsPopup() {
     if (!isVisible || !latestNews) return null;
 
     return (
-        <div className="fixed bottom-6 right-6 z-[100] w-[380px] md:w-[420px] animate-in fade-in slide-in-from-bottom-10 duration-700">
-            <div className="bg-[#1a1329] border border-[#b28cff]/30 rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_30px_rgba(146,72,255,0.15)] flex flex-col group">
-                
-                {/* Image Header */}
-                <div className="relative h-48 overflow-hidden">
+        <div 
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 md:p-8 animate-in fade-in duration-500"
+            onClick={() => setIsVisible(false)}
+        >
+            <div 
+                className="relative w-[90vw] h-[90vh] max-w-[1200px] max-h-[750px] bg-[#140f21] border border-[#b28cff]/30 rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_50px_rgba(146,72,255,0.2)] flex flex-col md:flex-row group animate-in zoom-in-95 duration-500"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Close Button on Modal top-right */}
+                <button 
+                    onClick={() => setIsVisible(false)}
+                    className="absolute top-6 right-6 z-50 p-3 rounded-full bg-black/60 backdrop-blur-md text-white/70 hover:text-white transition-all border border-white/10 hover:border-purple-500/50 hover:scale-105 active:scale-95"
+                >
+                    <X size={20} />
+                </button>
+
+                {/* Left Side: Large Featured Image */}
+                <div className="relative w-full h-[40%] md:w-[55%] md:h-full overflow-hidden">
                     <Image 
                         src={latestNews.image_url || "/images/news/ai.png"} 
                         alt={latestNews.title}
                         fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-700"
+                        priority
+                        className="object-cover group-hover:scale-105 transition-transform duration-1000"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1a1329] via-transparent to-transparent" />
+                    {/* Shadow / Gradient overlays */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#140f21] via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-[#140f21] z-10" />
                     
-                    <button 
-                        onClick={() => setIsVisible(false)}
-                        className="absolute top-4 right-4 p-2 rounded-full bg-black/40 backdrop-blur-md text-white/70 hover:text-white transition-all border border-white/10"
-                    >
-                        <X size={18} />
-                    </button>
-
-                    <div className="absolute top-4 left-4">
-                        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-600 text-white text-[10px] font-black uppercase tracking-widest border border-purple-400/30 shadow-lg">
-                            <TrendingUp size={12} /> Just In
+                    {/* Just In badge */}
+                    <div className="absolute top-6 left-6 z-20">
+                        <span className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-purple-600 text-white text-xs font-black uppercase tracking-widest border border-purple-400/30 shadow-lg animate-pulse">
+                            <TrendingUp size={14} /> Just In
                         </span>
                     </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-6">
-                    <div className="flex items-center gap-2 mb-3">
-                        <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">
-                            {latestNews.category || 'Movie News'}
-                        </span>
-                        <div className="w-1 h-1 rounded-full bg-white/20" />
-                        <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest">
-                            {new Date(latestNews.created_on).toLocaleDateString()}
-                        </span>
+                {/* Right Side: News Content */}
+                <div className="w-full h-[60%] md:w-[45%] md:h-full p-6 md:p-10 flex flex-col justify-between overflow-y-auto bg-[#140f21]/95 relative z-20">
+                    <div className="flex flex-col">
+                        {/* Meta Category and Date */}
+                        <div className="flex items-center gap-2.5 mb-4">
+                            <span className="text-xs font-black text-purple-400 uppercase tracking-widest bg-purple-500/10 px-3 py-1 rounded-md border border-purple-500/20">
+                                {latestNews.category || 'Movie News'}
+                            </span>
+                            <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
+                            <span className="text-xs text-white/40 font-bold uppercase tracking-widest">
+                                {new Date(latestNews.created_on).toLocaleDateString()}
+                            </span>
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-2xl md:text-3xl font-black text-white mb-4 leading-tight group-hover:text-purple-300 transition-colors">
+                            {latestNews.title}
+                        </h3>
+
+                        {/* Divider */}
+                        <div className="h-[1px] w-12 bg-purple-500/50 mb-6" />
+
+                        {/* Description content */}
+                        <p className="text-sm md:text-base text-gray-300 leading-relaxed font-medium mb-6 whitespace-pre-line">
+                            {latestNews.content}
+                        </p>
                     </div>
 
-                    <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 leading-tight group-hover:text-purple-300 transition-colors">
-                        {latestNews.title}
-                    </h3>
-
-                    <p className="text-sm text-gray-400 mb-6 line-clamp-2 leading-relaxed">
-                        {latestNews.content}
-                    </p>
-
-                    <div className="flex items-center gap-3">
-                        <Link 
-                            href={`/news/${latestNews.news_id}`}
-                            onClick={() => setIsVisible(false)}
-                            className="flex-1 flex items-center justify-center gap-2 bg-white text-[#1a1329] font-black py-3 rounded-2xl text-xs uppercase tracking-widest hover:bg-purple-500 hover:text-white transition-all shadow-lg"
-                        >
-                            Read More
-                            <ChevronRight size={16} />
-                        </Link>
-                        <Link 
-                            href="/news"
-                            onClick={() => setIsVisible(false)}
-                            className="p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-purple-500/30 text-white/60 hover:text-white transition-all"
-                        >
-                            <Newspaper size={20} />
-                        </Link>
+                    {/* CTAs */}
+                    <div className="flex flex-col gap-4 mt-auto pt-6 border-t border-white/5">
+                        <div className="flex items-center gap-3">
+                            <Link 
+                                href={`/news/${latestNews.news_id}`}
+                                onClick={() => setIsVisible(false)}
+                                className="flex-1 flex items-center justify-center gap-2 bg-white text-[#1a1329] font-black py-4 rounded-2xl text-xs uppercase tracking-widest hover:bg-purple-500 hover:text-white transition-all shadow-lg active:scale-95"
+                            >
+                                Read More
+                                <ChevronRight size={18} />
+                            </Link>
+                            <Link 
+                                href="/news"
+                                onClick={() => setIsVisible(false)}
+                                className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-purple-500/30 text-white/60 hover:text-white transition-all hover:bg-white/10"
+                            >
+                                <Newspaper size={22} />
+                            </Link>
+                        </div>
+                        
+                        {/* Footer text */}
+                        <div className="text-center pt-2">
+                            <p className="text-[10px] font-black text-purple-400/70 uppercase tracking-[0.25em]">
+                                Daily News Updates • PrimeTime Exclusive
+                            </p>
+                        </div>
                     </div>
-                </div>
-
-                {/* Bottom Bar */}
-                <div className="px-6 py-3 bg-purple-500/10 border-t border-white/5 flex items-center justify-center">
-                    <p className="text-[9px] font-bold text-purple-400 uppercase tracking-[0.2em]">
-                        Daily News Updates • PrimeTime Exclusive
-                    </p>
                 </div>
             </div>
         </div>

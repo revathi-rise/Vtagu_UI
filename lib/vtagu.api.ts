@@ -25,7 +25,8 @@ async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 
 
 export interface Genre {
   genre_id: number;
-  name: string;
+  name?: string;
+  genre_name?: string;
   in_home: string;
   path: string;
 }
@@ -241,6 +242,59 @@ export interface Movie {
   interactiveMap: any;
   createdAt: string;
   updatedAt: string;
+  media?: {
+    image?: {
+      url: string;
+      alt?: string;
+    };
+    card_image?: {
+      url: string;
+      alt?: string;
+    };
+    video?: {
+      url: string;
+      alt?: string;
+    };
+    trailer?: {
+      url: string;
+      alt?: string;
+    };
+  };
+}
+
+export function cleanHtmlString(htmlStr: string): string {
+  if (!htmlStr) return '';
+
+  let cleaned = htmlStr;
+
+  // 1. Remove CodeMirror syntax highlighting spans or any span tags, but KEEP their inner content
+  // E.g., <span class="ͼ1a">p</span> -> p
+  cleaned = cleaned.replace(/<span[^>]*>(.*?)<\/span>/gi, '$1');
+
+  // 2. Decode HTML entities
+  cleaned = cleaned
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+
+  return cleaned.trim();
+}
+
+export function normalizeMovie(movie: any): Movie {
+  if (!movie) return movie;
+  return {
+    ...movie,
+    shortDescription: cleanHtmlString(movie.shortDescription || ""),
+    longDescription: cleanHtmlString(movie.longDescription || ""),
+    posterImage: movie.media?.card_image?.url || movie.media?.image?.url || movie.posterImage || "",
+    videoUrl: movie.media?.video?.url || movie.videoUrl || "",
+    trailerUrl: movie.media?.trailer?.url || movie.trailerUrl || "",
+    posterAlt: movie.media?.card_image?.alt || movie.media?.image?.alt || movie.posterAlt || "",
+    trailerAlt: movie.media?.trailer?.alt || movie.trailerAlt || "",
+  };
 }
 
 export async function getMovies(): Promise<Movie[]> {
@@ -251,7 +305,8 @@ export async function getMovies(): Promise<Movie[]> {
       throw new Error(`Failed to fetch movies. Status: ${res.status}`);
     }
     const result = await res.json();
-    return result.data || [];
+    const data = result.data || [];
+    return data.map(normalizeMovie);
   } catch (err: any) {
     return [];
   }
@@ -266,7 +321,7 @@ export async function getMovieBySlug(slug: string): Promise<Movie | null> {
       throw new Error(`Failed to fetch movie detail. Status: ${res.status}`);
     }
     const result = await res.json();
-    return result.data || result; // Use data if present, else result
+    return normalizeMovie(result.data || result);
   } catch (err: any) {
     return null;
   }
@@ -284,7 +339,8 @@ export async function getTrendingMovies(limit: number = 10): Promise<Movie[]> {
       throw new Error(`Failed to fetch trending movies. Status: ${res.status}`);
     }
     const result = await res.json();
-    return result.data || [];
+    const data = result.data || [];
+    return data.map(normalizeMovie);
   } catch (err: any) {
     return [];
   }
@@ -470,7 +526,7 @@ export async function getMoviesByLanguage(slug: string): Promise<LanguageMoviesR
     const result = await res.json();
     return {
       language: result.language || '',
-      movies: result.movies || [],
+      movies: (result.movies || []).map(normalizeMovie),
     };
   } catch (err: any) {
     console.error(`Error fetching movies by language ${slug} in API:`, err);

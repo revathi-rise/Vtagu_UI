@@ -142,9 +142,10 @@ export const LandscapeCard = ({
             "overflow-hidden transition-all duration-500",
             isHovered ? "max-h-[60px] opacity-100 mt-1" : "max-h-0 opacity-0"
           )}>
-            <p className="text-[11px] text-white/50 line-clamp-2 leading-relaxed">
-              {description || "Continue your journey with the latest episode. Watch now on PrimeTime."}
-            </p>
+            <div 
+              className="text-[11px] text-white/50 line-clamp-2 leading-relaxed [&_p]:inline [&_p]:m-0 [&_p]:p-0"
+              dangerouslySetInnerHTML={{ __html: description || "Continue your journey with the latest episode. Watch now on PrimeTime." }}
+            />
           </div>
 
           {/* Mini Meta Bar */}

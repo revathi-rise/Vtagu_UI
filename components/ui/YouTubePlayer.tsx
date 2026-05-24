@@ -28,7 +28,6 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
     onEnded,
   }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const iframeRef = useRef<HTMLIFrameElement>(null);
     const playerRef = useRef<any>(null);
     const [error, setError] = useState<string | null>(null);
     const [isReady, setIsReady] = useState(false);
@@ -37,19 +36,29 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
     React.useEffect(() => {
       if (typeof window === 'undefined') return;
 
-      // Load YouTube API
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
+      let player: any = null;
+      let checkYTInterval: NodeJS.Timeout | null = null;
 
-      // Define global onYouTubeIframeAPIReady
-      (window as any).onYouTubeIframeAPIReady = () => {
-        if (!iframeRef.current) return;
-
+      const initPlayer = () => {
+        const container = document.getElementById(`youtube-player-${videoId}`);
+        if (!container) return;
         const YT = (window as any).YT;
-        playerRef.current = new YT.Player(iframeRef.current, {
+        if (!YT || !YT.Player) return;
+
+        player = new YT.Player(`youtube-player-${videoId}`, {
+          width: '100%',
+          height: '100%',
+          videoId: videoId,
+          playerVars: {
+            autoplay: autoPlay ? 1 : 0,
+            controls: 1,
+            modestbranding: 1,
+            rel: 0,
+            fs: 1,
+            iv_load_policy: 3,
+            playsinline: 1,
+            enablejsapi: 1,
+          },
           events: {
             'onReady': () => {
               setIsReady(true);
@@ -94,8 +103,42 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
             },
           },
         });
+        playerRef.current = player;
       };
-    }, [autoPlay, onTimeUpdate, onEnded]);
+
+      if ((window as any).YT && (window as any).YT.Player) {
+        initPlayer();
+      } else {
+        if (!document.getElementById('youtube-iframe-api-script')) {
+          const tag = document.createElement('script');
+          tag.id = 'youtube-iframe-api-script';
+          tag.src = 'https://www.youtube.com/iframe_api';
+          const firstScriptTag = document.getElementsByTagName('script')[0];
+          firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
+        }
+
+        checkYTInterval = setInterval(() => {
+          if ((window as any).YT && (window as any).YT.Player) {
+            if (checkYTInterval) clearInterval(checkYTInterval);
+            initPlayer();
+          }
+        }, 100);
+
+        const previousCallback = (window as any).onYouTubeIframeAPIReady;
+        (window as any).onYouTubeIframeAPIReady = () => {
+          if (previousCallback) previousCallback();
+          if (checkYTInterval) clearInterval(checkYTInterval);
+          initPlayer();
+        };
+      }
+
+      return () => {
+        if (checkYTInterval) clearInterval(checkYTInterval);
+        if (player && player.destroy) {
+          player.destroy();
+        }
+      };
+    }, [autoPlay, onTimeUpdate, onEnded, videoId]);
 
     useImperativeHandle(ref, () => ({
       play: () => playerRef.current?.playVideo?.(),
@@ -137,15 +180,11 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
         )}
 
         {/* YouTube Iframe */}
+        {/* YouTube Player */}
         <div className="w-full h-full">
-          <iframe
-            ref={iframeRef}
+          <div
             id={`youtube-player-${videoId}`}
             className="w-full h-full"
-            src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=${autoPlay ? 1 : 0}&controls=1&modestbranding=1&rel=0&fs=1&iv_load_policy=3&playsinline=1`}
-            frameBorder="0"
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            allowFullScreen
           />
         </div>
 

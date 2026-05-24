@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
@@ -11,17 +11,10 @@ interface BackgroundVideoProps {
 }
 
 export default function BackgroundVideo({ videoUrl, posterImage, posterAlt }: BackgroundVideoProps) {
-  const [videoLoaded, setVideoLoaded] = useState(false);
-  const [timerFinished, setTimerFinished] = useState(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
   const { scrollY } = useScroll();
-
-  // 10-second timer to delay the video transition (Premium Feel)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setTimerFinished(true);
-    }, 400000);
-    return () => clearTimeout(timer);
-  }, []);
+  const playerRef = useRef<any>(null);
+  const fadeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Safety check for posterImage to avoid 'Invalid URL' errors
   const safePosterImage = (posterImage && (posterImage.startsWith('http') || posterImage.startsWith('/') || posterImage.startsWith('data:')))
@@ -41,6 +34,117 @@ export default function BackgroundVideo({ videoUrl, posterImage, posterAlt }: Ba
 
   const videoId = getYTId(videoUrl);
 
+  // Initialize YouTube API and player
+  useEffect(() => {
+    if (typeof window === 'undefined' || !videoId) return;
+
+    let player: any = null;
+    let checkYTInterval: NodeJS.Timeout | null = null;
+
+    const initPlayer = () => {
+      const YT = (window as any).YT;
+      if (!YT || !YT.Player) return;
+
+      const container = document.getElementById(`bg-youtube-player-${videoId}`);
+      if (!container) return;
+
+      player = new YT.Player(`bg-youtube-player-${videoId}`, {
+        videoId: videoId,
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          controls: 0,
+          modestbranding: 1,
+          rel: 0,
+          showinfo: 0,
+          iv_load_policy: 3,
+          playsinline: 1,
+          disablekb: 1,
+        },
+        events: {
+          onReady: (event: any) => {
+            const p = event?.target || player || playerRef.current;
+            p?.mute?.();
+            p?.playVideo?.();
+          },
+          onStateChange: (event: any) => {
+            const YT = (window as any).YT;
+            
+            // Clear any existing fade timer first
+            if (fadeTimerRef.current) {
+              clearTimeout(fadeTimerRef.current);
+              fadeTimerRef.current = null;
+            }
+
+            if (event.data === YT.PlayerState.PLAYING) {
+              // Delay fading in the video by 2.5 seconds so that YouTube's initial
+              // play/pause controls overlay has time to auto-hide.
+              fadeTimerRef.current = setTimeout(() => {
+                setVideoPlaying(true);
+              }, 2500);
+            } else if (event.data === YT.PlayerState.ENDED) {
+              // Loop the video programmatically without playlist parameters
+              const p = event?.target || player || playerRef.current;
+              p?.playVideo?.();
+            } else if (event.data === YT.PlayerState.BUFFERING) {
+              // Keep showing or fade out during buffering (optional)
+              // If it was already playing, we keep showing it to prevent flickers
+              // otherwise we keep it hidden.
+            } else {
+              setVideoPlaying(false);
+            }
+          },
+          onError: () => {
+            setVideoPlaying(false);
+          }
+        }
+      });
+      playerRef.current = player;
+    };
+
+    if ((window as any).YT && (window as any).YT.Player) {
+      const timer = setTimeout(initPlayer, 100);
+      return () => {
+        clearTimeout(timer);
+        if (player && player.destroy) {
+          player.destroy();
+        }
+      };
+    } else {
+      if (!document.getElementById('youtube-iframe-api-script')) {
+        const tag = document.createElement('script');
+        tag.id = 'youtube-iframe-api-script';
+        tag.src = 'https://www.youtube.com/iframe_api';
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
+      }
+
+      checkYTInterval = setInterval(() => {
+        if ((window as any).YT && (window as any).YT.Player) {
+          if (checkYTInterval) clearInterval(checkYTInterval);
+          initPlayer();
+        }
+      }, 100);
+
+      const previousCallback = (window as any).onYouTubeIframeAPIReady;
+      (window as any).onYouTubeIframeAPIReady = () => {
+        if (previousCallback) previousCallback();
+        if (checkYTInterval) clearInterval(checkYTInterval);
+        initPlayer();
+      };
+    }
+
+    return () => {
+      if (checkYTInterval) clearInterval(checkYTInterval);
+      if (fadeTimerRef.current) {
+        clearTimeout(fadeTimerRef.current);
+      }
+      if (player && player.destroy) {
+        player.destroy();
+      }
+    };
+  }, [videoId]);
+
   return (
     <div className="absolute inset-0 z-0 bg-[#0B0A10]">
       {/* Fallback/Initial Poster */}
@@ -48,7 +152,7 @@ export default function BackgroundVideo({ videoUrl, posterImage, posterAlt }: Ba
         src={safePosterImage}
         alt={posterAlt}
         fill
-        className={`object-cover transition-opacity duration-[2000ms] ease-in-out ${(videoLoaded && timerFinished) ? 'opacity-0' : 'opacity-40'}`}
+        className={`object-cover transition-opacity duration-[2000ms] ease-in-out ${videoPlaying ? 'opacity-0' : 'opacity-40'}`}
         priority
         placeholder="blur"
         blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
@@ -58,17 +162,19 @@ export default function BackgroundVideo({ videoUrl, posterImage, posterAlt }: Ba
       {videoId && (
         <motion.div
           style={{ opacity: videoOpacity, filter: videoBlur }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: (videoLoaded && timerFinished) ? 1 : 0 }}
-          transition={{ duration: 3, ease: "easeInOut" }}
           className="absolute inset-0 overflow-hidden pointer-events-none"
         >
-          <iframe
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&enablejsapi=1`}
-            className="absolute top-1/2 left-1/2 w-[115%] h-[115%] -translate-x-1/2 -translate-y-1/2 object-cover scale-[1.3]"
-            allow="autoplay; encrypted-media"
-            onLoad={() => setVideoLoaded(true)}
-          />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: videoPlaying ? 1 : 0 }}
+            transition={{ duration: 2, ease: "easeInOut" }}
+            className="absolute top-1/2 left-1/2 w-[115%] h-[115%] -translate-x-1/2 -translate-y-1/2 scale-[1.3] pointer-events-none"
+          >
+            <div
+              id={`bg-youtube-player-${videoId}`}
+              className="w-full h-full pointer-events-none"
+            />
+          </motion.div>
         </motion.div>
       )}
 

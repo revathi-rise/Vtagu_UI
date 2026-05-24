@@ -100,7 +100,7 @@ export default function HeroSection({ posters = [] }: HeroSectionProps) {
             nextSlide();
           }
         }}
-        className="relative z-20 h-full w-full max-w-[1440px] mx-auto px-5 sm:px-8 md:px-12 lg:px-20 flex flex-col justify-center cursor-grab active:cursor-grabbing"
+        className="relative z-20 h-full w-full max-w-[90%] mx-auto px-5 sm:px-8 md:px-12 lg:px-20 flex flex-col justify-center cursor-grab active:cursor-grabbing"
       >
         <div className="max-w-2xl space-y-6">
           <AnimatePresence mode="wait">

@@ -17,6 +17,8 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [interactiveMovies, setInteractiveMovies] = useState<InteractiveMovie[]>([]);
   const [genresList, setGenresList] = useState<Genre[]>(genres);
+  console.log(genresList);
+  
   const [languagesList, setLanguagesList] = useState<Language[]>(languages);
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
@@ -56,7 +58,7 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
             shouldFetchLanguages ? getLanguages() : Promise.resolve(languagesList),
             shouldFetchGenres ? getGenres() : Promise.resolve(genresList)
           ]);
-          
+
           if (shouldFetchLanguages && results[0]?.length > 0) {
             setLanguagesList(results[0]);
           }
@@ -142,7 +144,7 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
           <DropdownNavItem
             label="MOVIES"
             href="/movies"
-            items={genresList.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
+            items={genresList.map(g => ({ id: g.genre_id, name: g.genre_name || g.name || "", path: g.genre_name || g.name || "" }))}
             active={pathname === "/movies"}
             scrolled={scrolled}
           />
@@ -150,7 +152,7 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
           <DropdownNavItem
             label="WEB SERIES"
             href="/episodes"
-            items={genresList.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
+            items={genresList.map(g => ({ id: g.genre_id, name: g.genre_name || g.name || "", path: g.genre_name || g.name || "" }))}
             active={pathname === "/episodes"}
             scrolled={scrolled}
           />
@@ -281,14 +283,14 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
               <MobileDropdownNavItem
                 label="MOVIES"
                 href="/movies"
-                items={genresList.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
+                items={genresList.map(g => ({ id: g.genre_id, name: g.genre_name || g.name || "", path: g.genre_name || g.name || "" }))}
                 onClick={() => setIsMobileMenuOpen(false)}
               />
 
               <MobileDropdownNavItem
                 label="WEB SERIES"
                 href="/episodes"
-                items={genresList.map(g => ({ id: g.genre_id, name: g.name, path: g.path }))}
+                items={genresList.map(g => ({ id: g.genre_id, name: g.genre_name || g.name || "", path: g.genre_name || g.name || "" }))}
                 onClick={() => setIsMobileMenuOpen(false)}
               />
 

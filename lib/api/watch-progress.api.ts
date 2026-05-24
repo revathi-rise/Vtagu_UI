@@ -99,6 +99,14 @@ export const watchProgressApi = {
         method: 'GET',
       });
       
+      if (res.status === 404) {
+        return {
+          status: true,
+          message: 'No watch progress found for this content',
+          data: undefined,
+        };
+      }
+      
       if (!res.ok) {
         throw new Error(`Failed to fetch content progress: ${res.status}`);
       }

@@ -26,6 +26,14 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'wallpapercave.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'vtaguprime.b-cdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.b-cdn.net',
       }
     ],
   },

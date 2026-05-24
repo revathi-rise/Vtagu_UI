@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import WatchTrackingVideoPlayer, { VideoPlayerHandle } from './WatchTrackingVideoPlayer';
 
@@ -24,11 +25,17 @@ export default function VideoPlayerModal({
   userId,
 }: VideoPlayerModalProps) {
   const playerRef = useRef<VideoPlayerHandle>(null);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
-  return (
-    <div className="fixed inset-0 z-[999] bg-black flex flex-col">
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[99999] bg-black flex flex-col">
       {/* Top Bar */}
       <div className="flex items-center justify-between px-6 py-4 bg-black/80 backdrop-blur-md border-b border-white/10 flex-shrink-0">
         <div>
@@ -58,6 +65,7 @@ export default function VideoPlayerModal({
           className="w-full h-full"
         />
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

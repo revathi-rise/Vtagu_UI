@@ -92,9 +92,10 @@ export default function HoverVideoCard({
         <h3 className="text-[16px] font-black tracking-tight text-white uppercase">{title}</h3>
         
         {description && (
-          <p className="mt-2 text-xs text-gray-400/80 line-clamp-2 leading-relaxed font-medium">
-            {description}
-          </p>
+          <div 
+            className="mt-2 text-xs text-gray-400/80 line-clamp-2 leading-relaxed font-medium [&_p]:inline [&_p]:m-0 [&_p]:p-0"
+            dangerouslySetInnerHTML={{ __html: description }}
+          />
         )}
         
         <div className={`mt-5 flex items-center gap-3 transition-all duration-500`}>

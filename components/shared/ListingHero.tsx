@@ -113,9 +113,10 @@ export default function ListingHero({ items, basePath }: ListingHeroProps) {
                 <span className="border border-white/20 px-2 py-0.5 rounded text-[10px]">4K HDR</span>
               </div>
 
-              <p className="text-[11px] sm:text-sm md:text-base text-white/50 line-clamp-3 leading-relaxed max-w-2xl font-medium">
-                {currentItem.description}
-              </p>
+              <div 
+                className="text-[11px] sm:text-sm md:text-base text-white/50 line-clamp-3 leading-relaxed max-w-2xl font-medium [&_p]:inline [&_p]:m-0 [&_p]:p-0"
+                dangerouslySetInnerHTML={{ __html: currentItem.description || '' }}
+              />
 
               <div className="flex items-center gap-4 pt-4">
                 <Link

@@ -38,10 +38,10 @@ export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
         {/* Header */}
         <div className="flex items-center justify-between mb-10 px-4">
           <SectionTitle
-            title="FEATURED "
+            title="WEB "
             subtitle="Premium Collection"
             Icon={Film}
-            gradientText="WEB SERIES"
+            gradientText="SERIES"
             viewAllHref="#"
           />
         </div>

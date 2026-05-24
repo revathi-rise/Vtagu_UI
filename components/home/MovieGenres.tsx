@@ -71,9 +71,9 @@ export default function MovieGenres({ genres = [] }: MovieGenresProps) {
                         {displayGenres.map((genre) => (
                             <SwiperSlide key={genre.genre_id} className="!overflow-visible">
                                 <GenreCard
-                                    title={genre.name}
+                                    title={genre.genre_name || genre.name || ""}
                                     image={genre.path ? `${IMAGE_BASE_URL}${genre.path}` : "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1000&auto=format&fit=crop"}
-                                    color={GENRE_COLORS[genre.name] || "rgba(168, 85, 247, 0.4)"}
+                                    color={GENRE_COLORS[genre.genre_name || genre.name || ""] || "rgba(168, 85, 247, 0.4)"}
                                 />
                             </SwiperSlide>
                         ))}
