@@ -35,7 +35,7 @@ export default function ListingHero({ items, basePath }: ListingHeroProps) {
   }, [items.length]);
 
   useEffect(() => {
-    const timer = setInterval(nextSlide, 8000);
+    const timer = setInterval(nextSlide, 10000);
     return () => clearInterval(timer);
   }, [nextSlide]);
 

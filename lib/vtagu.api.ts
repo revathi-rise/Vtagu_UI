@@ -174,11 +174,48 @@ export async function getChoices(sceneId: number): Promise<Choice[]> {
 }
 
 export interface Episode {
-  episodeId: number;
-  seasonId: number;
+  id: number;
+  season_id: number;
+  episode_number: number;
   title: string;
-  url: string;
-  image: number | string | null;
+  slug: string;
+  shortDescription: string;
+  longDescription: string;
+  duration: string;
+  languages: string;
+  rating: number;
+  isFeatured: boolean;
+  isFree: boolean;
+  viewCount: number;
+  media?: {
+    poster_image?: { url: string; alt?: string };
+    image?: { url: string; alt?: string };
+    card_image?: { url: string; alt?: string };
+    video?: { url: string; alt?: string };
+    trailer?: { url: string; alt?: string };
+  };
+  createdAt?: string;
+  updatedAt?: string;
+
+  // Fallback fields for transition period
+  episodeId?: number;
+  seasonId?: number;
+  url?: string;
+  image?: number | string | null;
+}
+
+export function normalizeEpisode(episode: any): Episode {
+  if (!episode) return episode;
+  return {
+    ...episode,
+    shortDescription: cleanHtmlString(episode.shortDescription || ""),
+    longDescription: cleanHtmlString(episode.longDescription || ""),
+    // Provide backwards compatible fields just in case
+    episodeId: episode.id || episode.episodeId,
+    seasonId: episode.season_id || episode.seasonId,
+    url: episode.media?.video?.url || episode.url || "",
+    image: episode.media?.poster_image?.url || episode.media?.image?.url || episode.image || null,
+  };
 }
 
 export async function getEpisodes(): Promise<Episode[]> {
@@ -189,8 +226,8 @@ export async function getEpisodes(): Promise<Episode[]> {
       throw new Error(`Failed to fetch episodes. Status: ${res.status}`);
     }
     const result = await res.json();
-    // Support both direct array and nested data structure
-    return Array.isArray(result) ? result : (result.data || []);
+    const data = Array.isArray(result) ? result : (result.data || []);
+    return data.map(normalizeEpisode);
   } catch (err: any) {
     return [];
   }
@@ -205,7 +242,7 @@ export async function getEpisodeById(id: string | number): Promise<Episode | nul
       throw new Error(`Failed to fetch episode. Status: ${res.status}`);
     }
     const result = await res.json();
-    return result.data || result;
+    return normalizeEpisode(result.data || result);
   } catch (err: any) {
     return null;
   }
@@ -287,6 +324,7 @@ export function normalizeMovie(movie: any): Movie {
   if (!movie) return movie;
   return {
     ...movie,
+    id: movie.id || movie.movie_id || movie.movieId,
     shortDescription: cleanHtmlString(movie.shortDescription || ""),
     longDescription: cleanHtmlString(movie.longDescription || ""),
     posterImage: movie.media?.card_image?.url || movie.media?.image?.url || movie.posterImage || "",

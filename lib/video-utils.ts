@@ -85,12 +85,16 @@ export function getYouTubeEmbedUrl(videoUrl: string): string | null {
 /**
  * Detect video type from URL
  */
-export type VideoType = 'native' | 'youtube' | 'unknown';
+export type VideoType = 'native' | 'youtube' | 'iframe' | 'unknown';
 
 export function getVideoType(url: string | null | undefined): VideoType {
   if (!url || typeof url !== 'string') return 'unknown';
   
   if (isYouTubeUrl(url)) return 'youtube';
+  
+  if (url.includes('iframe.mediadelivery.net') || url.includes('iframe') || url.includes('/embed/')) {
+    return 'iframe';
+  }
   
   const videoExtensions = ['.mp4', '.webm', '.ogg', '.m3u8', '.mov', '.mkv'];
   const lowerUrl = url.toLowerCase();
@@ -114,6 +118,11 @@ export function isValidVideoUrl(url: string | null | undefined): boolean {
     // Check if it's YouTube
     if (isYouTubeUrl(url)) {
       return !!getYouTubeVideoId(url);
+    }
+
+    // Check if it's a valid iframe/embed source
+    if (url.includes('iframe.mediadelivery.net') || url.includes('iframe') || url.includes('/embed/')) {
+      return true;
     }
     
     // Check if it's a valid native video URL

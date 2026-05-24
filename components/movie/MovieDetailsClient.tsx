@@ -90,7 +90,7 @@ export default function MovieDetailsClient({ movie }: MovieDetailsClientProps) {
               <WatchNowButton
                 url={movie.videoUrl}
                 title={movie.title}
-                contentId={movie.id.toString()}
+                contentId={movie.id?.toString() || ""}
                 contentType="movie"
                 internal={true}
               />

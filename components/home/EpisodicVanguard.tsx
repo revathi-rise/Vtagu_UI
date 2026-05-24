@@ -65,26 +65,37 @@ export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
             }}
             className="!px-4 !py-6 -my-6"
           >
-            {episodes.map((episode, index) => (
-              <SwiperSlide key={episode.episodeId} className="!overflow-visible">
-                <Link
-                  href={`/episodes/${slugify(episode.title)}`}
-                  className="block"
-                >
-                  <MediaCard
-                    variant="landscape"
-                    title={episode.title}
-                    image={`https://picsum.photos/seed/${episode.episodeId + 100}/800/450`}
-                    previewGif={mockGifs[index % mockGifs.length]}
-                    subtitle={`S${episode.seasonId} • EPISODE`}
-                    description={`Watch the latest episode of ${episode.title}. Experience premium episodic storytelling at its best.`}
-                    badge="PREMIUM"
-                    badgeColor="orange"
-                    infoLabel="EPISODE" // Explicitly setting EPISODE label
-                  />
-                </Link>
-              </SwiperSlide>
-            ))}
+            {episodes.map((episode, index) => {
+              const epId = episode.id || episode.episodeId;
+              const epSlug = episode.slug || slugify(episode.title);
+              const epSeason = episode.season_id || episode.seasonId;
+              const epImage = episode.media?.card_image?.url || episode.media?.poster_image?.url || episode.image || `https://picsum.photos/seed/${Number(epId) + 100}/800/450`;
+              const epDesc = episode.shortDescription || `Watch the latest episode of ${episode.title}. Experience premium episodic storytelling at its best.`;
+
+              return (
+                <SwiperSlide key={epId} className="!overflow-visible">
+                  <Link
+                    href={`/episodes/${epSlug}`}
+                    className="block"
+                  >
+                    <MediaCard
+                      variant="landscape"
+                      title={episode.title}
+                      image={typeof epImage === 'string' ? epImage : `https://picsum.photos/seed/${Number(epId) + 100}/800/450`}
+                      previewGif={episode.media?.trailer?.url ? undefined : mockGifs[index % mockGifs.length]}
+                      trailerUrl={episode.media?.trailer?.url}
+                      subtitle={`S${epSeason} • EPISODE`}
+                      description={epDesc}
+                      badge={episode.isFeatured ? "FEATURED" : "PREMIUM"}
+                      badgeColor={episode.isFeatured ? "purple" : "orange"}
+                      infoLabel="EPISODE"
+                      duration={episode.duration}
+                      rating={episode.rating}
+                    />
+                  </Link>
+                </SwiperSlide>
+              );
+            })}
           </Swiper>
 
           {/* Navigation */}

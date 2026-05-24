@@ -4,6 +4,7 @@ import { getEpisodeById, getEpisodes } from '@/lib/vtagu.api';
 import { Metadata } from 'next';
 import TitleHero from '@/components/title/TitleHero';
 import EpisodeDetailContent from '@/components/title/EpisodeDetailContent';
+import EpisodeSection from '@/components/title/EpisodeSection';
 import RelatedNarratives from '@/components/title/RelatedNarratives';
 import Footer from '@/components/layout/Footer';
 
@@ -39,14 +40,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: `${episode.title} | Web Series | PrimeTime`,
-    description: `Watch ${episode.title} — Season ${episode.seasonId} exclusively on PrimeTime.`,
+    description: `Watch ${episode.title} — Season ${episode.season_id || episode.seasonId} exclusively on PrimeTime.`,
   };
 }
 
 export async function generateStaticParams() {
   try {
     const episodes = await getEpisodes();
-    return episodes.map((ep) => ({ slug: ep.episodeId.toString() }));
+    return episodes.map((ep) => ({ slug: ep.slug || (ep.id || ep.episodeId)?.toString() || "" }));
   } catch {
     return [];
   }
@@ -62,12 +63,16 @@ export default async function EpisodeDetailsPage({ params }: PageProps) {
     notFound();
   }
 
-  // Parse the iframe src from the raw embed HTML (or plain URL)
-  const iframeSrc = extractIframeSrc(episode.url as string);
+  // Fetch all episodes for the Explorer Grid list
+  const allEpisodes = await getEpisodes();
 
+  // Parse the iframe src from the raw embed HTML (or plain URL)
+  const iframeSrc = extractIframeSrc(episode.media?.video?.url || episode.url as string);
+
+  const epImage = episode.media?.poster_image?.url || episode.image;
   const backdropUrl =
-    episode.image && typeof episode.image === 'string'
-      ? episode.image
+    epImage && typeof epImage === 'string'
+      ? epImage
       : 'https://images.unsplash.com/photo-1542281286-9e0a16bb7366?auto=format&fit=crop&q=80&w=1920';
 
   return (
@@ -77,8 +82,8 @@ export default async function EpisodeDetailsPage({ params }: PageProps) {
         title={episode.title}
         year={new Date().getFullYear().toString()}
         rating="TV-MA"
-        seasons={`Season ${episode.seasonId}`}
-        description={`Watch the latest episode of ${episode.title}. Experience premium episodic storytelling at its finest — exclusively on PrimeTime.`}
+        seasons={`Season ${episode.season_id || episode.seasonId}`}
+        description={episode.shortDescription || `Watch the latest episode of ${episode.title}. Experience premium episodic storytelling at its finest — exclusively on PrimeTime.`}
         backdropUrl={backdropUrl}
         videoUrl={iframeSrc ?? undefined}
       />
@@ -86,6 +91,9 @@ export default async function EpisodeDetailsPage({ params }: PageProps) {
       <div className="relative z-30 -mt-20">
         {/* Embedded player + episode info (client component) */}
         <EpisodeDetailContent episode={episode} iframeSrc={iframeSrc} />
+
+        {/* Dynamic Episode Grid Explorer */}
+        <EpisodeSection episodes={allEpisodes} currentEpisodeId={episode.id || episode.episodeId} />
 
         {/* Related episodes */}
         {/* <RelatedNarratives /> */}

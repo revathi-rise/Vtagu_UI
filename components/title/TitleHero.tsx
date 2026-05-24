@@ -41,8 +41,8 @@ export default function TitleHero({ title, year, rating, seasons, description, b
           
           {/* Subtitle / Episode Badge */}
           {episodeNumber && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-cyan-400/10 border border-cyan-400/30 text-cyan-400 text-xs font-black tracking-[0.2em] uppercase skeuo-neon-glow-refined animate-pulse">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,1)]" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-primary/10 border border-primary/30 text-primary text-xs font-black tracking-[0.2em] uppercase animate-pulse">
+              <span className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(50,153,255,1)]" />
               {episodeNumber}
             </div>
           )}
@@ -56,7 +56,7 @@ export default function TitleHero({ title, year, rating, seasons, description, b
 
           {/* Metadata Badges - Tactile Labels */}
           <div className="flex flex-wrap items-center gap-4 text-sm font-bold text-white/90">
-            <div className="flex items-center gap-1.5 text-[#00E5FF] uppercase tracking-widest bg-white/5 px-2.5 py-1.5 rounded-xl border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_4px_10px_rgba(0,0,0,0.5)] bg-gradient-to-tr from-white/5 to-transparent">
+            <div className="flex items-center gap-1.5 text-primary uppercase tracking-widest bg-white/5 px-2.5 py-1.5 rounded-xl border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_4px_10px_rgba(0,0,0,0.5)] bg-gradient-to-tr from-white/5 to-transparent">
               <Star size={16} fill="currentColor" />
               <span>New Release</span>
             </div>
@@ -65,7 +65,7 @@ export default function TitleHero({ title, year, rating, seasons, description, b
             {rating && (
               <>
                 <span className="text-white/40">•</span>
-                <span className="border border-[#00E5FF]/40 text-[#00E5FF] px-2.5 py-1.5 rounded-xl text-xs bg-[#00E5FF]/5 font-black shadow-[inset_0_1px_1px_rgba(0,229,255,0.1)]">{rating}</span>
+                <span className="border border-primary/40 text-primary px-2.5 py-1.5 rounded-xl text-xs bg-primary/5 font-black shadow-[inset_0_1px_1px_rgba(50,153,255,0.1)]">{rating}</span>
               </>
             )}
             {seasons && (
@@ -77,9 +77,10 @@ export default function TitleHero({ title, year, rating, seasons, description, b
           </div>
 
           {/* Description */}
-          <p className="text-base sm:text-lg md:text-[24px] text-white/70 max-w-2xl leading-relaxed font-semibold drop-shadow-lg">
-            {description}
-          </p>
+          <div 
+            className="text-base sm:text-lg md:text-[24px] text-white/70 max-w-2xl leading-relaxed font-semibold drop-shadow-lg [&_p]:inline [&_p]:m-0 [&_p]:p-0"
+            dangerouslySetInnerHTML={{ __html: description }}
+          />
 
           {/* Action Buttons - Premium Tactile Design */}
           <div className="flex items-center gap-6 pt-6">
@@ -88,19 +89,18 @@ export default function TitleHero({ title, year, rating, seasons, description, b
                 const player = document.getElementById('episode-player');
                 if (player) player.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }}
-              className="skeuo-button-cyan h-14 sm:h-18 px-6 sm:px-[2rem] rounded-[1.5rem] sm:rounded-[2rem] text-sm sm:text-[18px] active:skeuo-pressed transition-all duration-300 group relative overflow-hidden flex items-center gap-3"
+              className="bg-primary text-black h-14 sm:h-16 px-8 rounded-full font-black text-sm sm:text-base hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(50,153,255,0.5)] transition-all duration-300 group flex items-center gap-3 active:scale-95 shadow-xl"
             >
-              <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Play size={20} fill="black" className="group-hover:scale-110 transition-transform relative z-10" />
-              <span className="relative z-10">EXECUTE PLAY</span>
+              <Play size={20} fill="black" className="group-hover:scale-110 transition-transform" />
+              <span>WATCH NOW</span>
             </button>
 
             
-            <button className="skeuo-icon-btn w-14 h-14 sm:w-18 sm:h-18 rounded-[1.5rem] sm:rounded-[2.5rem] active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparen flex justify-center items-center">
+            <button className="skeuo-icon-btn w-14 h-14 sm:w-16 sm:h-16 rounded-full active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparent flex justify-center items-center">
               <Plus size={20} className="sm:w-6 sm:h-6" />
             </button>
             
-            <button className="skeuo-icon-btn w-14 h-14 sm:w-18 sm:h-18 rounded-[1.5rem] sm:rounded-[2.5rem] active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparent flex justify-center items-center">
+            <button className="skeuo-icon-btn w-14 h-14 sm:w-16 sm:h-16 rounded-full active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparent flex justify-center items-center">
               <Share2 size={20} className="sm:w-6 sm:h-6" />
             </button>
           </div>

@@ -98,6 +98,18 @@ const UniversalVideoPlayer = forwardRef<UniversalVideoPlayerHandle, UniversalVid
       );
     }
 
+    if (videoType === 'iframe') {
+      return (
+        <iframe
+          src={src}
+          className="w-full h-full border-none"
+          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          title={contentId}
+        />
+      );
+    }
+
     // Native video player
     return (
       <VideoPlayer
