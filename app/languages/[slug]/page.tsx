@@ -28,12 +28,14 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function LanguageMoviesPage({ params }: PageProps) {
   const { slug } = await params;
-  const { language, movies } = await getMoviesByLanguage(slug);
+  const { language, movies, Interactive, episodes } = await getMoviesByLanguage(slug);
+  console.log("Language Page Loaded Content:", { movies, Interactive, episodes });
 
   const displayLanguage = language || slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
-  // Sleek empty state fallback when no movies are mapped to this language
-  if (!movies || movies.length === 0) {
+  // Sleek empty state fallback when no content is mapped to this language
+  const hasContent = (movies && movies.length > 0) || (Interactive && Interactive.length > 0) || (episodes && episodes.length > 0);
+  if (!hasContent) {
     return (
       <main className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 select-none relative overflow-hidden">
         {/* Soft Background Neon Glow */}
@@ -44,10 +46,10 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
             <Video size={40} className="text-primary drop-shadow-[0_0_10px_rgba(50,153,255,0.6)]" />
           </div>
           <h1 className="text-3xl font-black uppercase tracking-tight mb-4">
-            No Movies in <span className="text-gradient">{displayLanguage}</span>
+            No Content in <span className="text-gradient">{displayLanguage}</span>
           </h1>
           <p className="text-white/50 leading-relaxed text-sm mb-10 font-medium">
-            Our curators are working round the clock to catalog amazing blockbuster titles for this language. Check back shortly!
+            Our curators are working round the clock to catalog amazing titles for this language. Check back shortly!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 w-full">
             <Link
@@ -68,60 +70,145 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
     );
   }
 
-  // Slice first 5 movies for the ListingHero banner carousel
-  const carouselItems = movies.slice(0, 5).map((movie, index) => ({
-    id: movie.id,
-    title: movie.title,
-    description: movie.shortDescription,
-    image: movie.posterImage || "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2000&auto=format&fit=crop",
-    rating: movie.rating || "8.5",
-    year: movie.releaseYear,
-    duration: movie.duration,
-    slug: movie.slug,
-    badge: index === 0 ? `Featured ${displayLanguage}` : `Trending in ${displayLanguage}`
-  }));
+  // Slice first 5 items of whatever is available for the ListingHero banner carousel
+  const bannerItems = (movies && movies.length > 0) ? movies : ((Interactive && Interactive.length > 0) ? Interactive : episodes);
+  const bannerBasePath = (movies && movies.length > 0) ? "/movies" : ((Interactive && Interactive.length > 0) ? "/interactive" : "/episodes");
+
+  const carouselItems = bannerItems.slice(0, 5).map((item: any, index: number) => {
+    const isMovie = movies && movies.length > 0;
+    const isInteractive = !isMovie && (Interactive && Interactive.length > 0);
+
+    return {
+      id: item.id || item.interactive_movie_id,
+      title: item.title,
+      description: item.shortDescription || item.description || "",
+      image: item.posterImage || item.banner_image || (item.media?.poster_image?.url || item.media?.image?.url || "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2000&auto=format&fit=crop"),
+      rating: item.rating || "8.5",
+      year: item.releaseYear || (item.created_at ? new Date(item.created_at).getFullYear() : undefined),
+      duration: item.duration,
+      slug: isMovie ? item.slug : (isInteractive ? item.interactive_movie_id.toString() : item.id.toString()),
+      badge: index === 0 ? `Featured ${displayLanguage}` : `Trending in ${displayLanguage}`
+    };
+  });
 
   return (
     <main className="min-h-screen bg-[#050505] text-white selection:bg-primary/30 relative">
       {/* Dynamic Cinematic Hero Carousel */}
-      <ListingHero items={carouselItems} basePath="/movies" />
+      <ListingHero items={carouselItems} basePath={bannerBasePath} />
 
-      {/* Grid Section of Movies */}
+      {/* Grid Section of Movies / Content */}
       <section className="py-24 max-w-[90%] mx-auto relative z-20">
-        <div className="flex flex-col gap-12">
-          {/* Header */}
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-3 text-xs font-black tracking-widest text-primary uppercase">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(50,153,255,0.8)]" />
-              Language Showcase
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter uppercase drop-shadow-lg">
-              {displayLanguage} <span className="text-gradient">Collection</span>
-            </h2>
-            <div className="w-24 h-1.5 bg-brand-gradient rounded-full mt-1 shadow-[0_1px_10px_rgba(146,72,255,0.4)]" />
-          </div>
-
-          {/* Dynamic Grid Layout */}
-          <ResponsiveGrid gridCols={{ desktop: 5 }}>
-            {movies.map((movie, index) => (
-              <div key={movie.id} className="relative group">
-                <Link href={`/movies/${movie.slug}`}>
-                  <MediaCard
-                    variant="portrait"
-                    title={movie.title}
-                    image={movie.posterImage || "https://picsum.photos/seed/movie/600/900"}
-                    rating={movie.rating || "8.5"}
-                    year={movie.releaseYear}
-                    duration={movie.duration}
-                    description={movie.shortDescription}
-                    badge={movie.isFree ? 'FREE' : 'PREMIUM'}
-                    badgeColor={movie.isFree ? 'green' : 'orange'}
-                    trailerUrl={movie.trailerUrl}
-                  />
-                </Link>
+        <div className="flex flex-col gap-20">
+          
+          {/* 1. MOVIES SECTION */}
+          {movies && movies.length > 0 && (
+            <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3 text-xs font-black tracking-widest text-primary uppercase">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(50,153,255,0.8)]" />
+                  Blockbusters
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black tracking-tighter uppercase drop-shadow-lg">
+                  {displayLanguage} <span className="text-gradient">Movies</span>
+                </h2>
+                <div className="w-24 h-1.5 bg-brand-gradient rounded-full mt-1 shadow-[0_1px_10px_rgba(146,72,255,0.4)]" />
               </div>
-            ))}
-          </ResponsiveGrid>
+
+              <ResponsiveGrid gridCols={{ desktop: 5 }}>
+                {movies.map((movie) => (
+                  <div key={movie.id} className="relative group">
+                    <Link href={`/movies/${movie.slug}`}>
+                      <MediaCard
+                        variant="portrait"
+                        title={movie.title}
+                        image={movie.posterImage || "https://picsum.photos/seed/movie/600/900"}
+                        rating={movie.rating || "8.5"}
+                        year={movie.releaseYear}
+                        duration={movie.duration}
+                        description={movie.shortDescription}
+                        badge={movie.isFree ? 'FREE' : 'PREMIUM'}
+                        badgeColor={movie.isFree ? 'green' : 'orange'}
+                        trailerUrl={movie.trailerUrl}
+                      />
+                    </Link>
+                  </div>
+                ))}
+              </ResponsiveGrid>
+            </div>
+          )}
+
+          {/* 2. INTERACTIVE SECTION */}
+          {Interactive && Interactive.length > 0 && (
+            <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3 text-xs font-black tracking-widest text-cyan-400 uppercase">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                  Branching Stories
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black tracking-tighter uppercase drop-shadow-lg">
+                  Interactive <span className="text-gradient">Originals</span>
+                </h2>
+                <div className="w-24 h-1.5 bg-brand-gradient rounded-full mt-1 shadow-[0_1px_10px_rgba(146,72,255,0.4)]" />
+              </div>
+
+              <ResponsiveGrid gridCols={{ desktop: 5 }}>
+                {Interactive.map((movie) => (
+                  <div key={movie.interactive_movie_id} className="relative group">
+                    <Link href={`/interactive/${movie.interactive_movie_id}`}>
+                      <MediaCard
+                        variant="portrait"
+                        title={movie.title}
+                        image={movie.card_image || "https://picsum.photos/seed/interactive/600/900"}
+                        subtitle={movie.languages || "Interactive"}
+                        year={movie.created_at ? new Date(movie.created_at).getFullYear() : undefined}
+                        description={movie.description}
+                        badge="STORY"
+                        badgeColor="blue"
+                        trailerUrl={movie.trailer_video_url}
+                      />
+                    </Link>
+                  </div>
+                ))}
+              </ResponsiveGrid>
+            </div>
+          )}
+
+          {/* 3. EPISODES SECTION */}
+          {episodes && episodes.length > 0 && (
+            <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3 text-xs font-black tracking-widest text-purple-400 uppercase">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+                  Web Series
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black tracking-tighter uppercase drop-shadow-lg">
+                  {displayLanguage} <span className="text-gradient">Shows & Episodes</span>
+                </h2>
+                <div className="w-24 h-1.5 bg-brand-gradient rounded-full mt-1 shadow-[0_1px_10px_rgba(146,72,255,0.4)]" />
+              </div>
+
+              <ResponsiveGrid gridCols={{ desktop: 5 }}>
+                {episodes.map((episode) => (
+                  <div key={episode.id} className="relative group">
+                    <Link href={`/episodes/${episode.id}`}>
+                      <MediaCard
+                        variant="portrait"
+                        title={episode.title}
+                        image={episode.media?.poster_image?.url || episode.media?.image?.url || (episode.image ? String(episode.image) : "") || "https://picsum.photos/seed/episode/600/900"}
+                        rating={episode.rating || "8.0"}
+                        duration={episode.duration}
+                        description={episode.shortDescription}
+                        badge={episode.isFree ? 'FREE' : 'PREMIUM'}
+                        badgeColor={episode.isFree ? 'green' : 'orange'}
+                        trailerUrl={episode.media?.trailer?.url || episode.url}
+                      />
+                    </Link>
+                  </div>
+                ))}
+              </ResponsiveGrid>
+            </div>
+          )}
+
         </div>
       </section>
 

@@ -77,7 +77,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
             <div className="relative h-[65vh] w-full overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <Image
-                        src="/journey_of_ashwin_banner_img.png"
+                        src={movie.banner_image || "/journey_of_ashwin_banner_img.png"}
                         alt={movie.title}
                         fill
                         className="object-cover opacity-50 scale-100"
@@ -91,9 +91,14 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                         <Zap size={14} fill="black" />
                         Interactive Original
                     </div>
-                    <h1 className="text-6xl md:text-8xl font-bold mb-6 tracking-tighter animate-in fade-in slide-in-from-bottom-6 duration-1000">
+                    <h1 className="text-6xl md:text-8xl font-bold mb-3 tracking-tighter animate-in fade-in slide-in-from-bottom-6 duration-1000">
                         {movie.title}
                     </h1>
+                    {movie.languages && (
+                        <div className="text-cyan-400 font-bold uppercase tracking-[0.25em] text-xs md:text-sm mb-6 animate-in fade-in slide-in-from-bottom-7 duration-1000">
+                            Available in: {movie.languages}
+                        </div>
+                    )}
                     <p className="text-white/60 text-lg md:text-xl max-w-3xl leading-relaxed mb-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
                         {movie.description}
                     </p>

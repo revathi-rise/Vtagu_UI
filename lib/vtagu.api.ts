@@ -104,6 +104,10 @@ export interface InteractiveMovie {
   interactive_movie_id: number;
   title: string;
   description: string;
+  banner_image?: string;
+  card_image?: string;
+  trailer_video_url?: string;
+  languages?: string;
   created_at: string;
 }
 
@@ -537,6 +541,8 @@ export interface Language {
 export interface LanguageMoviesResponse {
   language: string;
   movies: Movie[];
+  Interactive: InteractiveMovie[];
+  episodes: Episode[];
 }
 
 export async function getLanguages(): Promise<Language[]> {
@@ -562,13 +568,16 @@ export async function getMoviesByLanguage(slug: string): Promise<LanguageMoviesR
       throw new Error(`Failed to fetch movies by language slug "${slug}". Status: ${res.status}`);
     }
     const result = await res.json();
+    const data = result.data || {};
     return {
-      language: result.language || '',
-      movies: (result.movies || []).map(normalizeMovie),
+      language: data.language || '',
+      movies: (data.movies || []).map(normalizeMovie),
+      Interactive: data.Interactive || [],
+      episodes: (data.episodes || []).map(normalizeEpisode),
     };
   } catch (err: any) {
     console.error(`Error fetching movies by language ${slug} in API:`, err);
-    return { language: '', movies: [] };
+    return { language: '', movies: [], Interactive: [], episodes: [] };
   }
 }
 

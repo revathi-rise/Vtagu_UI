@@ -89,11 +89,12 @@ export default function InteractiveGridHero({ interactiveMovies }: InteractiveHe
                                     <MediaCard
                                         title={movie.title}
                                         description={movie.description}
-                                        image="/journey_of_ashwin.png"
-                                        subtitle="Interactive"
+                                        image={movie.card_image || "/journey_of_ashwin.png"}
+                                        subtitle={movie.languages || "Interactive"}
                                         year={movie.created_at ? new Date(movie.created_at).getFullYear() : undefined}
                                         badge="USB READY"
                                         badgeColor="blue"
+                                        trailerUrl={movie.trailer_video_url}
                                         onClick={() => {
                                             if (typeof window !== 'undefined' && sessionStorage.getItem('vtagu_authorized') === 'true') {
                                                 router.push(`/interactive/${movie.interactive_movie_id}`);

@@ -5,6 +5,7 @@ import { Check, Zap, Crown, Sparkles, Star, Play, ChevronRight } from 'lucide-re
 import Link from 'next/link';
 import Image from 'next/image';
 import { getPlans } from '@/lib/vtagu.api';
+import { API_BASE } from '@/lib/api-client';
 
 export const metadata: Metadata = {
   title: 'Plans & Pricing | PrimeTime',
@@ -50,6 +51,30 @@ export default async function PricingPage() {
   const plans = await getPlans();
   const cookieStore = await cookies();
   const isLoggedIn = cookieStore.has('token');
+  const token = cookieStore.get('token')?.value;
+  const userIdStr = cookieStore.get('userId')?.value;
+  const userId = userIdStr ? parseInt(userIdStr, 10) : null;
+
+  let activeSubscription: any = null;
+  if (token && userId) {
+    try {
+      const response = await fetch(`${API_BASE}/subscriptions/user/${userId}/active`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        cache: 'no-store'
+      });
+      if (response.ok) {
+        const result = await response.json();
+        if (result.status && result.data) {
+          activeSubscription = result.data;
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch active subscription on pricing page:", err);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-[#0a0a0c] text-white selection:bg-cyan-500/30">
@@ -96,6 +121,7 @@ export default async function PricingPage() {
           {plans.map((plan) => {
             const style = planStyles[plan.name.toLowerCase()] || planStyles.starter;
             const Icon = style.icon;
+            const isActivePlan = activeSubscription && activeSubscription.planId === plan.planId && activeSubscription.status === 1;
             
             return (
                 <div 
@@ -103,26 +129,32 @@ export default async function PricingPage() {
                   className={`
                     relative flex flex-col rounded-[2rem] md:rounded-[2.5rem] border bg-gradient-to-br p-6 md:p-8
                     transition-all duration-700 hover:scale-[1.03] group
-                    ${style.color} ${style.borderColor} ${style.glow}
-                    ${style.featured ? 'ring-2 ring-cyan-500/30' : ''}
+                    ${isActivePlan ? 'from-emerald-500/10 to-emerald-500/5 border-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.1)]' : style.color} 
+                    ${isActivePlan ? 'border-emerald-500/30' : style.borderColor} 
+                    ${isActivePlan ? '' : style.glow}
+                    ${style.featured && !isActivePlan ? 'ring-2 ring-cyan-500/30' : ''}
+                    ${isActivePlan ? 'ring-2 ring-emerald-500/30' : ''}
                   `}
                 >
                   {/* Badge */}
-                  {style.badge && (
+                  {(style.badge || isActivePlan) && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                       <div className={`px-5 py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white whitespace-nowrap shadow-2xl ${
-                        style.featured 
-                          ? 'bg-gradient-to-r from-cyan-500 to-blue-600' 
-                          : 'bg-white/10 backdrop-blur-md border border-white/20'
+                        isActivePlan
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-600'
+                          : (style.featured 
+                              ? 'bg-gradient-to-r from-cyan-500 to-blue-600' 
+                              : 'bg-white/10 backdrop-blur-md border border-white/20'
+                            )
                       }`}>
-                        {style.badge}
+                        {isActivePlan ? 'Active Plan' : style.badge}
                       </div>
                     </div>
                   )}
 
                   {/* Header */}
                   <div className="mb-6 md:mb-8">
-                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 md:mb-6 group-hover:rotate-12 transition-transform duration-500 ${style.iconColor}`}>
+                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 md:mb-6 group-hover:rotate-12 transition-transform duration-500 ${isActivePlan ? 'text-emerald-400' : style.iconColor}`}>
                       <Icon size={24} className="md:w-7 md:h-7" />
                     </div>
                     <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter uppercase mb-1 italic">
@@ -144,55 +176,70 @@ export default async function PricingPage() {
                         / {plan.validity.split(' ')[1] === 'Year' ? 'yr' : 'mo'}
                       </span>
                     </div>
-                  {plan.discount > 0 && (
-                    <div className="mt-2 text-cyan-400 text-[11px] font-black uppercase tracking-widest bg-cyan-400/10 px-3 py-1 rounded-full inline-block">
-                      Save {plan.discount}% Off
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {plan.discount > 0 && (
+                        <div className="text-cyan-400 text-[11px] font-black uppercase tracking-widest bg-cyan-400/10 px-3 py-1 rounded-full inline-block">
+                          Save {plan.discount}% Off
+                        </div>
+                      )}
+                      {isActivePlan && (
+                        <div className="text-emerald-400 text-[11px] font-black uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full inline-block">
+                          Subscribed
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                    {isActivePlan && activeSubscription.timestamp_to && (
+                      <div className="mt-3 text-white/50 text-[10px] font-black uppercase tracking-[0.1em] border-t border-white/5 pt-3">
+                        Renews: {new Date(activeSubscription.timestamp_to * 1000).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
 
-                {/* Main Features Summary */}
-                <ul className="space-y-4 mb-10 flex-1">
-                   <li className="flex items-center gap-3 text-sm font-bold text-white/80">
-                      <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-                        <Check size={12} className="text-cyan-400" />
-                      </div>
-                      {plan.quality} Stream Quality
-                   </li>
-                   <li className="flex items-center gap-3 text-sm font-bold text-white/80">
-                      <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-                        <Check size={12} className="text-cyan-400" />
-                      </div>
-                      {plan.screens} Active Screen{Number(plan.screens) > 1 ? 's' : ''}
-                   </li>
-                   {plan.unlimited === 1 && (
-                      <li className="flex items-center gap-3 text-sm font-bold text-white/80">
+                  {/* Main Features Summary */}
+                  <ul className="space-y-4 mb-10 flex-1">
+                     <li className="flex items-center gap-3 text-sm font-bold text-white/80">
                         <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
                           <Check size={12} className="text-cyan-400" />
                         </div>
-                        Unlimited Library
-                      </li>
-                   )}
-                   <li className="flex items-center gap-3 text-sm font-bold text-white/80">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${plan.cancellation === 1 ? 'bg-cyan-500/10 border border-cyan-500/30' : 'bg-white/5 border border-white/10 opacity-40'}`}>
-                        {plan.cancellation === 1 ? <Check size={12} className="text-cyan-400" /> : <div className="w-1.5 h-px bg-white/50" />}
-                      </div>
-                      <span className={plan.cancellation === 1 ? '' : 'text-white/30'}>Cancel Anytime</span>
-                   </li>
-                </ul>
+                        {plan.quality} Stream Quality
+                     </li>
+                     <li className="flex items-center gap-3 text-sm font-bold text-white/80">
+                        <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+                          <Check size={12} className="text-cyan-400" />
+                        </div>
+                        {plan.screens} Active Screen{Number(plan.screens) > 1 ? 's' : ''}
+                     </li>
+                     {plan.unlimited === 1 && (
+                        <li className="flex items-center gap-3 text-sm font-bold text-white/80">
+                          <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+                            <Check size={12} className="text-cyan-400" />
+                          </div>
+                          Unlimited Library
+                        </li>
+                     )}
+                     <li className="flex items-center gap-3 text-sm font-bold text-white/80">
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${plan.cancellation === 1 ? 'bg-cyan-500/10 border border-cyan-500/30' : 'bg-white/5 border border-white/10 opacity-40'}`}>
+                          {plan.cancellation === 1 ? <Check size={12} className="text-cyan-400" /> : <div className="w-1.5 h-px bg-white/50" />}
+                        </div>
+                        <span className={plan.cancellation === 1 ? '' : 'text-white/30'}>Cancel Anytime</span>
+                     </li>
+                  </ul>
 
-                {/* CTA */}
-                <Link
-                  href={isLoggedIn ? `/checkout?plan=${plan.planId}` : `/register?plan=${plan.planId}`}
-                  className={`
-                    w-full py-5 rounded-[1.5rem] text-xs font-black uppercase tracking-[0.2em] text-center transition-all duration-300 flex items-center justify-center gap-2 group/btn
-                    ${style.featured 
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_15px_40px_rgba(6,182,212,0.3)]' 
-                      : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
-                    }
-                  `}
-                >
-                  Get {plan.name}
+                  {/* CTA */}
+                  <Link
+                    href={isActivePlan ? "/account" : (isLoggedIn ? `/checkout?plan=${plan.planId}` : `/register?plan=${plan.planId}`)}
+                    className={`
+                      w-full py-5 rounded-[1.5rem] text-xs font-black uppercase tracking-[0.2em] text-center transition-all duration-300 flex items-center justify-center gap-2 group/btn
+                      ${isActivePlan 
+                        ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-[0_15px_40px_rgba(16,185,129,0.3)]' 
+                        : (style.featured 
+                          ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_15px_40px_rgba(6,182,212,0.3)]' 
+                          : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                        )
+                      }
+                    `}
+                  >
+                    {isActivePlan ? "Current Plan" : `Get ${plan.name}`}
                   <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                 </Link>
               </div>

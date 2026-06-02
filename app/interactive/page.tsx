@@ -13,6 +13,7 @@ export const metadata = {
 
 export default async function InteractiveListing() {
     const movies = await getInteractiveMovies();
+console.log(movies, "movies");
 
     const carouselItems = movies.slice(0, 3).map((movie, index) => ({
         id: movie.interactive_movie_id,
@@ -73,11 +74,12 @@ export default async function InteractiveListing() {
                                             variant="portrait"
                                             title={movie.title}
                                             description={movie.description}
-                                            image="/journey_of_ashwin.png"
-                                            subtitle="Interactive"
+                                            image={movie.card_image || "/journey_of_ashwin.png"}
+                                            subtitle={movie.languages || "Interactive"}
                                             year={movie.created_at ? new Date(movie.created_at).getFullYear() : undefined}
                                             badge={index === 0 ? "TRENDING" : "STORY"}
                                             badgeColor={index === 0 ? "purple" : "blue"}
+                                            trailerUrl={movie.trailer_video_url}
                                         />
                                     </Link>
                                 </div>
