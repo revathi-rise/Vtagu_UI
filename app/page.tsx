@@ -17,17 +17,19 @@ export const metadata = {
 
 export default async function Home() {
   const [posters, interactiveMovies, episodes, movies, genres] = await Promise.all([
-    getPosters(),
+    getPosters("home"),
     getInteractiveMovies(),
     getEpisodes(),
     getMovies(),
     getGenres(),
   ]);
+  console.log(posters);
+  
   return (
     <main className="bg-[#0f0a10] selection:bg-primary/30 min-h-screen">
       
       {/* 1. Banner */}
-      <HeroSection posters={posters} />
+      <HeroSection posters={posters} movies={movies} episodes={episodes} />
       
       {/* 2. Continue Watching */}
       <ContinueWatching />

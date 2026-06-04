@@ -51,16 +51,37 @@ export async function getGenres(): Promise<Genre[]> {
 
 export interface Poster {
   poster_id: number;
+  poster_title?: string;
+  description?: string;
+  genres_list?: string;
   path: string;
-  link: string;
+  trailer_url?: string;
+  link?: string;
+  languages?: string;
+  page_type?: string;
+  reference_id?: number;
+  reference_type?: string;
   status: string;
-  createdon: string;
+  createdon?: string;
 }
 
-export async function getPosters(): Promise<Poster[]> {
-  const url = `${API_BASE}/posters`;
+export async function getPosters(pageType?: string, language?: string): Promise<Poster[]> {
+  let url = `${API_BASE}/posters`;
+  if (pageType) {
+    url = `${API_BASE}/posters/${pageType}`;
+  }
+console.log(url);
+
+  const params = new URLSearchParams();
+  if (language) {
+    params.append('language', language);
+  }
+
+  const queryString = params.toString();
+  const fullUrl = `${url}${queryString ? `?${queryString}` : ''}`;
+
   try {
-    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
+    const res = await fetchWithRetry(fullUrl, { next: { revalidate: 60 } });
     if (!res.ok) {
         throw new Error(`Failed to fetch posters. Status: ${res.status}`);
     }

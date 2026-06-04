@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { Play, Info, Star, Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, Info, Star, Calendar, Clock, ChevronLeft, ChevronRight, Globe } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -14,8 +14,10 @@ interface ListingHeroItem {
   rating?: string | number;
   year?: string | number;
   duration?: string;
-  slug: string;
+  slug?: string;
+  link?: string;
   badge?: string;
+  languages?: string;
 }
 
 interface ListingHeroProps {
@@ -118,9 +120,26 @@ export default function ListingHero({ items, basePath }: ListingHeroProps) {
                 dangerouslySetInnerHTML={{ __html: currentItem.description || '' }}
               />
 
+              {/* Languages Row */}
+              {currentItem.languages && currentItem.languages.trim() !== "" && (
+                <div className="flex flex-wrap items-center gap-2 text-white/70 text-xs md:text-sm font-medium">
+                  <span className="text-white/40 uppercase tracking-[0.15em] text-[10px] md:text-[11px] font-bold flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-primary" /> Languages:
+                  </span>
+                  {currentItem.languages.split(',').map((lang) => (
+                    <span 
+                      key={lang} 
+                      className="px-2.5 py-0.5 rounded-full bg-white/10 text-white/90 text-[11px] font-bold border border-white/5 shadow-sm uppercase tracking-wider"
+                    >
+                      {lang.trim()}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               <div className="flex items-center gap-4 pt-4">
                 <Link
-                  href={`${basePath}/${currentItem.slug}`}
+                  href={currentItem.link || `${basePath}/${currentItem.slug || ""}`}
                   className="bg-primary hover:bg-primary/80 text-black px-5 sm:px-8 py-3 sm:py-4 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all flex items-center gap-2 active:scale-95"
                 >
                   <Play size={16} fill="currentColor" /> Watch Now

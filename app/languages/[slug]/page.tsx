@@ -1,10 +1,16 @@
 import React from 'react';
 import Link from 'next/link';
 import { ChevronRight, Home, Video } from 'lucide-react';
-import { getMoviesByLanguage } from '@/lib/vtagu.api';
+import { getMoviesByLanguage, getPosters } from '@/lib/vtagu.api';
 import ListingHero from '@/components/shared/ListingHero';
 import ResponsiveGrid from '@/components/shared/ResponsiveGrid';
 import { MediaCard } from '@/components/shared/MediaCard';
+
+const IMAGE_BASE_URL = "https://www.vtagu.in/";
+const resolveImageUrl = (path?: string) => {
+  if (!path) return "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2000&auto=format&fit=crop";
+  return path.startsWith('http') ? path : `${IMAGE_BASE_URL}${path}`;
+};
 
 interface PageProps {
   params: Promise<{
@@ -32,6 +38,9 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
   console.log("Language Page Loaded Content:", { movies, Interactive, episodes });
 
   const displayLanguage = language || slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+  // Fetch banners specifically for this language
+  const posters = await getPosters("language", displayLanguage);
 
   // Sleek empty state fallback when no content is mapped to this language
   const hasContent = (movies && movies.length > 0) || (Interactive && Interactive.length > 0) || (episodes && episodes.length > 0);
@@ -74,22 +83,37 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
   const bannerItems = (movies && movies.length > 0) ? movies : ((Interactive && Interactive.length > 0) ? Interactive : episodes);
   const bannerBasePath = (movies && movies.length > 0) ? "/movies" : ((Interactive && Interactive.length > 0) ? "/interactive" : "/episodes");
 
-  const carouselItems = bannerItems.slice(0, 5).map((item: any, index: number) => {
-    const isMovie = movies && movies.length > 0;
-    const isInteractive = !isMovie && (Interactive && Interactive.length > 0);
+  let carouselItems;
+  if (posters && posters.length > 0) {
+    carouselItems = posters.map((poster, index) => ({
+      id: poster.poster_id,
+      title: poster.poster_title || "PRIME EXCLUSIVE",
+      description: poster.description || "",
+      image: resolveImageUrl(poster.path),
+      badge: index === 0 ? `Featured ${displayLanguage}` : `Trending in ${displayLanguage}`,
+      link: poster.link,
+      slug: "",
+      languages: poster.languages || ""
+    }));
+  } else {
+    carouselItems = bannerItems.slice(0, 5).map((item: any, index: number) => {
+      const isMovie = movies && movies.length > 0;
+      const isInteractive = !isMovie && (Interactive && Interactive.length > 0);
 
-    return {
-      id: item.id || item.interactive_movie_id,
-      title: item.title,
-      description: item.shortDescription || item.description || "",
-      image: item.posterImage || item.banner_image || (item.media?.poster_image?.url || item.media?.image?.url || "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2000&auto=format&fit=crop"),
-      rating: item.rating || "8.5",
-      year: item.releaseYear || (item.created_at ? new Date(item.created_at).getFullYear() : undefined),
-      duration: item.duration,
-      slug: isMovie ? item.slug : (isInteractive ? item.interactive_movie_id.toString() : item.id.toString()),
-      badge: index === 0 ? `Featured ${displayLanguage}` : `Trending in ${displayLanguage}`
-    };
-  });
+      return {
+        id: item.id || item.interactive_movie_id,
+        title: item.title,
+        description: item.shortDescription || item.description || "",
+        image: item.posterImage || item.banner_image || (item.media?.poster_image?.url || item.media?.image?.url || "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2000&auto=format&fit=crop"),
+        rating: item.rating || "8.5",
+        year: item.releaseYear || (item.created_at ? new Date(item.created_at).getFullYear() : undefined),
+        duration: item.duration,
+        slug: isMovie ? item.slug : (isInteractive ? item.interactive_movie_id.toString() : item.id.toString()),
+        badge: index === 0 ? `Featured ${displayLanguage}` : `Trending in ${displayLanguage}`,
+        languages: item.languages || ""
+      };
+    });
+  }
 
   return (
     <main className="min-h-screen bg-[#050505] text-white selection:bg-primary/30 relative">

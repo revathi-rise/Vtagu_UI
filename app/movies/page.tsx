@@ -1,5 +1,5 @@
 import React from 'react';
-import { getMovies } from '@/lib/vtagu.api';
+import { getMovies, getPosters } from '@/lib/vtagu.api';
 import { MediaCard } from '@/components/shared/MediaCard';
 import Link from 'next/link';
 
@@ -11,20 +11,44 @@ export const metadata = {
   description: 'Explore our curated collection of premium blockbusters and award-winning masterpieces.',
 };
 
-export default async function MoviesPage() {
-  const movies = await getMovies();
+const IMAGE_BASE_URL = "https://www.vtagu.in/";
+const resolveImageUrl = (path?: string) => {
+  if (!path) return "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2000&auto=format&fit=crop";
+  return path.startsWith('http') ? path : `${IMAGE_BASE_URL}${path}`;
+};
 
-  const carouselItems = movies.slice(0, 5).map((movie, index) => ({
-    id: movie.id,
-    title: movie.title,
-    description: movie.shortDescription,
-    image: movie.posterImage || "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2000&auto=format&fit=crop",
-    rating: movie.rating,
-    year: movie.releaseYear,
-    duration: movie.duration,
-    slug: movie.slug,
-    badge: index === 0 ? "#1 Trending" : `#${index + 1} Spotlight`
-  }));
+export default async function MoviesPage() {
+  const [movies, posters] = await Promise.all([
+    getMovies(),
+    getPosters("movies"),
+  ]);
+
+  let carouselItems;
+  if (posters && posters.length > 0) {
+    carouselItems = posters.map((poster, index) => ({
+      id: poster.poster_id,
+      title: poster.poster_title || "PRIME EXCLUSIVE",
+      description: poster.description || "",
+      image: resolveImageUrl(poster.path),
+      badge: index === 0 ? "#1 Trending" : `#${index + 1} Spotlight`,
+      link: poster.link,
+      slug: "",
+      languages: poster.languages || ""
+    }));
+  } else {
+    carouselItems = movies.slice(0, 5).map((movie, index) => ({
+      id: movie.id,
+      title: movie.title,
+      description: movie.shortDescription,
+      image: movie.posterImage || "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2000&auto=format&fit=crop",
+      rating: movie.rating,
+      year: movie.releaseYear,
+      duration: movie.duration,
+      slug: movie.slug,
+      badge: index === 0 ? "#1 Trending" : `#${index + 1} Spotlight`,
+      languages: movie.languages || ""
+    }));
+  }
 
   return (
     <main className="min-h-screen bg-[#050505] text-white selection:bg-primary/30">

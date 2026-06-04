@@ -1,5 +1,5 @@
 import React from 'react';
-import { getInteractiveMovies } from '@/lib/vtagu.api';
+import { getInteractiveMovies, getPosters } from '@/lib/vtagu.api';
 import { MediaCard } from '@/components/shared/MediaCard';
 import ListingHero from '@/components/shared/ListingHero';
 import Link from 'next/link';
@@ -11,19 +11,43 @@ export const metadata = {
     description: 'Choose your destiny. Step into the narrative with our exclusive interactive cinematic experiences.',
 };
 
-export default async function InteractiveListing() {
-    const movies = await getInteractiveMovies();
-console.log(movies, "movies");
+const IMAGE_BASE_URL = "https://www.vtagu.in/";
+const resolveImageUrl = (path?: string) => {
+  if (!path) return "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2000&auto=format&fit=crop";
+  return path.startsWith('http') ? path : `${IMAGE_BASE_URL}${path}`;
+};
 
-    const carouselItems = movies.slice(0, 3).map((movie, index) => ({
-        id: movie.interactive_movie_id,
-        title: movie.title,
-        description: movie.description || "Experience a groundbreaking narrative where your choices define the outcome.",
-        image: index === 0 ? "/interactive_bg.png" : "/journey_of_ashwin.png",
-        slug: movie.interactive_movie_id.toString(),
-        badge: index === 0 ? "Narrative Hub" : "Spotlight",
-        rating: "Interactive"
-    }));
+export default async function InteractiveListing() {
+    const [moviesResult, posters] = await Promise.all([
+        getInteractiveMovies(),
+        getPosters("interactive"),
+    ]);
+    const movies = Array.isArray(moviesResult) ? moviesResult : [];
+
+    let carouselItems;
+    if (posters && posters.length > 0) {
+        carouselItems = posters.map((poster, index) => ({
+            id: poster.poster_id,
+            title: poster.poster_title || "PRIME EXCLUSIVE",
+            description: poster.description || "",
+            image: resolveImageUrl(poster.path),
+            badge: index === 0 ? "Narrative Hub" : "Spotlight",
+            link: poster.link,
+            slug: "",
+            languages: poster.languages || ""
+        }));
+    } else {
+        carouselItems = movies.slice(0, 3).map((movie, index) => ({
+            id: movie.interactive_movie_id,
+            title: movie.title,
+            description: movie.description || "Experience a groundbreaking narrative where your choices define the outcome.",
+            image: index === 0 ? "/interactive_bg.png" : "/journey_of_ashwin.png",
+            slug: movie.interactive_movie_id.toString(),
+            badge: index === 0 ? "Narrative Hub" : "Spotlight",
+            rating: "Interactive",
+            languages: movie.languages || ""
+        }));
+    }
 
     return (
         <main className="min-h-screen bg-[#050505] text-white selection:bg-primary/30 relative overflow-hidden">
