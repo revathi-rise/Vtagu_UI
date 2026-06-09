@@ -73,18 +73,27 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
 
   if (items.length === 0) return null;
 
+  const [videoError, setVideoError] = useState(false);
+
   const nextSlide = React.useCallback(() => {
     setActiveIndex((prev) => (prev + 1) % items.length);
+    setVideoError(false);
   }, [items.length]);
 
   const prevSlide = React.useCallback(() => {
     setActiveIndex((prev) => (prev - 1 + items.length) % items.length);
+    setVideoError(false);
   }, [items.length]);
 
   React.useEffect(() => {
-    const timer = setInterval(nextSlide, 8000);
-    return () => clearInterval(timer);
-  }, [nextSlide]);
+    let timer: NodeJS.Timeout;
+    if (!currentItem?.trailerUrl || videoError) {
+      timer = setInterval(nextSlide, 8000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [nextSlide, currentItem?.trailerUrl, videoError]);
 
   const handleThumbClick = (index: number) => {
     setActiveIndex(index);
@@ -106,9 +115,10 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
             <video
               src={currentItem.trailerUrl}
               autoPlay
-              loop
               muted={isMuted}
               playsInline
+              onEnded={nextSlide}
+              onError={() => setVideoError(true)}
               className="absolute inset-0 w-full h-full object-cover"
               poster={currentItem.image}
             />

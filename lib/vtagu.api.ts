@@ -65,16 +65,17 @@ export interface Poster {
   createdon?: string;
 }
 
-export async function getPosters(pageType?: string, language?: string): Promise<Poster[]> {
-  let url = `${API_BASE}/posters`;
-  if (pageType) {
-    url = `${API_BASE}/posters/${pageType}`;
-  }
-console.log(url);
-
+export async function getPosters(pageType?: string, language?: string, limit?: number): Promise<Poster[]> {
+  const url = `${API_BASE}/posters`;
   const params = new URLSearchParams();
+  if (pageType) {
+    params.append('page_type', pageType);
+  }
   if (language) {
     params.append('language', language);
+  }
+  if (limit) {
+    params.append('limit', limit.toString());
   }
 
   const queryString = params.toString();
@@ -586,6 +587,14 @@ export async function getMoviesByLanguage(slug: string): Promise<LanguageMoviesR
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
     if (!res.ok) {
+      if (res.status === 404) {
+        return { 
+          language: slug.charAt(0).toUpperCase() + slug.slice(1), 
+          movies: [], 
+          Interactive: [], 
+          episodes: [] 
+        };
+      }
       throw new Error(`Failed to fetch movies by language slug "${slug}". Status: ${res.status}`);
     }
     const result = await res.json();

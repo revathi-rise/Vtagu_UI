@@ -93,7 +93,8 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
       badge: index === 0 ? `Featured ${displayLanguage}` : `Trending in ${displayLanguage}`,
       link: poster.link,
       slug: "",
-      languages: poster.languages || ""
+      languages: poster.languages || "",
+      trailerUrl: poster.trailer_url || ""
     }));
   } else {
     carouselItems = bannerItems.slice(0, 5).map((item: any, index: number) => {
@@ -104,7 +105,7 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
         id: item.id || item.interactive_movie_id,
         title: item.title,
         description: item.shortDescription || item.description || "",
-        image: item.posterImage || item.banner_image || (item.media?.poster_image?.url || item.media?.image?.url || "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2000&auto=format&fit=crop"),
+        image: resolveImageUrl(item.posterImage || item.banner_image || item.media?.poster_image?.url || item.media?.image?.url),
         rating: item.rating || "8.5",
         year: item.releaseYear || (item.created_at ? new Date(item.created_at).getFullYear() : undefined),
         duration: item.duration,
@@ -145,7 +146,7 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
                       <MediaCard
                         variant="portrait"
                         title={movie.title}
-                        image={movie.posterImage || "https://picsum.photos/seed/movie/600/900"}
+                        image={resolveImageUrl(movie.posterImage)}
                         rating={movie.rating || "8.5"}
                         year={movie.releaseYear}
                         duration={movie.duration}
@@ -182,7 +183,7 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
                       <MediaCard
                         variant="portrait"
                         title={movie.title}
-                        image={movie.card_image || "https://picsum.photos/seed/interactive/600/900"}
+                        image={resolveImageUrl(movie.card_image)}
                         subtitle={movie.languages || "Interactive"}
                         year={movie.created_at ? new Date(movie.created_at).getFullYear() : undefined}
                         description={movie.description}
@@ -218,7 +219,7 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
                       <MediaCard
                         variant="portrait"
                         title={episode.title}
-                        image={episode.media?.poster_image?.url || episode.media?.image?.url || (episode.image ? String(episode.image) : "") || "https://picsum.photos/seed/episode/600/900"}
+                        image={resolveImageUrl(episode.media?.poster_image?.url || episode.media?.image?.url || (episode.image ? String(episode.image) : ""))}
                         rating={episode.rating || "8.0"}
                         duration={episode.duration}
                         description={episode.shortDescription}

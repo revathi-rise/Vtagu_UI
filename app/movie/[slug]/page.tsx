@@ -1,6 +1,8 @@
 import React from 'react';
+import { notFound } from 'next/navigation';
 import TitleHero from '@/components/title/TitleHero';
 import RelatedNarratives from '@/components/title/RelatedNarratives';
+import { getMovieBySlug } from '@/lib/vtagu.api';
 
 interface PageProps {
   params: Promise<{
@@ -10,26 +12,43 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
-  const title = slug
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  const movie = await getMovieBySlug(slug);
+console.log(movie, "movie");
+
+  if (!movie) {
+    const title = slug
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+      
+    return {
+      title: `${title} | Movie | PrimeTime`,
+      description: `Watch the movie ${title} in 4K HDR only on PrimeTime.`,
+    };
+  }
 
   return {
-    title: `${title} | Movie | PrimeTime`,
-    description: `Watch the movie ${title} in 4K HDR only on PrimeTime.`,
+    title: `${movie.title} | Movie | PrimeTime`,
+    description: movie.shortDescription || `Watch the movie ${movie.title} in 4K HDR only on PrimeTime.`,
   };
 }
 
 export default async function MovieDetailsPage({ params }: PageProps) {
   const { slug } = await params;
-  // Mock data for a movie
+  
+  const movie = await getMovieBySlug(slug);
+
+  if (!movie) {
+    notFound();
+  }
+
   const movieData = {
-    title: slug.replace(/-/g, ' ').toUpperCase(),
-    year: "2024",
-    rating: "PG-13",
-    description: "An epic cinematic journey through forgotten realms and ancient mysteries. Experience the award-winning visual masterpiece that redefined the action-adventure genre.",
-    backdropUrl: "https://images.unsplash.com/photo-1542281286-9e0a16bb7366?auto=format&fit=crop&q=80&w=1920"
+    title: movie.title || slug.replace(/-/g, ' ').toUpperCase(),
+    year: movie.releaseYear?.toString() || "2024",
+    rating: movie.ageRestriction || "PG-13",
+    description: movie.shortDescription || "",
+    backdropUrl: movie.media?.image?.url || movie.posterImage || "https://images.unsplash.com/photo-1542281286-9e0a16bb7366?auto=format&fit=crop&q=80&w=1920",
+    videoUrl: movie.videoUrl || "",
   };
 
   return (
@@ -49,11 +68,13 @@ export default async function MovieDetailsPage({ params }: PageProps) {
                     </h2>
                     <div className="space-y-8 max-w-4xl">
                         <p className="text-white/70 text-xl md:text-2xl leading-relaxed font-semibold drop-shadow-md">
-                            In a world where legends are lost to time, a group of unlikely heroes embarks on a perilous quest to uncover the secret of the Alchemy of Gold. As they navigate treacherous landscapes and face formidable foes, they discover that the true gold lies within their courage and unity.
+                            {movie.longDescription || movie.shortDescription || "No synopsis available."}
                         </p>
                         <div className="h-px w-full bg-gradient-to-r from-[#00E5FF]/30 to-transparent" />
                         <p className="text-white/50 text-base md:text-lg leading-loose italic font-medium">
-                            Directed by the visionary director <span className="text-white font-black text-[#00E5FF]">Sarah Jenkins</span>, this film features breathtaking cinematography and a soul-stirring original score that transports viewers to a world beyond imagination.
+                            {movie.director || (movie as any).director_name ? (
+                              <>Directed by <span className="text-white font-black text-[#00E5FF]">{movie.director || (movie as any).director_name}</span>.</>
+                            ) : null} {movie.actors || (movie as any).cast_name ? `Starring ${movie.actors || (movie as any).cast_name}.` : ""}
                         </p>
                     </div>
                 </div>
