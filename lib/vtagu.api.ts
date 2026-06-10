@@ -140,7 +140,7 @@ export interface Scene {
   scene_text?: string;
   scene_url: string;
   poster_url?: string;
-  show_choices_on: number;
+  show_choices_on?: string | number | null;
   is_start: boolean;
   is_ending: boolean;
   choices?: Choice[];
@@ -155,6 +155,7 @@ export interface Choice {
   choice_text?: string; // from example
   position_x: number;
   position_y: number;
+  button_color?: string;
 }
 
 export async function getInteractiveMovies(): Promise<InteractiveMovie[]> {
