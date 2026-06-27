@@ -76,6 +76,7 @@ const parseTimeToSeconds = (timeVal: string | number | undefined | null): number
 const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
     ({ currentScene, choices, onChoiceSelect, onRestart }, ref) => {
     const playerRef = useRef<VideoPlayerHandle>(null);
+    console.log(currentScene, "currentScene");
     
     // UI State
     const [showChoices, setShowChoices] = useState(false);
@@ -93,11 +94,13 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
     const videoUrl = currentScene?.poster_url || currentScene?.scene_url || '';
 
     const handleTimeUpdate = (currentTime: number, duration: number) => {
+        if (currentScene?.is_ending) return;
+
         if (currentScene?.show_choices_on) {
             const showChoicesSeconds = parseTimeToSeconds(currentScene.show_choices_on);
             if (showChoicesSeconds > 0 && currentTime >= showChoicesSeconds && !showChoices) {
                 setShowChoices(true);
-                playerRef.current?.pause();
+                // Removed playerRef.current?.pause() so the video keeps playing in the background
             }
         }
     };
@@ -126,9 +129,17 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                             contentId={currentScene.scene_id?.toString() || currentScene.title || 'scene'}
                             contentType="episode"
                             autoPlay={true}
+                            loop={!currentScene.is_ending}
                             showControls={!showChoices}
                             onTimeUpdate={handleTimeUpdate}
-                            onEnded={() => setShowChoices(true)}
+                            onEnded={() => {
+                                if (!currentScene.is_ending) {
+                                    setShowChoices(true);
+                                } else {
+                                    // Finish the webseries by returning to home/catalog
+                                    window.location.href = '/';
+                                }
+                            }}
                             className="w-full h-full"
                             showSkip={true}
                             onSkip={() => {
@@ -157,37 +168,64 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                     </button>
                                 </div>
                             ) : (
-                                <div className="text-center px-6 max-w-2xl animate-in slide-in-from-bottom-10 duration-500">
-                                    <h3 className="text-3xl font-bold mb-8 drop-shadow-lg text-white">Make your choice</h3>
-                                    <div className="flex flex-wrap justify-center gap-4">
-                                        {choices.map((choice) => {
-                                            const styles = getButtonStyles(choice.button_color);
-                                            return (
-                                                <button 
-                                                    key={choice.choice_id}
-                                                    onClick={() => onChoiceSelect(choice.next_scene_id || choice.target_scene)}
-                                                    style={{
-                                                        '--btn-color': styles.baseColor,
-                                                        '--btn-border': styles.rgbaBorder,
-                                                        '--btn-glow': styles.rgbaGlow,
-                                                        '--btn-bg-hover': styles.rgbaBgHover,
-                                                    } as React.CSSProperties}
-                                                    className="choice-btn px-8 py-4 bg-white/5 backdrop-blur-xl border border-[var(--btn-border)] rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 relative overflow-hidden group text-white hover:scale-105 active:scale-95"
-                                                >
-                                                    {/* Shine effect */}
-                                                    <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full shine-effect" />
-                                                    
-                                                    {/* Radial background hover glow */}
-                                                    <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-radial-glow pointer-events-none" />
+                                <div className="absolute inset-0 pointer-events-none animate-in fade-in duration-700">
+                                    {choices.map((choice, index) => {
+                                        const styles = getButtonStyles(choice.button_color);
+                                        const isLeft = index % 2 === 0;
+                                        
+                                        // Use choice_text for the slanted box and button_text for the side text, or fallback
+                                        const boxText = choice.choice_text || choice.button_text;
+                                        const sideText = choice.choice_text ? choice.button_text : '';
 
-                                                    <span className="relative z-10 flex items-center justify-center gap-2">
-                                                        {choice.choice_text || choice.button_text}
-                                                        <ChevronRight size={18} className="transform group-hover:translate-x-1 transition-transform duration-300" />
-                                                    </span>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
+                                        return (
+                                            <div 
+                                                key={choice.choice_id}
+                                                onClick={() => onChoiceSelect(choice.next_scene_id || choice.target_scene)}
+                                                style={{ '--btn-color': styles.baseColor } as React.CSSProperties}
+                                                className={`absolute bottom-[25%] ${isLeft ? 'left-[8%] md:left-[15%]' : 'right-[8%] md:right-[15%]'} flex items-center gap-3 md:gap-5 pointer-events-auto cursor-pointer group hover:scale-105 transition-transform duration-500`}
+                                            >
+                                                {isLeft ? (
+                                                    <>
+                                                        <div className="bg-[var(--btn-color)] px-6 py-2 md:px-8 md:py-3 transform -skew-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_25px_var(--btn-color)] transition-shadow duration-500 relative overflow-hidden">
+                                                            <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover:animate-[shine_1s_ease-in-out]" />
+                                                            <span className="block transform skew-x-12 text-[#0c0816] font-black italic text-xl md:text-3xl tracking-wide whitespace-pre-line text-center">
+                                                                {boxText}
+                                                            </span>
+                                                        </div>
+                                                        {sideText && (
+                                                            <div className="text-white font-bold italic text-2xl md:text-4xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wide">
+                                                                {sideText}
+                                                            </div>
+                                                        )}
+                                                        {/* Vector Line */}
+                                                        <svg className="absolute top-[90%] right-4 w-[1px] h-[1px] overflow-visible pointer-events-none opacity-70 group-hover:opacity-100 group-hover:drop-shadow-[0_0_8px_var(--btn-color)] transition-all duration-500" style={{ stroke: 'var(--btn-color)' }}>
+                                                            <path d="M 0,0 L 40,0 L 140,60" fill="none" strokeWidth="3" />
+                                                            <circle cx="140" cy="60" r="5" fill="transparent" strokeWidth="3" />
+                                                        </svg>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {sideText && (
+                                                            <div className="text-white font-bold italic text-2xl md:text-4xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wide">
+                                                                {sideText}
+                                                            </div>
+                                                        )}
+                                                        <div className="bg-[var(--btn-color)] px-6 py-2 md:px-8 md:py-3 transform -skew-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_25px_var(--btn-color)] transition-shadow duration-500 relative overflow-hidden">
+                                                            <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover:animate-[shine_1s_ease-in-out]" />
+                                                            <span className="block transform skew-x-12 text-[#0c0816] font-black italic text-xl md:text-3xl tracking-wide whitespace-pre-line text-center">
+                                                                {boxText}
+                                                            </span>
+                                                        </div>
+                                                        {/* Vector Line */}
+                                                        <svg className="absolute top-[90%] left-4 w-[1px] h-[1px] overflow-visible pointer-events-none opacity-70 group-hover:opacity-100 group-hover:drop-shadow-[0_0_8px_var(--btn-color)] transition-all duration-500" style={{ stroke: 'var(--btn-color)' }}>
+                                                            <path d="M 0,0 L -40,0 L -140,60" fill="none" strokeWidth="3" />
+                                                            <circle cx="-140" cy="60" r="5" fill="transparent" strokeWidth="3" />
+                                                        </svg>
+                                                    </>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
