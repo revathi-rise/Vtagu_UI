@@ -18,6 +18,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
     const [currentScene, setCurrentScene] = useState<Scene | null>(
         initialScenes.find(s => s.is_start) || initialScenes[0] || null
     );
+    const [previousScene, setPreviousScene] = useState<Scene | null>(null);
 
     const [choices, setChoices] = useState<Choice[]>([]);
     const [loadingChoices, setLoadingChoices] = useState(false);
@@ -51,7 +52,15 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
         if (sceneId === undefined) return;
         const scene = scenes.find(s => s.scene_id === sceneId);
         if (scene) {
+            setPreviousScene(currentScene);
             setCurrentScene(scene);
+        }
+    };
+
+    const handlePrevious = () => {
+        if (previousScene) {
+            setCurrentScene(previousScene);
+            setPreviousScene(null);
         }
     };
 
@@ -127,6 +136,8 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                                     choices={choices}
                                     onChoiceSelect={handleSceneChange}
                                     onRestart={handleRestart}
+                                    onPrevious={handlePrevious}
+                                    hasPrevious={!!previousScene}
                                 />
                             </div>
 

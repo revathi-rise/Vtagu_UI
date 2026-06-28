@@ -24,6 +24,7 @@ export interface VideoPlayerProps {
     crossOrigin?: string;
     showSkip?: boolean;
     onSkip?: () => void;
+    onFullscreenRequest?: () => void;
 }
 
 export interface VideoPlayerHandle {
@@ -47,7 +48,8 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         onTimeUpdate,
         crossOrigin = 'anonymous',
         showSkip = false,
-        onSkip
+        onSkip,
+        onFullscreenRequest
     }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -250,7 +252,9 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
     const handleFullscreen = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (containerRef.current?.requestFullscreen) {
+        if (onFullscreenRequest) {
+            onFullscreenRequest();
+        } else if (containerRef.current?.requestFullscreen) {
             containerRef.current.requestFullscreen();
         } else if ((containerRef.current as any).webkitRequestFullscreen) {
             (containerRef.current as any).webkitRequestFullscreen();

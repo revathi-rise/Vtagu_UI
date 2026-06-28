@@ -11,6 +11,8 @@ interface SceneManagerProps {
     choices: Choice[];
     onChoiceSelect: (nextSceneId: number) => void;
     onRestart: () => void;
+    onPrevious?: () => void;
+    hasPrevious?: boolean;
 }
 
 export interface SceneManagerHandle {
@@ -74,8 +76,9 @@ const parseTimeToSeconds = (timeVal: string | number | undefined | null): number
 };
 
 const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
-    ({ currentScene, choices, onChoiceSelect, onRestart }, ref) => {
+    ({ currentScene, choices, onChoiceSelect, onRestart, onPrevious, hasPrevious }, ref) => {
     const playerRef = useRef<VideoPlayerHandle>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     console.log(currentScene, "currentScene");
     
     // UI State
@@ -83,9 +86,25 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
     
     useImperativeHandle(ref, () => ({
         requestFullScreen: () => {
-            playerRef.current?.requestFullScreen();
+            if (containerRef.current) {
+                if (containerRef.current.requestFullscreen) {
+                    containerRef.current.requestFullscreen();
+                } else if ((containerRef.current as any).webkitRequestFullscreen) {
+                    (containerRef.current as any).webkitRequestFullscreen();
+                }
+            }
         }
     }));
+
+    const handleFullscreenRequest = () => {
+        if (containerRef.current) {
+            if (containerRef.current.requestFullscreen) {
+                containerRef.current.requestFullscreen();
+            } else if ((containerRef.current as any).webkitRequestFullscreen) {
+                (containerRef.current as any).webkitRequestFullscreen();
+            }
+        }
+    };
 
     useEffect(() => {
         setShowChoices(false);
@@ -105,6 +124,8 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
         }
     };
 
+    const hasShowOnTime = currentScene?.show_choices_on ? parseTimeToSeconds(currentScene.show_choices_on) > 0 : false;
+
     return (
         <div className="space-y-8">
             <div className="flex items-center justify-between">
@@ -120,7 +141,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
             </div>
 
             {/* Interactive Player Area */}
-            <div className="relative aspect-video rounded-[2.5rem] bg-black border border-white/5 overflow-hidden shadow-2xl group ring-1 ring-white/10">
+            <div ref={containerRef} className="relative aspect-video rounded-[2.5rem] bg-black border border-white/5 overflow-hidden shadow-2xl group ring-1 ring-white/10">
                 {currentScene ? (
                     <>
                         <WatchTrackingVideoPlayer
@@ -147,10 +168,11 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                     playerRef.current.videoElement.currentTime = playerRef.current.videoElement.duration - 1;
                                 }
                             }}
+                            onFullscreenRequest={handleFullscreenRequest}
                         />
 
                         {/* Choice Overlay */}
-                        <div className={`absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md transition-opacity duration-500 ${showChoices ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                        <div className={`absolute inset-0 z-20 flex flex-col items-center justify-center transition-opacity duration-500 ${showChoices ? 'opacity-100' : 'opacity-0 pointer-events-none'} ${hasShowOnTime && !currentScene.is_ending ? '' : 'bg-black/40 backdrop-blur-md'}`}>
                             {currentScene.is_ending ? (
                                 <div className="text-center space-y-6 p-8 animate-in fade-in zoom-in duration-500">
                                     <div className="w-20 h-20 bg-cyan-400 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-cyan-400/40">
@@ -169,58 +191,89 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                 </div>
                             ) : (
                                 <div className="absolute inset-0 pointer-events-none animate-in fade-in duration-700">
-                                    {/* Small Restart Button */}
-                                    <button 
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setShowChoices(false);
-                                            onRestart();
-                                        }}
-                                        className="absolute top-6 right-6 pointer-events-auto flex items-center gap-2 px-4 py-2 bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/20 rounded-full text-white/80 hover:text-white transition-all text-[11px] font-bold uppercase tracking-widest group z-30"
-                                    >
-                                        <RotateCcw size={14} className="group-hover:-rotate-180 transition-transform duration-500" /> 
-                                        Restart
-                                    </button>
+                                    {/* Small Previous and Restart Buttons */}
+                                    <div className="absolute top-6 right-6 flex items-center gap-3 z-30">
+                                        {hasPrevious && onPrevious && (
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setShowChoices(false);
+                                                    onPrevious();
+                                                }}
+                                                className="pointer-events-auto flex items-center gap-2 px-4 py-2 bg-black/60 hover:bg-[var(--btn-color)] backdrop-blur-md border border-white/20 hover:border-transparent rounded-full text-white/80 hover:text-black transition-all text-[11px] font-bold uppercase tracking-widest group"
+                                            >
+                                                <RotateCcw size={14} className="group-hover:-rotate-45 transition-transform duration-500" /> 
+                                                Previous
+                                            </button>
+                                        )}
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setShowChoices(false);
+                                                onRestart();
+                                            }}
+                                            className="pointer-events-auto flex items-center gap-2 px-4 py-2 bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/20 rounded-full text-white/80 hover:text-white transition-all text-[11px] font-bold uppercase tracking-widest group"
+                                        >
+                                            <RotateCcw size={14} className="group-hover:-rotate-180 transition-transform duration-500" /> 
+                                            Restart
+                                        </button>
+                                    </div>
                                     
                                     {choices.map((choice, index) => {
                                         const styles = getButtonStyles(choice.button_color);
-                                        const isLeft = index % 2 === 0;
+                                        const isSingle = choices.length === 1;
+                                        const isLeft = isSingle ? true : index % 2 === 0;
+                                        const positionClass = isSingle 
+                                            ? 'left-1/2 -translate-x-1/2' 
+                                            : (isLeft ? 'left-[5%] sm:left-[10%] md:left-[15%]' : 'right-[5%] sm:right-[10%] md:right-[15%]');
                                         const boxText = choice.choice_text || choice.button_text;
 
                                         return (
                                             <div 
                                                 key={choice.choice_id}
-                                                onClick={() => onChoiceSelect(choice.next_scene_id || choice.target_scene)}
-                                                style={{ '--btn-color': styles.baseColor } as React.CSSProperties}
-                                                className={`absolute bottom-[20%] md:bottom-[25%] ${isLeft ? 'left-[5%] sm:left-[10%] md:left-[15%]' : 'right-[5%] sm:right-[10%] md:right-[15%]'} flex items-center pointer-events-auto cursor-pointer group hover:scale-105 transition-transform duration-500`}
+                                                onClick={() => {
+                                                    // 0.5s delay
+                                                    setTimeout(() => {
+                                                        onChoiceSelect(choice.next_scene_id || choice.target_scene);
+                                                    }, 500);
+                                                }}
+                                                style={{ 
+                                                    '--btn-color': styles.baseColor,
+                                                    '--btn-bg-hover': styles.rgbaBgHover 
+                                                } as React.CSSProperties}
+                                                className={`absolute bottom-[20%] md:bottom-[25%] ${positionClass} flex items-center pointer-events-auto cursor-pointer group hover:scale-105 transition-transform duration-500`}
                                             >
                                                 {isLeft ? (
                                                     <>
-                                                        <div className="bg-[var(--btn-color)] px-6 py-2 md:px-10 md:py-3 transform -skew-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_25px_var(--btn-color)] transition-shadow duration-500 relative overflow-hidden z-10">
-                                                            <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover:animate-[shine_1s_ease-in-out]" />
-                                                            <span className="block transform skew-x-12 text-[#0c0816] font-black italic text-xl md:text-3xl tracking-wide whitespace-pre-line text-center">
+                                                        <div className="bg-[var(--btn-bg-hover)] backdrop-blur-md border border-[var(--btn-color)] px-6 py-2 md:px-10 md:py-3 transform -skew-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_25px_var(--btn-color)] hover:bg-[var(--btn-color)] transition-all duration-500 relative overflow-hidden z-10 group/btn">
+                                                            <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover/btn:animate-[shine_1s_ease-in-out]" />
+                                                            <span className="block transform skew-x-12 font-black italic text-xl md:text-3xl tracking-wide whitespace-pre-line text-center group-hover:text-[#0c0816] transition-colors duration-500 drop-shadow-lg" style={{ color: 'var(--btn-color)' }}>
                                                                 {boxText}
                                                             </span>
                                                         </div>
                                                         {/* Vector Line Accent */}
-                                                        <svg className="absolute top-[90%] right-4 w-[60px] h-[40px] overflow-visible pointer-events-none opacity-70 group-hover:opacity-100 group-hover:drop-shadow-[0_0_8px_var(--btn-color)] transition-all duration-500 z-0" style={{ stroke: 'var(--btn-color)' }}>
-                                                            <path d="M 0,0 L 15,0 L 35,20" fill="none" strokeWidth="3" />
-                                                            <circle cx="35" cy="20" r="4" fill="transparent" strokeWidth="3" />
-                                                        </svg>
+                                                        {!isSingle && (
+                                                            <svg className="absolute top-[90%] right-4 w-[60px] h-[40px] overflow-visible pointer-events-none opacity-70 group-hover:opacity-100 group-hover:drop-shadow-[0_0_8px_var(--btn-color)] transition-all duration-500 z-0" style={{ stroke: 'var(--btn-color)' }}>
+                                                                <path d="M 0,0 L 15,0 L 35,20" fill="none" strokeWidth="3" />
+                                                                <circle cx="35" cy="20" r="4" fill="transparent" strokeWidth="3" />
+                                                            </svg>
+                                                        )}
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <div className="bg-[var(--btn-color)] px-6 py-2 md:px-10 md:py-3 transform -skew-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_25px_var(--btn-color)] transition-shadow duration-500 relative overflow-hidden z-10">
-                                                            <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover:animate-[shine_1s_ease-in-out]" />
-                                                            <span className="block transform skew-x-12 text-[#0c0816] font-black italic text-xl md:text-3xl tracking-wide whitespace-pre-line text-center">
+                                                        <div className="bg-[var(--btn-bg-hover)] backdrop-blur-md border border-[var(--btn-color)] px-6 py-2 md:px-10 md:py-3 transform -skew-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_25px_var(--btn-color)] hover:bg-[var(--btn-color)] transition-all duration-500 relative overflow-hidden z-10 group/btn">
+                                                            <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover/btn:animate-[shine_1s_ease-in-out]" />
+                                                            <span className="block transform skew-x-12 font-black italic text-xl md:text-3xl tracking-wide whitespace-pre-line text-center group-hover:text-[#0c0816] transition-colors duration-500 drop-shadow-lg" style={{ color: 'var(--btn-color)' }}>
                                                                 {boxText}
                                                             </span>
                                                         </div>
                                                         {/* Vector Line Accent */}
-                                                        <svg className="absolute top-[90%] left-4 w-[60px] h-[40px] overflow-visible pointer-events-none opacity-70 group-hover:opacity-100 group-hover:drop-shadow-[0_0_8px_var(--btn-color)] transition-all duration-500 z-0" style={{ stroke: 'var(--btn-color)' }}>
-                                                            <path d="M 0,0 L -15,0 L -35,20" fill="none" strokeWidth="3" />
-                                                            <circle cx="-35" cy="20" r="4" fill="transparent" strokeWidth="3" />
-                                                        </svg>
+                                                        {!isSingle && (
+                                                            <svg className="absolute top-[90%] left-4 w-[60px] h-[40px] overflow-visible pointer-events-none opacity-70 group-hover:opacity-100 group-hover:drop-shadow-[0_0_8px_var(--btn-color)] transition-all duration-500 z-0" style={{ stroke: 'var(--btn-color)' }}>
+                                                                <path d="M 0,0 L -15,0 L -35,20" fill="none" strokeWidth="3" />
+                                                                <circle cx="-35" cy="20" r="4" fill="transparent" strokeWidth="3" />
+                                                            </svg>
+                                                        )}
                                                     </>
                                                 )}
                                             </div>

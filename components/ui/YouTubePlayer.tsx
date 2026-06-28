@@ -19,6 +19,7 @@ interface YouTubePlayerProps {
   onEnded?: () => void;
   showSkip?: boolean;
   onSkip?: () => void;
+  onFullscreenRequest?: () => void;
 }
 
 const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
@@ -32,6 +33,7 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
     onEnded,
     showSkip = false,
     onSkip,
+    onFullscreenRequest,
   }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const ytWrapperRef = useRef<HTMLDivElement>(null);
@@ -240,7 +242,9 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
 
     const handleFullscreen = (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (containerRef.current?.requestFullscreen) {
+      if (onFullscreenRequest) {
+        onFullscreenRequest();
+      } else if (containerRef.current?.requestFullscreen) {
         containerRef.current.requestFullscreen();
       } else if ((containerRef.current as any).webkitRequestFullscreen) {
         (containerRef.current as any).webkitRequestFullscreen();

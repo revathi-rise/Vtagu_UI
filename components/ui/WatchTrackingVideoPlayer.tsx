@@ -26,6 +26,7 @@ interface WatchTrackingVideoPlayerProps {
   onTimeUpdate?: (currentTime: number, duration: number) => void;
   onEnded?: () => void;
   onSkip?: () => void;
+  onFullscreenRequest?: () => void;
 }
 
 const WatchTrackingVideoPlayer = React.forwardRef<
