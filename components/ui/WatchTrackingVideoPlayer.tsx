@@ -22,6 +22,8 @@ interface WatchTrackingVideoPlayerProps {
   className?: string;
   crossOrigin?: string;
   showSkip?: boolean;
+  showPrevious?: boolean;
+  onPrevious?: () => void;
   onProgressUpdate?: (progress: number, currentTime: number) => void;
   onTimeUpdate?: (currentTime: number, duration: number) => void;
   onEnded?: () => void;

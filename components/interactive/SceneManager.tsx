@@ -163,6 +163,8 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                     playerRef.current.videoElement.currentTime = playerRef.current.videoElement.duration - 1;
                                 }
                             }}
+                            showPrevious={hasPrevious}
+                            onPrevious={onPrevious}
                             onFullscreenRequest={handleFullscreenRequest}
                         />
 

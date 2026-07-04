@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { Play, Pause, Maximize, Volume2, VolumeX, SkipForward, AlertCircle } from 'lucide-react';
+import { Play, Pause, Maximize, Volume2, VolumeX, SkipForward, SkipBack, AlertCircle } from 'lucide-react';
 
 declare global {
     interface Window {
@@ -24,6 +24,8 @@ export interface VideoPlayerProps {
     crossOrigin?: string;
     showSkip?: boolean;
     onSkip?: () => void;
+    showPrevious?: boolean;
+    onPrevious?: () => void;
     onFullscreenRequest?: () => void;
 }
 
@@ -49,6 +51,8 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         crossOrigin = 'anonymous',
         showSkip = false,
         onSkip,
+        showPrevious = false,
+        onPrevious,
         onFullscreenRequest
     }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -333,6 +337,17 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                                 </div>
 
                                 <div className="flex items-center gap-4">
+                                    {showPrevious && (
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onPrevious?.();
+                                            }} 
+                                            className="text-white/40 hover:text-cyan-400 transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-widest"
+                                        >
+                                            <SkipBack size={14} /> Previous
+                                        </button>
+                                    )}
                                     {showSkip && (
                                         <button 
                                             onClick={(e) => {

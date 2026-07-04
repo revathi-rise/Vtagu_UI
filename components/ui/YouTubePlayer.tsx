@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useImperativeHandle, forwardRef, useEffect } from 'react';
-import { AlertCircle, Maximize, Play, Pause, Volume2, VolumeX, SkipForward } from 'lucide-react';
+import { AlertCircle, Maximize, Play, Pause, Volume2, VolumeX, SkipForward, SkipBack } from 'lucide-react';
 
 export interface YouTubePlayerHandle {
   play: () => void;
@@ -19,6 +19,8 @@ interface YouTubePlayerProps {
   onEnded?: () => void;
   showSkip?: boolean;
   onSkip?: () => void;
+  showPrevious?: boolean;
+  onPrevious?: () => void;
   onFullscreenRequest?: () => void;
 }
 
@@ -33,6 +35,8 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
     onEnded,
     showSkip = false,
     onSkip,
+    showPrevious = false,
+    onPrevious,
     onFullscreenRequest,
   }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -318,6 +322,17 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
                     </div>
 
                     <div className="flex items-center gap-4">
+                        {showPrevious && (
+                            <button 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onPrevious?.();
+                                }} 
+                                className="text-white/40 hover:text-cyan-400 transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-widest"
+                            >
+                                <SkipBack size={14} /> Previous
+                            </button>
+                        )}
                         {showSkip && (
                             <button 
                                 onClick={(e) => {

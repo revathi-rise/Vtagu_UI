@@ -18,7 +18,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
     const [currentScene, setCurrentScene] = useState<Scene | null>(
         initialScenes.find(s => s.is_start) || initialScenes[0] || null
     );
-    const [previousScene, setPreviousScene] = useState<Scene | null>(null);
+    const [sceneHistory, setSceneHistory] = useState<Scene[]>([]);
 
     const [choices, setChoices] = useState<Choice[]>([]);
     const [loadingChoices, setLoadingChoices] = useState(false);
@@ -52,21 +52,25 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
         if (sceneId === undefined) return;
         const scene = scenes.find(s => s.scene_id === sceneId);
         if (scene) {
-            setPreviousScene(currentScene);
+            if (currentScene) {
+                setSceneHistory(prev => [...prev, currentScene]);
+            }
             setCurrentScene(scene);
         }
     };
 
     const handlePrevious = () => {
-        if (previousScene) {
-            setCurrentScene(previousScene);
-            setPreviousScene(null);
+        if (sceneHistory.length > 0) {
+            const prevScene = sceneHistory[sceneHistory.length - 1];
+            setSceneHistory(prev => prev.slice(0, -1));
+            setCurrentScene(prevScene);
         }
     };
 
     const handleRestart = () => {
         const startScene = scenes.find(s => s.is_start) || scenes[0];
         if (startScene) {
+            setSceneHistory([]);
             setCurrentScene(startScene);
             managerRef.current?.requestFullScreen();
         }
@@ -137,7 +141,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                                     onChoiceSelect={handleSceneChange}
                                     onRestart={handleRestart}
                                     onPrevious={handlePrevious}
-                                    hasPrevious={!!previousScene}
+                                    hasPrevious={sceneHistory.length > 0}
                                 />
                             </div>
 
