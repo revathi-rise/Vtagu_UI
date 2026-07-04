@@ -143,6 +143,7 @@ export interface Scene {
   show_choices_on?: string | number | null;
   is_start: boolean;
   is_ending: boolean;
+  end_text?: string;
   choices?: Choice[];
 }
 
@@ -585,6 +586,8 @@ export async function getLanguages(): Promise<Language[]> {
 
 export async function getMoviesByLanguage(slug: string): Promise<LanguageMoviesResponse> {
   const url = `${API_BASE}/languages/${slug}/movies`;
+  console.log(url,"url");
+  
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
     if (!res.ok) {

@@ -55,7 +55,7 @@ export default async function RootLayout({
           <div className="pt-24 min-h-screen">
             {children}
           </div>
-          <NewsPopup />
+          {/* <NewsPopup /> */}
           <Footer />
         </ReduxProvider>
       </body>

@@ -154,12 +154,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                             showControls={!showChoices}
                             onTimeUpdate={handleTimeUpdate}
                             onEnded={() => {
-                                if (!currentScene.is_ending) {
-                                    setShowChoices(true);
-                                } else {
-                                    // Finish the webseries by returning to home/catalog
-                                    window.location.href = '/';
-                                }
+                                setShowChoices(true);
                             }}
                             className="w-full h-full"
                             showSkip={true}
@@ -178,16 +173,24 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                     <div className="w-20 h-20 bg-cyan-400 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-cyan-400/40">
                                         <CheckCircle2 size={40} className="text-black" />
                                     </div>
-                                    <h3 className="text-3xl font-bold">The End</h3>
-                                    <button 
-                                        onClick={() => {
-                                            setShowChoices(false);
-                                            onRestart();
-                                        }} 
-                                        className="flex items-center gap-2 mx-auto px-8 py-3 bg-white text-black rounded-xl font-bold hover:bg-cyan-400 transition-colors"
-                                    >
-                                        <RotateCcw size={18} /> Restart Story
-                                    </button>
+                                    <h3 className="text-3xl font-bold">{currentScene.end_text || "The End"}</h3>
+                                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                        <button 
+                                            onClick={() => {
+                                                setShowChoices(false);
+                                                onRestart();
+                                            }} 
+                                            className="flex items-center gap-2 px-8 py-3 bg-white text-black rounded-xl font-bold hover:bg-cyan-400 transition-colors w-full sm:w-auto justify-center"
+                                        >
+                                            <RotateCcw size={18} /> Restart Story
+                                        </button>
+                                        <a 
+                                            href="/"
+                                            className="flex items-center gap-2 px-8 py-3 bg-white/10 text-white border border-white/20 rounded-xl font-bold hover:bg-white/20 transition-colors w-full sm:w-auto justify-center"
+                                        >
+                                            Return Home
+                                        </a>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="absolute inset-0 pointer-events-none animate-in fade-in duration-700">
@@ -247,7 +250,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                     <>
                                                         <div className="bg-[var(--btn-bg-hover)] backdrop-blur-md border border-[var(--btn-color)] px-6 py-2 md:px-10 md:py-3 transform -skew-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_25px_var(--btn-color)] hover:bg-[var(--btn-color)] transition-all duration-500 relative overflow-hidden z-10 group/btn">
                                                             <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover/btn:animate-[shine_1s_ease-in-out]" />
-                                                            <span className="block transform skew-x-12 font-black italic text-xl md:text-3xl tracking-wide whitespace-pre-line text-center group-hover:text-[#0c0816] transition-colors duration-500 drop-shadow-lg" style={{ color: 'var(--btn-color)' }}>
+                                                            <span className="block transform skew-x-12 font-black italic text-xl md:text-3xl tracking-wide whitespace-pre-line text-center text-white transition-colors duration-500 drop-shadow-lg">
                                                                 {boxText}
                                                             </span>
                                                         </div>
@@ -263,7 +266,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                     <>
                                                         <div className="bg-[var(--btn-bg-hover)] backdrop-blur-md border border-[var(--btn-color)] px-6 py-2 md:px-10 md:py-3 transform -skew-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_25px_var(--btn-color)] hover:bg-[var(--btn-color)] transition-all duration-500 relative overflow-hidden z-10 group/btn">
                                                             <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover/btn:animate-[shine_1s_ease-in-out]" />
-                                                            <span className="block transform skew-x-12 font-black italic text-xl md:text-3xl tracking-wide whitespace-pre-line text-center group-hover:text-[#0c0816] transition-colors duration-500 drop-shadow-lg" style={{ color: 'var(--btn-color)' }}>
+                                                            <span className="block transform skew-x-12 font-black italic text-xl md:text-3xl tracking-wide whitespace-pre-line text-center text-white transition-colors duration-500 drop-shadow-lg">
                                                                 {boxText}
                                                             </span>
                                                         </div>
