@@ -44,13 +44,30 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
     const playerRef = useRef<any>(null);
     const [error, setError] = useState<string | null>(null);
     const [isReady, setIsReady] = useState(false);
+    const [isBuffering, setIsBuffering] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [showUI, setShowUI] = useState(true);
 
-    // Initialize YouTube API
+    const playerIdRef = useRef<string>(`youtube-player-${Math.random().toString(36).substr(2, 9)}`);
+    const initialVideoId = useRef(videoId);
+    const currentVideoIdRef = useRef(videoId);
+
+    const onTimeUpdateRef = useRef(onTimeUpdate);
+    const onEndedRef = useRef(onEnded);
+
+    useEffect(() => {
+      onTimeUpdateRef.current = onTimeUpdate;
+      onEndedRef.current = onEnded;
+    }, [onTimeUpdate, onEnded]);
+
+    useEffect(() => {
+      currentVideoIdRef.current = videoId;
+    }, [videoId]);
+
+    // Initialize YouTube API once on mount
     React.useEffect(() => {
       if (typeof window === 'undefined') return;
 
@@ -59,19 +76,19 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
 
       const initPlayer = () => {
         // Manually inject the target div so React doesn't try to manage it or overwrite it
-        if (ytWrapperRef.current && !document.getElementById(`youtube-player-${videoId}`)) {
-          ytWrapperRef.current.innerHTML = `<div id="youtube-player-${videoId}" class="w-full h-full scale-[1.2]"></div>`;
+        if (ytWrapperRef.current && !document.getElementById(playerIdRef.current)) {
+          ytWrapperRef.current.innerHTML = `<div id="${playerIdRef.current}" class="w-full h-full scale-[1.2]"></div>`;
         }
 
-        const container = document.getElementById(`youtube-player-${videoId}`);
+        const container = document.getElementById(playerIdRef.current);
         if (!container) return;
         const YT = (window as any).YT;
         if (!YT || !YT.Player) return;
 
-        player = new YT.Player(`youtube-player-${videoId}`, {
+        player = new YT.Player(playerIdRef.current, {
           width: '100%',
           height: '100%',
-          videoId: videoId,
+          videoId: initialVideoId.current,
           playerVars: {
             autoplay: autoPlay ? 1 : 0,
             controls: 0, // Always hide native controls
@@ -87,16 +104,22 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
             'onReady': (event: any) => {
               setIsReady(true);
               
-              // Ensure we have the fully initialized player object with all methods
               if (event.target) {
                 playerRef.current = event.target;
               }
 
-              // Setup initial duration
               if (typeof playerRef.current.getDuration === 'function') {
                 setDuration(playerRef.current.getDuration());
               }
-              if (autoPlay) {
+              
+              // Load the latest video if it changed during initialization
+              const latestVideoId = currentVideoIdRef.current;
+              if (latestVideoId !== initialVideoId.current) {
+                playerRef.current.loadVideoById({
+                  videoId: latestVideoId,
+                  startSeconds: 0
+                });
+              } else if (autoPlay) {
                 if (typeof playerRef.current.playVideo === 'function') {
                   playerRef.current.playVideo();
                 }
@@ -114,9 +137,12 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
             },
             'onStateChange': (event: any) => {
               const YT = (window as any).YT;
-              if (event.data === YT.PlayerState.PLAYING) {
+              if (event.data === YT.PlayerState.BUFFERING) {
+                setIsBuffering(true);
+              } else if (event.data === YT.PlayerState.PLAYING) {
+                setIsBuffering(false);
                 setIsPlaying(true);
-                if (onTimeUpdate) {
+                if (onTimeUpdateRef.current) {
                   // Update progress periodically during playback
                   const interval = setInterval(() => {
                     if (
@@ -128,7 +154,7 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
                       const total = playerRef.current.getDuration();
                       setCurrentTime(current);
                       setDuration(total);
-                      onTimeUpdate(current, total);
+                      onTimeUpdateRef.current?.(current, total);
                     }
                   }, 1000);
 
@@ -141,11 +167,12 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
                   }, 1000);
                 }
               } else {
+                setIsBuffering(false);
                 setIsPlaying(false);
               }
 
-              if (event.data === YT.PlayerState.ENDED && onEnded) {
-                onEnded();
+              if (event.data === YT.PlayerState.ENDED && onEndedRef.current) {
+                onEndedRef.current();
               }
             },
           },
@@ -185,7 +212,20 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
           player.destroy();
         }
       };
-    }, [autoPlay, onTimeUpdate, onEnded, videoId]);
+    }, [autoPlay]);
+
+    // Handle videoId updates by reusing the existing player instance
+    useEffect(() => {
+      setCurrentTime(0);
+      setDuration(0);
+      
+      if (playerRef.current && typeof playerRef.current.loadVideoById === 'function') {
+        playerRef.current.loadVideoById({
+          videoId: videoId,
+          startSeconds: 0
+        });
+      }
+    }, [videoId]);
 
     useImperativeHandle(ref, () => ({
       play: () => {
@@ -279,6 +319,13 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
         {/* Loading State */}
         {!isReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-20">
+            <div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin shadow-[0_0_15px_rgba(34,211,238,0.4)]" />
+          </div>
+        )}
+
+        {/* Buffering State */}
+        {isReady && isBuffering && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-[2px] z-20">
             <div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin shadow-[0_0_15px_rgba(34,211,238,0.4)]" />
           </div>
         )}

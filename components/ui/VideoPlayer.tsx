@@ -106,6 +106,11 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     }, []);
 
     useEffect(() => {
+        setCurrentTime(0);
+        setDuration(0);
+    }, [src]);
+
+    useEffect(() => {
         if (!hlsLoaded || !src) return;
         
         setError(null);
@@ -292,6 +297,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                         loop={loop}
                         muted={isMuted}
                         playsInline
+                        preload="auto"
                         // crossOrigin={crossOrigin}
                         onClick={togglePlay}
                         poster={poster}
