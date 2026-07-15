@@ -81,6 +81,32 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
     const containerRef = useRef<HTMLDivElement>(null);
     console.log(currentScene, "currentScene");
     
+    // Synthesized click sound effect generator
+    const playClickSound = () => {
+        try {
+            const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            
+            osc.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1500, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.03);
+            
+            gainNode.gain.setValueAtTime(0.12, ctx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
+            
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.04);
+        } catch (e) {
+            // Safe catch for browser autoplays
+        }
+    };
+    
     // UI State
     const [prevSceneId, setPrevSceneId] = useState<number | undefined>(undefined);
     const [showChoices, setShowChoices] = useState(false);
@@ -182,6 +208,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                                             <button 
                                                 onClick={() => {
+                                                    playClickSound();
                                                     setShowChoices(false);
                                                     onRestart();
                                                 }} 
@@ -191,6 +218,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                             </button>
                                             <a 
                                                 href="/"
+                                                onClick={() => playClickSound()}
                                                 className="flex items-center gap-2 px-8 py-3 bg-white/10 text-white border border-white/20 rounded-xl font-bold hover:bg-white/20 transition-colors w-full sm:w-auto justify-center"
                                             >
                                                 Return Home
@@ -205,6 +233,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                 <button 
                                                     onClick={(e) => {
                                                         e.stopPropagation();
+                                                        playClickSound();
                                                         setShowChoices(false);
                                                         onPrevious();
                                                     }}
@@ -217,6 +246,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                             <button 
                                                 onClick={(e) => {
                                                     e.stopPropagation();
+                                                    playClickSound();
                                                     setShowChoices(false);
                                                     onRestart();
                                                 }}
@@ -240,6 +270,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                 <div 
                                                     key={choice.choice_id}
                                                     onClick={() => {
+                                                        playClickSound();
                                                         setShowChoices(false);
                                                         // 0.5s delay
                                                         setTimeout(() => {

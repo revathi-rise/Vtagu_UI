@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useImperativeHandle, forwardRef, useEffect } from 'react';
-import { AlertCircle, Maximize, Play, Pause, Volume2, VolumeX, SkipForward, SkipBack } from 'lucide-react';
+import { AlertCircle, Maximize, Play, Pause, Volume2, VolumeX, SkipForward, SkipBack, ChevronRight, ChevronLeft } from 'lucide-react';
 
 export interface YouTubePlayerHandle {
   play: () => void;
@@ -50,6 +50,46 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [showUI, setShowUI] = useState(true);
+
+    const [indicator, setIndicator] = useState<{ type: 'play' | 'pause' | 'forward' | 'rewind'; id: number } | null>(null);
+    const indicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Synthesized premium modern click sound generator
+    const playClickSound = () => {
+        try {
+            const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            
+            osc.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1600, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(700, ctx.currentTime + 0.035);
+            
+            gainNode.gain.setValueAtTime(0.08, ctx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.035);
+            
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.04);
+        } catch (e) {
+            // Autoplay security warning catch
+        }
+    };
+
+    const triggerIndicator = (type: 'play' | 'pause' | 'forward' | 'rewind') => {
+        if (indicatorTimeoutRef.current) {
+            clearTimeout(indicatorTimeoutRef.current);
+        }
+        setIndicator({ type, id: Date.now() });
+        indicatorTimeoutRef.current = setTimeout(() => {
+            setIndicator(null);
+        }, 500);
+    };
 
     const playerIdRef = useRef<string>(`youtube-player-${Math.random().toString(36).substr(2, 9)}`);
     const initialVideoId = useRef(videoId);
@@ -254,19 +294,158 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
     };
 
     const togglePlay = () => {
+      playClickSound();
       if (isPlaying) {
         if (typeof playerRef.current?.pauseVideo === 'function') {
           playerRef.current.pauseVideo();
+          triggerIndicator('pause');
         }
       } else {
         if (typeof playerRef.current?.playVideo === 'function') {
           playerRef.current.playVideo();
+          triggerIndicator('play');
         }
+      }
+    };
+
+    const handleVideoClick = (e: React.MouseEvent) => {
+      // Prevent click if clicking controls
+      if ((e.target as HTMLElement).closest('.video-controls-container')) return;
+
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+        clickTimeoutRef.current = null;
+        handleDoubleVideoClick(e);
+      } else {
+        clickTimeoutRef.current = setTimeout(() => {
+          clickTimeoutRef.current = null;
+          togglePlay();
+        }, 250);
+      }
+    };
+
+    const handleDoubleVideoClick = (e: React.MouseEvent) => {
+      if (!containerRef.current || !playerRef.current) return;
+      playClickSound();
+      
+      const rect = containerRef.current.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const width = rect.width;
+      
+      if (clickX < width / 2) {
+        // Rewind 10s
+        if (typeof playerRef.current.getCurrentTime === 'function' && typeof playerRef.current.seekTo === 'function') {
+          const current = playerRef.current.getCurrentTime();
+          const newTime = Math.max(0, current - 10);
+          playerRef.current.seekTo(newTime, true);
+          setCurrentTime(newTime);
+          triggerIndicator('rewind');
+        }
+      } else {
+        // Fast forward 10s
+        if (typeof playerRef.current.getCurrentTime === 'function' && typeof playerRef.current.seekTo === 'function') {
+          const current = playerRef.current.getCurrentTime();
+          const newTime = Math.min(duration || 0, current + 10);
+          playerRef.current.seekTo(newTime, true);
+          setCurrentTime(newTime);
+          triggerIndicator('forward');
+        }
+      }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (!playerRef.current) return;
+      
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || (activeEl as any).isContentEditable)) {
+        return;
+      }
+
+      switch (e.key) {
+        case ' ':
+          e.preventDefault();
+          togglePlay();
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          playClickSound();
+          if (typeof playerRef.current.getCurrentTime === 'function' && typeof playerRef.current.seekTo === 'function') {
+            const current = playerRef.current.getCurrentTime();
+            const newTime = Math.max(0, current - 5);
+            playerRef.current.seekTo(newTime, true);
+            setCurrentTime(newTime);
+            triggerIndicator('rewind');
+          }
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          playClickSound();
+          if (typeof playerRef.current.getCurrentTime === 'function' && typeof playerRef.current.seekTo === 'function') {
+            const current = playerRef.current.getCurrentTime();
+            const newTime = Math.min(duration || 0, current + 5);
+            playerRef.current.seekTo(newTime, true);
+            setCurrentTime(newTime);
+            triggerIndicator('forward');
+          }
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          playClickSound();
+          if (typeof playerRef.current.getVolume === 'function' && typeof playerRef.current.setVolume === 'function') {
+            const currentVol = playerRef.current.getVolume();
+            const newVol = Math.min(100, currentVol + 5);
+            playerRef.current.setVolume(newVol);
+            if (isMuted && newVol > 0) {
+              if (typeof playerRef.current.unMute === 'function') playerRef.current.unMute();
+              setIsMuted(false);
+            }
+          }
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          playClickSound();
+          if (typeof playerRef.current.getVolume === 'function' && typeof playerRef.current.setVolume === 'function') {
+            const currentVol = playerRef.current.getVolume();
+            const newVol = Math.max(0, currentVol - 5);
+            playerRef.current.setVolume(newVol);
+            if (newVol === 0) {
+              if (typeof playerRef.current.mute === 'function') playerRef.current.mute();
+              setIsMuted(true);
+            }
+          }
+          break;
+        case 'm':
+        case 'M':
+          e.preventDefault();
+          playClickSound();
+          if (isMuted) {
+            if (typeof playerRef.current?.unMute === 'function') playerRef.current.unMute();
+            setIsMuted(false);
+          } else {
+            if (typeof playerRef.current?.mute === 'function') playerRef.current.mute();
+            setIsMuted(true);
+          }
+          break;
+        case 'f':
+        case 'F':
+          e.preventDefault();
+          playClickSound();
+          if (onFullscreenRequest) {
+            onFullscreenRequest();
+          } else if (containerRef.current?.requestFullscreen) {
+            containerRef.current.requestFullscreen();
+          } else if ((containerRef.current as any).webkitRequestFullscreen) {
+            (containerRef.current as any).webkitRequestFullscreen();
+          }
+          break;
+        default:
+          break;
       }
     };
 
     const toggleMute = (e: React.MouseEvent) => {
       e.stopPropagation();
+      playClickSound();
       if (isMuted) {
         if (typeof playerRef.current?.unMute === 'function') playerRef.current.unMute();
         setIsMuted(false);
@@ -286,6 +465,7 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
 
     const handleFullscreen = (e: React.MouseEvent) => {
       e.stopPropagation();
+      playClickSound();
       if (onFullscreenRequest) {
         onFullscreenRequest();
       } else if (containerRef.current?.requestFullscreen) {
@@ -312,8 +492,10 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
     return (
       <div
         ref={containerRef}
-        className={`relative w-full bg-black overflow-hidden group ${className}`}
+        tabIndex={0}
+        className={`relative w-full bg-black overflow-hidden outline-none group ${className}`}
         style={{ aspectRatio: '16/9' }}
+        onKeyDown={handleKeyDown}
         onMouseMove={() => setShowUI(true)}
       >
         {/* Loading State */}
@@ -334,11 +516,49 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
         <div ref={ytWrapperRef} className="absolute inset-0" />
         
         {/* Transparent overlay to catch clicks and toggle play */}
-        <div className="absolute inset-0 z-10 cursor-pointer" onClick={togglePlay} />
+        <div className="absolute inset-0 z-10 cursor-pointer animate-youtube-clickable" onClick={handleVideoClick} />
+
+        {/* YouTube-like Pulsing/Scaling Overlay Indicator */}
+        {indicator && (
+            <div 
+                key={indicator.id}
+                className="absolute inset-0 flex items-center justify-center pointer-events-none z-40 select-none"
+            >
+                {(indicator.type === 'play' || indicator.type === 'pause') && (
+                    <div className="bg-black/60 text-white rounded-full p-6 animate-scale-up-fade-out">
+                        {indicator.type === 'play' ? (
+                            <Play size={40} fill="currentColor" />
+                        ) : (
+                            <Pause size={40} fill="currentColor" />
+                        )}
+                    </div>
+                )}
+                {indicator.type === 'forward' && (
+                    <div className="absolute right-12 top-1/2 -translate-y-1/2 bg-black/60 text-white px-5 py-3 rounded-xl flex flex-col items-center animate-ripple-right">
+                        <div className="flex gap-0.5">
+                            <ChevronRight size={18} className="animate-chevron-1" />
+                            <ChevronRight size={18} className="animate-chevron-2" />
+                            <ChevronRight size={18} className="animate-chevron-3" />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-wider mt-1">+10s</span>
+                    </div>
+                )}
+                {indicator.type === 'rewind' && (
+                    <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-black/60 text-white px-5 py-3 rounded-xl flex flex-col items-center animate-ripple-left">
+                        <div className="flex gap-0.5">
+                            <ChevronLeft size={18} className="animate-chevron-3" />
+                            <ChevronLeft size={18} className="animate-chevron-2" />
+                            <ChevronLeft size={18} className="animate-chevron-1" />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-wider mt-1">-10s</span>
+                    </div>
+                )}
+            </div>
+        )}
 
         {/* Custom Controls */}
         {showControls && (
-            <div className={`absolute bottom-0 left-0 right-0 z-30 p-6 bg-gradient-to-t from-black/80 to-transparent transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="video-controls-container absolute bottom-0 left-0 right-0 z-30 p-6 bg-gradient-to-t from-black/80 to-transparent transition-opacity duration-300 group-hover:opacity-100 opacity-100">
                 
                 {/* Progress Bar */}
                 <div className="mb-4 group/progress relative">
@@ -373,6 +593,7 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
                             <button 
                                 onClick={(e) => {
                                     e.stopPropagation();
+                                    playClickSound();
                                     onPrevious?.();
                                 }} 
                                 className="text-white/40 hover:text-cyan-400 transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-widest"
@@ -384,6 +605,7 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
                             <button 
                                 onClick={(e) => {
                                     e.stopPropagation();
+                                    playClickSound();
                                     onSkip?.();
                                 }} 
                                 className="text-white/40 hover:text-cyan-400 transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-widest"
@@ -413,6 +635,61 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
                 cursor: pointer;
                 box-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
             }
+
+            @keyframes scaleUpFadeOut {
+                0% {
+                    transform: scale(0.6);
+                    opacity: 0;
+                }
+                30% {
+                    transform: scale(1);
+                    opacity: 0.9;
+                }
+                100% {
+                    transform: scale(1.3);
+                    opacity: 0;
+                }
+            }
+
+            @keyframes rippleLeft {
+                0% {
+                    opacity: 0;
+                    transform: translateY(-50%) scale(0.9);
+                }
+                20% {
+                    opacity: 1;
+                    transform: translateY(-50%) scale(1);
+                }
+                80% {
+                    opacity: 1;
+                    transform: translateY(-50%) scale(1);
+                }
+                100% {
+                    opacity: 0;
+                    transform: translateY(-50%) scale(0.95);
+                }
+            }
+
+            @keyframes chevronPulse {
+                0%, 100% { opacity: 0.3; }
+                50% { opacity: 1; }
+            }
+
+            .animate-scale-up-fade-out {
+                animation: scaleUpFadeOut 0.5s ease-out forwards;
+            }
+
+            .animate-ripple-left {
+                animation: rippleLeft 0.5s ease-in-out forwards;
+            }
+
+            .animate-ripple-right {
+                animation: rippleLeft 0.5s ease-in-out forwards;
+            }
+
+            .animate-chevron-1 { animation: chevronPulse 0.5s infinite 0s; }
+            .animate-chevron-2 { animation: chevronPulse 0.5s infinite 0.15s; }
+            .animate-chevron-3 { animation: chevronPulse 0.5s infinite 0.3s; }
         `}</style>
       </div>
     );

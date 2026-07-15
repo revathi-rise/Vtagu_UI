@@ -390,7 +390,7 @@ function DropdownNavItem({
         href={href}
         className={`
           relative font-medium px-5 rounded-full transition-all duration-300 uppercase flex items-center gap-1.5
-          ${scrolled ? 'py-2 text-sm xl:text-base' : 'py-3 text-base xl:text-lg'}
+          ${scrolled ? 'py-2 text-sm xl:text-base' : 'py-3 text-base'}
           ${active
             ? "bg-secondary text-primary shadow-[inset_0_2px_4px_rgba(0,0,0,0.4),0_1px_1px_rgba(255,255,255,0.1)] border border-white/10"
             : "text-white/60 hover:text-white hover:bg-white/5 active:bg-black/20"

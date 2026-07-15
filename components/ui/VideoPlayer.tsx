@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { Play, Pause, Maximize, Volume2, VolumeX, SkipForward, SkipBack, AlertCircle } from 'lucide-react';
+import { Play, Pause, Maximize, Volume2, VolumeX, SkipForward, SkipBack, AlertCircle, ChevronRight, ChevronLeft } from 'lucide-react';
 
 declare global {
     interface Window {
@@ -70,6 +70,176 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     const [duration, setDuration] = useState(0);
     const [showUI, setShowUI] = useState(true);
     const [isBuffering, setIsBuffering] = useState(false);
+
+    // Indicator Overlay State
+    const [indicator, setIndicator] = useState<{ type: 'play' | 'pause' | 'forward' | 'rewind'; id: number } | null>(null);
+    const indicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Synthesized premium modern click sound generator
+    const playClickSound = () => {
+        try {
+            const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            
+            osc.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1600, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(700, ctx.currentTime + 0.035);
+            
+            gainNode.gain.setValueAtTime(0.08, ctx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.035);
+            
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.04);
+        } catch (e) {
+            // Autoplay security warning catch
+        }
+    };
+
+    const triggerIndicator = (type: 'play' | 'pause' | 'forward' | 'rewind') => {
+        if (indicatorTimeoutRef.current) {
+            clearTimeout(indicatorTimeoutRef.current);
+        }
+        setIndicator({ type, id: Date.now() });
+        indicatorTimeoutRef.current = setTimeout(() => {
+            setIndicator(null);
+        }, 500);
+    };
+
+    const togglePlay = () => {
+        if (!videoRef.current) return;
+        playClickSound();
+        if (videoRef.current.paused) {
+            videoRef.current.play();
+            triggerIndicator('play');
+        } else {
+            videoRef.current.pause();
+            triggerIndicator('pause');
+        }
+    };
+
+    const handleVideoClick = (e: React.MouseEvent) => {
+        if (!videoRef.current) return;
+        
+        // Prevent click if clicking controls
+        if ((e.target as HTMLElement).closest('.video-controls-container')) return;
+
+        if (clickTimeoutRef.current) {
+            clearTimeout(clickTimeoutRef.current);
+            clickTimeoutRef.current = null;
+            // Double click: seek
+            handleDoubleVideoClick(e);
+        } else {
+            clickTimeoutRef.current = setTimeout(() => {
+                clickTimeoutRef.current = null;
+                // Single click: play/pause
+                togglePlay();
+            }, 250); // 250ms threshold
+        }
+    };
+
+    const handleDoubleVideoClick = (e: React.MouseEvent) => {
+        if (!containerRef.current || !videoRef.current) return;
+        playClickSound();
+        
+        const rect = containerRef.current.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const width = rect.width;
+        
+        if (clickX < width / 2) {
+            // Seek backward 10s
+            const newTime = Math.max(0, videoRef.current.currentTime - 10);
+            videoRef.current.currentTime = newTime;
+            setCurrentTime(newTime);
+            triggerIndicator('rewind');
+        } else {
+            // Seek forward 10s
+            const newTime = Math.min(videoRef.current.duration || 0, videoRef.current.currentTime + 10);
+            videoRef.current.currentTime = newTime;
+            setCurrentTime(newTime);
+            triggerIndicator('forward');
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (!videoRef.current) return;
+        
+        // Ignore shortcuts if typing in fields
+        const activeEl = document.activeElement;
+        if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || (activeEl as any).isContentEditable)) {
+            return;
+        }
+
+        switch (e.key) {
+            case ' ':
+                e.preventDefault();
+                togglePlay();
+                break;
+            case 'ArrowLeft':
+                e.preventDefault();
+                playClickSound();
+                const backTime = Math.max(0, videoRef.current.currentTime - 5);
+                videoRef.current.currentTime = backTime;
+                setCurrentTime(backTime);
+                triggerIndicator('rewind');
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                playClickSound();
+                const fwdTime = Math.min(videoRef.current.duration || 0, videoRef.current.currentTime + 5);
+                videoRef.current.currentTime = fwdTime;
+                setCurrentTime(fwdTime);
+                triggerIndicator('forward');
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                playClickSound();
+                const volUp = Math.min(1, videoRef.current.volume + 0.05);
+                videoRef.current.volume = volUp;
+                if (videoRef.current.muted && volUp > 0) {
+                    videoRef.current.muted = false;
+                    setIsMuted(false);
+                }
+                break;
+            case 'ArrowDown':
+                e.preventDefault();
+                playClickSound();
+                const volDown = Math.max(0, videoRef.current.volume - 0.05);
+                videoRef.current.volume = volDown;
+                if (volDown === 0) {
+                    videoRef.current.muted = true;
+                    setIsMuted(true);
+                }
+                break;
+            case 'm':
+            case 'M':
+                e.preventDefault();
+                playClickSound();
+                videoRef.current.muted = !isMuted;
+                setIsMuted(!isMuted);
+                break;
+            case 'f':
+            case 'F':
+                e.preventDefault();
+                playClickSound();
+                if (onFullscreenRequest) {
+                    onFullscreenRequest();
+                } else if (containerRef.current?.requestFullscreen) {
+                    containerRef.current.requestFullscreen();
+                } else if ((containerRef.current as any).webkitRequestFullscreen) {
+                    (containerRef.current as any).webkitRequestFullscreen();
+                }
+                break;
+            default:
+                break;
+        }
+    };
 
     useImperativeHandle(ref, () => ({
         play: () => videoRef.current?.play(),
@@ -239,14 +409,9 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         setDuration(videoRef.current.duration);
     };
 
-    const togglePlay = () => {
-        if (!videoRef.current) return;
-        if (videoRef.current.paused) videoRef.current.play();
-        else videoRef.current.pause();
-    };
-
     const toggleMute = (e: React.MouseEvent) => {
         e.stopPropagation();
+        playClickSound();
         if (!videoRef.current) return;
         videoRef.current.muted = !isMuted;
         setIsMuted(!isMuted);
@@ -261,6 +426,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
     const handleFullscreen = (e: React.MouseEvent) => {
         e.stopPropagation();
+        playClickSound();
         if (onFullscreenRequest) {
             onFullscreenRequest();
         } else if (containerRef.current?.requestFullscreen) {
@@ -273,10 +439,11 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     return (
         <div 
             ref={containerRef}
-            className={`relative group bg-black overflow-hidden ${className}`}
+            tabIndex={0}
+            className={`relative group bg-black overflow-hidden outline-none ${className}`}
+            onKeyDown={handleKeyDown}
             onMouseMove={() => {
                 setShowUI(true);
-                // Clear existing timeout if any? Usually simple enough to just show.
             }}
         >
             {error ? (
@@ -298,10 +465,47 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                         muted={isMuted}
                         playsInline
                         preload="auto"
-                        // crossOrigin={crossOrigin}
-                        onClick={togglePlay}
+                        onClick={handleVideoClick}
                         poster={poster}
                     />
+
+                    {/* YouTube-like Pulsing/Scaling Overlay Indicator */}
+                    {indicator && (
+                        <div 
+                            key={indicator.id}
+                            className="absolute inset-0 flex items-center justify-center pointer-events-none z-40 select-none"
+                        >
+                            {(indicator.type === 'play' || indicator.type === 'pause') && (
+                                <div className="bg-black/60 text-white rounded-full p-6 animate-scale-up-fade-out">
+                                    {indicator.type === 'play' ? (
+                                        <Play size={40} fill="currentColor" />
+                                    ) : (
+                                        <Pause size={40} fill="currentColor" />
+                                    )}
+                                </div>
+                            )}
+                            {indicator.type === 'forward' && (
+                                <div className="absolute right-12 top-1/2 -translate-y-1/2 bg-black/60 text-white px-5 py-3 rounded-xl flex flex-col items-center animate-ripple-right">
+                                    <div className="flex gap-0.5">
+                                        <ChevronRight size={18} className="animate-chevron-1" />
+                                        <ChevronRight size={18} className="animate-chevron-2" />
+                                        <ChevronRight size={18} className="animate-chevron-3" />
+                                    </div>
+                                    <span className="text-[10px] font-black uppercase tracking-wider mt-1">+10s</span>
+                                </div>
+                            )}
+                            {indicator.type === 'rewind' && (
+                                <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-black/60 text-white px-5 py-3 rounded-xl flex flex-col items-center animate-ripple-left">
+                                    <div className="flex gap-0.5">
+                                        <ChevronLeft size={18} className="animate-chevron-3" />
+                                        <ChevronLeft size={18} className="animate-chevron-2" />
+                                        <ChevronLeft size={18} className="animate-chevron-1" />
+                                    </div>
+                                    <span className="text-[10px] font-black uppercase tracking-wider mt-1">-10s</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Buffering Spinner */}
                     {isBuffering && (
@@ -312,7 +516,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
                     {/* Custom Controls */}
                     {showControls && (
-                        <div className={`absolute bottom-0 left-0 right-0 z-30 p-6 bg-gradient-to-t from-black/80 to-transparent transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
+                        <div className="video-controls-container absolute bottom-0 left-0 right-0 z-30 p-6 bg-gradient-to-t from-black/80 to-transparent transition-opacity duration-300 group-hover:opacity-100 opacity-100">
                             
                             {/* Progress Bar */}
                             <div className="mb-4 group/progress relative">
@@ -347,6 +551,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                                         <button 
                                             onClick={(e) => {
                                                 e.stopPropagation();
+                                                playClickSound();
                                                 onPrevious?.();
                                             }} 
                                             className="text-white/40 hover:text-cyan-400 transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-widest"
@@ -358,6 +563,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                                         <button 
                                             onClick={(e) => {
                                                 e.stopPropagation();
+                                                playClickSound();
                                                 onSkip?.();
                                             }} 
                                             className="text-white/40 hover:text-cyan-400 transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-widest"
@@ -389,6 +595,61 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                     cursor: pointer;
                     box-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
                 }
+
+                @keyframes scaleUpFadeOut {
+                    0% {
+                        transform: scale(0.6);
+                        opacity: 0;
+                    }
+                    30% {
+                        transform: scale(1);
+                        opacity: 0.9;
+                    }
+                    100% {
+                        transform: scale(1.3);
+                        opacity: 0;
+                    }
+                }
+
+                @keyframes rippleLeft {
+                    0% {
+                        opacity: 0;
+                        transform: translateY(-50%) scale(0.9);
+                    }
+                    20% {
+                        opacity: 1;
+                        transform: translateY(-50%) scale(1);
+                    }
+                    80% {
+                        opacity: 1;
+                        transform: translateY(-50%) scale(1);
+                    }
+                    100% {
+                        opacity: 0;
+                        transform: translateY(-50%) scale(0.95);
+                    }
+                }
+
+                @keyframes chevronPulse {
+                    0%, 100% { opacity: 0.3; }
+                    50% { opacity: 1; }
+                }
+
+                .animate-scale-up-fade-out {
+                    animation: scaleUpFadeOut 0.5s ease-out forwards;
+                }
+
+                .animate-ripple-left {
+                    animation: rippleLeft 0.5s ease-in-out forwards;
+                }
+
+                .animate-ripple-right {
+                    animation: rippleLeft 0.5s ease-in-out forwards;
+                }
+
+                .animate-chevron-1 { animation: chevronPulse 0.5s infinite 0s; }
+                .animate-chevron-2 { animation: chevronPulse 0.5s infinite 0.15s; }
+                .animate-chevron-3 { animation: chevronPulse 0.5s infinite 0.3s; }
             `}</style>
         </div>
     );

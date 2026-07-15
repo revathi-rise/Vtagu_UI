@@ -34,12 +34,31 @@ export const watchProgressApi = {
    */
   updateProgress: async (data: Omit<WatchProgress, 'id' | 'createdAt' | 'updatedAt' | 'content'>): Promise<WatchProgressResponse> => {
     const url = `${API_BASE}/watch-progress`;
-    logger.debug(`Calling updateProgress API: ${url}`, data);
+    
+    const userIdNum = typeof data.userId === 'string' ? parseInt(data.userId, 10) : Number(data.userId);
+    const contentIdNum = typeof data.contentId === 'string' ? parseInt(data.contentId, 10) : Number(data.contentId);
+    
+    if (isNaN(userIdNum) || isNaN(contentIdNum)) {
+      logger.error('updateProgress error: Invalid userId or contentId', { userId: data.userId, contentId: data.contentId });
+      return {
+        status: false,
+        message: 'Invalid userId or contentId',
+        error: 'userId and contentId must be numeric',
+      };
+    }
+
+    const payload = {
+      ...data,
+      userId: userIdNum,
+      contentId: contentIdNum,
+    };
+
+    logger.debug(`Calling updateProgress API: ${url}`, payload);
     
     try {
       const res = await fetchWithAuth(url, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
       
       if (!res.ok) {
@@ -62,7 +81,18 @@ export const watchProgressApi = {
    * GET /watch-progress/user/:userId
    */
   getProgressList: async (userId: number | string): Promise<WatchProgressResponse> => {
-    const url = `${API_BASE}/watch-progress/user/${userId}`;
+    const userIdNum = typeof userId === 'string' ? parseInt(userId, 10) : Number(userId);
+    if (isNaN(userIdNum)) {
+      logger.error('getProgressList error: Invalid userId', userId);
+      return {
+        status: false,
+        message: 'Failed to fetch progress list',
+        error: 'userId must be numeric',
+        data: [],
+      };
+    }
+
+    const url = `${API_BASE}/watch-progress/user/${userIdNum}`;
     logger.debug(`Calling getProgressList API: ${url}`);
     
     try {
@@ -91,7 +121,19 @@ export const watchProgressApi = {
    * GET /watch-progress/user/:userId/content/:contentId
    */
   getContentProgress: async (userId: number | string, contentId: number | string): Promise<WatchProgressResponse> => {
-    const url = `${API_BASE}/watch-progress/user/${userId}/content/${contentId}`;
+    const userIdNum = typeof userId === 'string' ? parseInt(userId, 10) : Number(userId);
+    const contentIdNum = typeof contentId === 'string' ? parseInt(contentId, 10) : Number(contentId);
+    
+    if (isNaN(userIdNum) || isNaN(contentIdNum)) {
+      logger.error('getContentProgress error: Invalid userId or contentId', { userId, contentId });
+      return {
+        status: false,
+        message: 'Failed to fetch content progress',
+        error: 'userId and contentId must be numeric',
+      };
+    }
+
+    const url = `${API_BASE}/watch-progress/user/${userIdNum}/content/${contentIdNum}`;
     logger.debug(`Calling getContentProgress API: ${url}`);
     
     try {
@@ -127,7 +169,17 @@ export const watchProgressApi = {
    * DELETE /watch-progress/:progressId
    */
   deleteProgress: async (progressId: number | string): Promise<WatchProgressResponse> => {
-    const url = `${API_BASE}/watch-progress/${progressId}`;
+    const progressIdNum = typeof progressId === 'string' ? parseInt(progressId, 10) : Number(progressId);
+    if (isNaN(progressIdNum)) {
+      logger.error('deleteProgress error: Invalid progressId', progressId);
+      return {
+        status: false,
+        message: 'Failed to delete progress',
+        error: 'progressId must be numeric',
+      };
+    }
+
+    const url = `${API_BASE}/watch-progress/${progressIdNum}`;
     logger.debug(`Calling deleteProgress API: ${url}`);
     
     try {
@@ -155,7 +207,17 @@ export const watchProgressApi = {
    * DELETE /watch-progress/user/:userId
    */
   clearUserProgress: async (userId: number | string): Promise<WatchProgressResponse> => {
-    const url = `${API_BASE}/watch-progress/user/${userId}`;
+    const userIdNum = typeof userId === 'string' ? parseInt(userId, 10) : Number(userId);
+    if (isNaN(userIdNum)) {
+      logger.error('clearUserProgress error: Invalid userId', userId);
+      return {
+        status: false,
+        message: 'Failed to clear user progress',
+        error: 'userId must be numeric',
+      };
+    }
+
+    const url = `${API_BASE}/watch-progress/user/${userIdNum}`;
     logger.debug(`Calling clearUserProgress API: ${url}`);
     
     try {
