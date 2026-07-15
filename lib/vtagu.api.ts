@@ -131,6 +131,51 @@ export interface InteractiveMovie {
   trailer_video_url?: string;
   languages?: string;
   created_at: string;
+  is_free?: number;
+  price?: number;
+  currency?: string;
+}
+
+export interface MovieAccessResponse {
+  hasAccess: boolean;
+  reason: 'free' | 'subscription' | 'single_purchase' | 'none';
+  price: number;
+  currency: string;
+}
+
+export async function checkMovieAccess(movieId: number, userId?: string | null): Promise<MovieAccessResponse> {
+  const url = `${API_BASE}/interactive-movies/${movieId}/check-access${userId ? `?userId=${userId}` : ''}`;
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) {
+      throw new Error(`Failed to check movie access. Status: ${res.status}`);
+    }
+    const result = await res.json();
+    return result.data || { hasAccess: false, reason: 'none', price: 0, currency: 'INR' };
+  } catch (err: any) {
+    console.error("Error checking movie access:", err);
+    return { hasAccess: false, reason: 'none', price: 0, currency: 'INR' };
+  }
+}
+
+export async function purchaseMovie(movieId: number, userId: string, txnId: string, paidAmount: number, currency: string): Promise<any> {
+  const url = `${API_BASE}/interactive-movies/${movieId}/purchase`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId: Number(userId), txnId, paidAmount, currency }),
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to record movie purchase. Status: ${res.status}`);
+    }
+    return await res.json();
+  } catch (err: any) {
+    console.error("Error recording movie purchase:", err);
+    throw err;
+  }
 }
 
 export interface Scene {
@@ -172,6 +217,7 @@ export async function getInteractiveMovies(): Promise<InteractiveMovie[]> {
     return [];
   }
 }
+
 
 export async function getScenes(movieId: number): Promise<Scene[]> {
   const url = `${API_BASE}/scenes?id=${movieId}`;

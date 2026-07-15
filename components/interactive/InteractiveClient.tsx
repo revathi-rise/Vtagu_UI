@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Scene, Choice, InteractiveMovie, getChoices } from '@/lib/vtagu.api';
+import { Scene, Choice, InteractiveMovie, getChoices, checkMovieAccess } from '@/lib/vtagu.api';
 import { Play, ChevronRight, Zap, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import SceneManager, { SceneManagerHandle } from './SceneManager';
-import { PasswordModal } from '../shared/PasswordModal';
+import { PaywallGateModal } from './PaywallGateModal';
+import { getUserId } from '@/lib/api-client';
 
 interface InteractiveClientProps {
     movie: InteractiveMovie;
@@ -23,6 +24,32 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
     const [choices, setChoices] = useState<Choice[]>([]);
     const [loadingChoices, setLoadingChoices] = useState(false);
     const [isAuthorized, setIsAuthorized] = useState(false);
+    const [accessData, setAccessData] = useState<{
+        hasAccess: boolean;
+        reason: 'free' | 'subscription' | 'single_purchase' | 'none';
+        price: number;
+        currency: string;
+    } | null>(null);
+    const [checkingAccess, setCheckingAccess] = useState(true);
+
+    const checkAccess = async () => {
+        setCheckingAccess(true);
+        try {
+            const userId = getUserId();
+            const result = await checkMovieAccess(movie.interactive_movie_id, userId);
+            setAccessData(result);
+            setIsAuthorized(result.hasAccess);
+        } catch (error) {
+            console.error('Error checking movie access:', error);
+            setIsAuthorized(false);
+        } finally {
+            setCheckingAccess(false);
+        }
+    };
+
+    useEffect(() => {
+        checkAccess();
+    }, [movie.interactive_movie_id]);
 
     const fetchChoicesForScene = async (scene: Scene) => {
         if (scene.choices && scene.choices.length > 0) {
@@ -76,12 +103,22 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
         }
     };
 
+    if (checkingAccess) {
+        return (
+            <div className="min-h-screen bg-[#0c0816] flex items-center justify-center text-white">
+                <div className="w-10 h-10 border-4 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
+            </div>
+        );
+    }
+
     return (
         <>
-            <PasswordModal
+            <PaywallGateModal
                 isOpen={!isAuthorized}
-                onClose={() => { }} // Direct access requires password, no closing without auth
-                onSuccess={() => setIsAuthorized(true)}
+                price={accessData?.price || 0}
+                currency={accessData?.currency || 'INR'}
+                movieId={movie.interactive_movie_id}
+                movieTitle={movie.title}
             />
 
             {isAuthorized && (
