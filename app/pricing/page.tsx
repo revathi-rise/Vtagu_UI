@@ -1,7 +1,7 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import { Check, Zap, Crown, Sparkles, Star, Play, ChevronRight } from 'lucide-react';
+import { Check, Zap, Crown, Sparkles, Star, Play, ChevronRight, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getPlans } from '@/lib/vtagu.api';
@@ -45,6 +45,13 @@ const planStyles: Record<string, any> = {
     glow: 'shadow-[0_0_60px_rgba(146,72,255,0.15)]',
     badge: 'Best Value',
   },
+};
+
+const getCompatibilityLabel = (comp?: number) => {
+  if (comp === 1) return "Mobile & Tablet Access";
+  if (comp === 2) return "Mobile, Tablet & Laptop Access";
+  if (comp === 3) return "Mobile, Tablet, Laptop & TV Access";
+  return "All Screen Access (Mobile, TV, Browser)";
 };
 
 export default async function PricingPage() {
@@ -123,6 +130,8 @@ export default async function PricingPage() {
             const Icon = style.icon;
             const isActivePlan = activeSubscription && activeSubscription.planId === plan.planId && activeSubscription.status === 1;
             
+            const isInteractiveOnly = (plan.quality?.toLowerCase() === 'none' || !plan.quality || plan.isStandardIncluded === 0) && (plan.isInteractiveIncluded === 1 || plan.is_interactive_included === 1);
+
             return (
                 <div 
                   key={plan.planId}
@@ -137,17 +146,20 @@ export default async function PricingPage() {
                   `}
                 >
                   {/* Badge */}
-                  {(style.badge || isActivePlan) && (
+                  {(style.badge || isActivePlan || isInteractiveOnly) && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                       <div className={`px-5 py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white whitespace-nowrap shadow-2xl ${
                         isActivePlan
                           ? 'bg-gradient-to-r from-emerald-500 to-teal-600'
-                          : (style.featured 
-                              ? 'bg-gradient-to-r from-cyan-500 to-blue-600' 
-                              : 'bg-white/10 backdrop-blur-md border border-white/20'
+                          : (isInteractiveOnly
+                              ? 'bg-gradient-to-r from-purple-500 to-indigo-600'
+                              : (style.featured 
+                                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600' 
+                                  : 'bg-white/10 backdrop-blur-md border border-white/20'
+                                )
                             )
                       }`}>
-                        {isActivePlan ? 'Active Plan' : style.badge}
+                        {isActivePlan ? 'Active Plan' : (isInteractiveOnly ? 'Interactive Only' : style.badge)}
                       </div>
                     </div>
                   )}
@@ -163,6 +175,12 @@ export default async function PricingPage() {
                     <div className="text-[9px] md:text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
                       {plan.validity} ACCESS
                     </div>
+                    
+                    {isInteractiveOnly && (
+                      <div className="mt-3 bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[10px] font-semibold p-3 rounded-2xl">
+                        Recommended: Interactive Movies only. Standard streaming is not included.
+                      </div>
+                    )}
                   </div>
 
                   {/* Price */}
@@ -197,26 +215,74 @@ export default async function PricingPage() {
 
                   {/* Main Features Summary */}
                   <ul className="space-y-4 mb-10 flex-1">
-                     <li className="flex items-center gap-3 text-sm font-bold text-white/80">
-                        <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-                          <Check size={12} className="text-cyan-400" />
-                        </div>
-                        {plan.quality} Stream Quality
-                     </li>
-                     <li className="flex items-center gap-3 text-sm font-bold text-white/80">
-                        <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-                          <Check size={12} className="text-cyan-400" />
-                        </div>
-                        {plan.screens} Active Screen{Number(plan.screens) > 1 ? 's' : ''}
-                     </li>
-                     {plan.unlimited === 1 && (
-                        <li className="flex items-center gap-3 text-sm font-bold text-white/80">
+                     {/* Stream Quality / Standard Streams */}
+                     {!isInteractiveOnly ? (
+                       <li className="flex items-center gap-3 text-sm font-bold text-white/80">
                           <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-                            <Check size={12} className="text-cyan-400" />
+                             <Check size={12} className="text-cyan-400" />
                           </div>
-                          Unlimited Library
-                        </li>
+                          {plan.quality} Stream Quality
+                       </li>
+                     ) : (
+                       <li className="flex items-center gap-3 text-sm font-bold text-white/30">
+                          <div className="w-5 h-5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                             <X size={12} className="text-red-400" />
+                          </div>
+                          No Standard Video Streams
+                       </li>
                      )}
+
+                     {/* Screens limit */}
+                     {!isInteractiveOnly ? (
+                       <li className="flex items-center gap-3 text-sm font-bold text-white/80">
+                          <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+                             <Check size={12} className="text-cyan-400" />
+                          </div>
+                          {plan.screens} Active Screen{Number(plan.screens) > 1 ? 's' : ''}
+                       </li>
+                     ) : (
+                       <li className="flex items-center gap-3 text-sm font-bold text-white/30">
+                          <div className="w-5 h-5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                             <X size={12} className="text-red-400" />
+                          </div>
+                          No Concurrent Standard Screens
+                       </li>
+                     )}
+
+                     {/* Interactive Movies Access */}
+                     {(plan.isInteractiveIncluded === 1 || plan.is_interactive_included === 1) ? (
+                       <li className="flex items-center gap-3 text-sm font-bold text-white/80">
+                          <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+                             <Check size={12} className="text-cyan-400" />
+                          </div>
+                          {isInteractiveOnly ? "Premium Interactive Movies Only" : "Includes Premium Interactive Movies"}
+                       </li>
+                     ) : (
+                       <li className="flex items-center gap-3 text-sm font-bold text-white/30">
+                          <div className="w-5 h-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center opacity-40">
+                             <span className="w-1.5 h-px bg-white/50" />
+                          </div>
+                          No Interactive Movies
+                       </li>
+                     )}
+
+                     {/* Device Compatibility */}
+                     <li className="flex items-center gap-3 text-sm font-bold text-white/80">
+                        <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+                           <Check size={12} className="text-cyan-400" />
+                        </div>
+                        {getCompatibilityLabel(plan.compatibility)}
+                     </li>
+
+                     {/* Unlimited library */}
+                     <li className="flex items-center gap-3 text-sm font-bold text-white/80">
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${plan.unlimited === 1 ? 'bg-cyan-500/10 border border-cyan-500/30' : 'bg-white/5 border border-white/10 opacity-40'}`}>
+                          {plan.unlimited === 1 ? <Check size={12} className="text-cyan-400" /> : <div className="w-1.5 h-px bg-white/50" />}
+                        </div>
+                        <span className={plan.unlimited === 1 ? '' : 'text-white/30'}>Unlimited Library</span>
+                     </li>
+
+                     {/* Free cancellation */}
                      <li className="flex items-center gap-3 text-sm font-bold text-white/80">
                         <div className={`w-5 h-5 rounded-full flex items-center justify-center ${plan.cancellation === 1 ? 'bg-cyan-500/10 border border-cyan-500/30' : 'bg-white/5 border border-white/10 opacity-40'}`}>
                           {plan.cancellation === 1 ? <Check size={12} className="text-cyan-400" /> : <div className="w-1.5 h-px bg-white/50" />}
@@ -240,9 +306,9 @@ export default async function PricingPage() {
                     `}
                   >
                     {isActivePlan ? "Current Plan" : `Get ${plan.name}`}
-                  <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
-                </Link>
-              </div>
+                    <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
             );
           })}
         </div>

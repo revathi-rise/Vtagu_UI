@@ -116,6 +116,45 @@ function CheckoutContent() {
     setError('');
 
     try {
+      const userId = user.userId || user.id;
+      const amount = checkoutType === 'movie'
+        ? parseFloat(movie.price.toString().replace(/,/g, ''))
+        : parseFloat(plan!.price.replace(/,/g, ''));
+
+      if (amount === 0) {
+        if (checkoutType === 'movie') {
+          const purchaseRes = await purchaseMovie(
+            movie.interactive_movie_id,
+            userId,
+            'FREE',
+            0,
+            'INR'
+          );
+          if (purchaseRes.status === 'success' || (purchaseRes as any).status === true) {
+            setSuccess(true);
+          } else {
+            setError('Failed to activate free movie access.');
+          }
+        } else {
+          const { timestamp_from, timestamp_to } = calculateValidityTimestamps(plan!.validity);
+          const subRes = await subscriptionsApi.create({
+            planId: plan!.planId,
+            userId: userId,
+            payment_method: 'FREE',
+            payment_details: 'Free Plan Activation',
+            timestamp_from,
+            timestamp_to,
+          });
+          if (subRes.status) {
+            setSuccess(true);
+          } else {
+            setError('Failed to activate free subscription.');
+          }
+        }
+        setIsProcessing(false);
+        return;
+      }
+
       const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
       if (!res) {
         setError('Razorpay SDK failed to load. Are you offline?');
@@ -123,10 +162,7 @@ function CheckoutContent() {
         return;
       }
 
-      const userId = user.userId || user.id;
-      const amount = checkoutType === 'movie'
-        ? parseFloat(movie.price.toString().replace(/,/g, ''))
-        : parseFloat(plan!.price.replace(/,/g, ''));
+      // Re-use pre-calculated userId and amount values
       
       console.log('[DEBUG] Initiating payment:', { userId, amount, type: checkoutType });
       

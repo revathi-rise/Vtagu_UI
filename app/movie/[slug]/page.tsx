@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import TitleHero from '@/components/title/TitleHero';
 import RelatedNarratives from '@/components/title/RelatedNarratives';
 import { getMovieBySlug } from '@/lib/vtagu.api';
+import { cookies } from 'next/headers';
+import { PaywallGateModal } from '@/components/interactive/PaywallGateModal';
 
 interface PageProps {
   params: Promise<{
@@ -36,7 +38,9 @@ console.log(movie, "movie");
 export default async function MovieDetailsPage({ params }: PageProps) {
   const { slug } = await params;
   
-  const movie = await getMovieBySlug(slug);
+  const cookieStore = await cookies();
+  const userId = cookieStore.get('userId')?.value || null;
+  const movie = await getMovieBySlug(slug, userId);
 
   if (!movie) {
     notFound();
@@ -51,8 +55,17 @@ export default async function MovieDetailsPage({ params }: PageProps) {
     videoUrl: movie.videoUrl || "",
   };
 
+  const showPaywall = !movie.isFree && !movie.videoUrl;
+
   return (
     <main className="min-h-screen bg-[#0B0A10] text-white">
+      <PaywallGateModal
+        isOpen={showPaywall}
+        price={(movie as any).price || 0}
+        currency={(movie as any).currency || 'INR'}
+        movieId={movie.id}
+        movieTitle={movie.title}
+      />
       <TitleHero {...movieData} />
       
       <div className="relative z-30 -mt-20">

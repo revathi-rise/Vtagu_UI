@@ -7,6 +7,8 @@ import EpisodeDetailContent from '@/components/title/EpisodeDetailContent';
 import EpisodeSection from '@/components/title/EpisodeSection';
 import RelatedNarratives from '@/components/title/RelatedNarratives';
 import Footer from '@/components/layout/Footer';
+import { cookies } from 'next/headers';
+import { PaywallGateModal } from '@/components/interactive/PaywallGateModal';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -56,8 +58,11 @@ export async function generateStaticParams() {
 export default async function EpisodeDetailsPage({ params }: PageProps) {
   const { slug } = await params;
 
+  const cookieStore = await cookies();
+  const userId = cookieStore.get('userId')?.value || null;
+
   // SSR: fetch the specific episode by ID
-  const episode = await getEpisodeById(slug);
+  const episode = await getEpisodeById(slug, userId);
 
   if (!episode) {
     notFound();
@@ -75,8 +80,17 @@ export default async function EpisodeDetailsPage({ params }: PageProps) {
       ? epImage
       : 'https://images.unsplash.com/photo-1542281286-9e0a16bb7366?auto=format&fit=crop&q=80&w=1920';
 
+  const showPaywall = !episode.isFree && !iframeSrc;
+
   return (
     <main className="min-h-screen bg-[#0B0A10] text-white">
+      <PaywallGateModal
+        isOpen={showPaywall}
+        price={(episode as any).price || 0}
+        currency={(episode as any).currency || 'INR'}
+        movieId={episode.id || (episode as any).episodeId}
+        movieTitle={episode.title}
+      />
       {/* Hero — real episode data */}
       <TitleHero
         title={episode.title}

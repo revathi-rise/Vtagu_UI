@@ -307,8 +307,8 @@ export async function getEpisodes(): Promise<Episode[]> {
   }
 }
 
-export async function getEpisodeById(id: string | number): Promise<Episode | null> {
-  const url = `${API_BASE}/episodes/${id}`;
+export async function getEpisodeById(id: string | number, userId?: string | null): Promise<Episode | null> {
+  const url = `${API_BASE}/episodes/${id}${userId ? `?userId=${userId}` : ''}`;
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
     if (!res.ok) {
@@ -424,8 +424,8 @@ export async function getMovies(): Promise<Movie[]> {
   }
 }
 
-export async function getMovieBySlug(slug: string): Promise<Movie | null> {
-  const url = `${API_BASE}/movies/${slug}`;
+export async function getMovieBySlug(slug: string, userId?: string | null): Promise<Movie | null> {
+  const url = `${API_BASE}/movies/${slug}${userId ? `?userId=${userId}` : ''}`;
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
     if (!res.ok) {
@@ -582,6 +582,10 @@ export interface Plan {
   discount: number;
   validity: string;
   status: number;
+  isInteractiveIncluded?: number;
+  is_interactive_included?: number;
+  isStandardIncluded?: number;
+  is_standard_included?: number;
 }
 
 export async function getPlans(): Promise<Plan[]> {
@@ -658,6 +662,60 @@ export async function getMoviesByLanguage(slug: string): Promise<LanguageMoviesR
   } catch (err: any) {
     console.error(`Error fetching movies by language ${slug} in API:`, err);
     return { language: '', movies: [], Interactive: [], episodes: [] };
+  }
+}
+
+export interface WatchSessionResponse {
+  status: boolean;
+  message: string;
+  limit?: number;
+  activeCount?: number;
+}
+
+export async function pingWatchSession(
+  userId: number | string,
+  sessionId: string,
+  contentId: number | string,
+  contentType: string
+): Promise<WatchSessionResponse> {
+  const url = `${API_BASE}/watch-sessions/ping`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: Number(userId),
+        sessionId,
+        contentId: Number(contentId),
+        contentType,
+      }),
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to ping watch session. Status: ${res.status}`);
+    }
+    return await res.json();
+  } catch (err: any) {
+    console.error("Error pinging watch session:", err);
+    return { status: true, message: 'Fallback to true on network error' };
+  }
+}
+
+export async function exitWatchSession(sessionId: string): Promise<any> {
+  const url = `${API_BASE}/watch-sessions/exit`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sessionId }),
+    });
+    return await res.json();
+  } catch (err: any) {
+    console.error("Error exiting watch session:", err);
+    return { status: true };
   }
 }
 
