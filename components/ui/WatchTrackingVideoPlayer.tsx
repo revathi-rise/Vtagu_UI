@@ -30,6 +30,11 @@ interface WatchTrackingVideoPlayerProps {
   onEnded?: () => void;
   onSkip?: () => void;
   onFullscreenRequest?: () => void;
+  subtitles?: {
+      language: string;
+      label: string;
+      url: string;
+  }[];
 }
 
 const WatchTrackingVideoPlayer = React.forwardRef<

@@ -194,6 +194,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                             showPrevious={hasPrevious}
                             onPrevious={onPrevious}
                             onFullscreenRequest={handleFullscreenRequest}
+                            subtitles={currentScene.subtitles}
                         />
 
                         {/* Choice Overlay */}

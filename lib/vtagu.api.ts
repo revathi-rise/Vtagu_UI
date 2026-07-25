@@ -190,6 +190,11 @@ export interface Scene {
   is_ending: boolean;
   end_text?: string;
   choices?: Choice[];
+  subtitles?: {
+      language: string;
+      label: string;
+      url: string;
+  }[];
 }
 
 export interface Choice {

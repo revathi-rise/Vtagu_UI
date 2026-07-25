@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { Play, Pause, Maximize, Volume2, VolumeX, SkipForward, SkipBack, AlertCircle, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Play, Pause, Maximize, Volume2, VolumeX, SkipForward, SkipBack, AlertCircle, ChevronRight, ChevronLeft, Subtitles } from 'lucide-react';
 
 declare global {
     interface Window {
@@ -27,6 +27,11 @@ export interface VideoPlayerProps {
     showPrevious?: boolean;
     onPrevious?: () => void;
     onFullscreenRequest?: () => void;
+    subtitles?: {
+        language: string;
+        label: string;
+        url: string;
+    }[];
 }
 
 export interface VideoPlayerHandle {
@@ -48,12 +53,13 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         className = '', 
         onEnded, 
         onTimeUpdate,
-        crossOrigin = 'anonymous',
+        crossOrigin,
         showSkip = false,
         onSkip,
         showPrevious = false,
         onPrevious,
-        onFullscreenRequest
+        onFullscreenRequest,
+        subtitles
     }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -62,6 +68,51 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     // UI State
     const [error, setError] = useState<string | null>(null);
     const [hlsLoaded, setHlsLoaded] = useState(false);
+    
+    // Subtitle State
+    const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
+    const [activeSubtitleLanguage, setActiveSubtitleLanguage] = useState<string | null>(null);
+    const [showSubtitleMenu, setShowSubtitleMenu] = useState(false);
+    const [subtitleBlobs, setSubtitleBlobs] = useState<{ language: string; label: string; url: string; originalUrl: string }[]>([]);
+
+    useEffect(() => {
+        if (!subtitles || subtitles.length === 0) {
+            setSubtitleBlobs([]);
+            return;
+        }
+
+        let isMounted = true;
+        let objectUrls: string[] = [];
+        
+        const fetchSubtitles = async () => {
+            try {
+                const fetched = await Promise.all(subtitles.map(async (sub) => {
+                    try {
+                        const response = await fetch(sub.url);
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        const text = await response.text();
+                        const blob = new Blob([text], { type: 'text/vtt' });
+                        const blobUrl = URL.createObjectURL(blob);
+                        objectUrls.push(blobUrl);
+                        return { ...sub, url: blobUrl, originalUrl: sub.url };
+                    } catch (e) {
+                        console.warn('Failed to load subtitle via fetch, falling back to original URL:', sub.url, e);
+                        return { ...sub, originalUrl: sub.url };
+                    }
+                }));
+                if (isMounted) setSubtitleBlobs(fetched);
+            } catch (e) {
+                console.error('Error fetching subtitles', e);
+            }
+        };
+        
+        fetchSubtitles();
+        
+        return () => {
+            isMounted = false;
+            objectUrls.forEach(URL.revokeObjectURL);
+        };
+    }, [subtitles]);
     
     // Video State
     const [isPlaying, setIsPlaying] = useState(false);
@@ -129,6 +180,8 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         
         // Prevent click if clicking controls
         if ((e.target as HTMLElement).closest('.video-controls-container')) return;
+
+        setShowSubtitleMenu(false); // Close subtitle menu if clicking video
 
         if (clickTimeoutRef.current) {
             clearTimeout(clickTimeoutRef.current);
@@ -318,6 +371,14 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                 4: '📁 Video format not supported by your browser',
             };
 
+            if (errorCode === 4 && video.crossOrigin) {
+                console.warn('Video failed to load with crossOrigin. Retrying without it...');
+                video.removeAttribute('crossorigin');
+                video.src = src;
+                video.load();
+                return;
+            }
+
             const message = errorMap[errorCode] || errorMessage || 'Failed to load video';
             console.error('Video playback error:', {
                 code: errorCode,
@@ -374,7 +435,11 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             }
         } else {
             // Try multiple CORS settings
-            video.crossOrigin = crossOrigin || 'anonymous';
+            if (crossOrigin || (subtitles && subtitles.length > 0)) {
+                video.crossOrigin = crossOrigin || 'anonymous';
+            } else {
+                video.removeAttribute('crossorigin');
+            }
             video.src = src;
             video.load();
             video.addEventListener('canplay', handleCanPlay);
@@ -424,6 +489,30 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         setCurrentTime(time);
     };
 
+    const toggleSubtitle = (e: React.MouseEvent, language?: string) => {
+        e.stopPropagation();
+        playClickSound();
+        if (!videoRef.current) return;
+        
+        const tracks = videoRef.current.textTracks;
+        if (!tracks) return;
+
+        if (language) {
+            setSubtitlesEnabled(true);
+            setActiveSubtitleLanguage(language);
+            for (let i = 0; i < tracks.length; i++) {
+                tracks[i].mode = tracks[i].language === language ? 'showing' : 'hidden';
+            }
+        } else {
+            setSubtitlesEnabled(false);
+            setActiveSubtitleLanguage(null);
+            for (let i = 0; i < tracks.length; i++) {
+                tracks[i].mode = 'hidden';
+            }
+        }
+        setShowSubtitleMenu(false);
+    };
+
     const handleFullscreen = (e: React.MouseEvent) => {
         e.stopPropagation();
         playClickSound();
@@ -467,7 +556,18 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                         preload="auto"
                         onClick={handleVideoClick}
                         poster={poster}
-                    />
+                    >
+                        {subtitleBlobs.map((sub) => (
+                            <track
+                                key={sub.language}
+                                kind="subtitles"
+                                src={sub.url}
+                                srcLang={sub.language}
+                                label={sub.label}
+                                default={activeSubtitleLanguage === sub.language && subtitlesEnabled}
+                            />
+                        ))}
+                    </video>
 
                     {/* YouTube-like Pulsing/Scaling Overlay Indicator */}
                     {indicator && (
@@ -571,6 +671,49 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                                             Skip <SkipForward size={14} />
                                         </button>
                                     )}
+                                    
+                                    {/* CC Subtitles Button & Menu */}
+                                    {subtitles && subtitles.length > 0 && (
+                                        <div className="relative">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    playClickSound();
+                                                    setShowSubtitleMenu(!showSubtitleMenu);
+                                                }}
+                                                className={`transition-colors p-2 rounded-lg flex items-center justify-center ${subtitlesEnabled ? 'text-cyan-400 bg-cyan-400/10' : 'text-white hover:text-cyan-400 bg-white/5'}`}
+                                            >
+                                                <Subtitles size={18} />
+                                            </button>
+                                            
+                                            {/* Subtitles Popup Menu */}
+                                            {showSubtitleMenu && (
+                                                <div className="absolute bottom-full right-0 mb-4 bg-black/90 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden min-w-[150px] z-50 shadow-2xl animate-scale-up-fade-in origin-bottom-right">
+                                                    <div className="px-4 py-2 border-b border-white/10 text-xs font-black uppercase tracking-widest text-white/50">
+                                                        Subtitles
+                                                    </div>
+                                                    <div className="flex flex-col py-1">
+                                                        <button 
+                                                            onClick={(e) => toggleSubtitle(e)}
+                                                            className={`text-left px-4 py-2 text-sm transition-colors hover:bg-white/10 ${!subtitlesEnabled ? 'text-cyan-400 font-bold' : 'text-white'}`}
+                                                        >
+                                                            Off
+                                                        </button>
+                                                        {subtitles.map((sub) => (
+                                                            <button 
+                                                                key={sub.language}
+                                                                onClick={(e) => toggleSubtitle(e, sub.language)}
+                                                                className={`text-left px-4 py-2 text-sm transition-colors hover:bg-white/10 ${subtitlesEnabled && activeSubtitleLanguage === sub.language ? 'text-cyan-400 font-bold' : 'text-white'}`}
+                                                            >
+                                                                {sub.label}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
                                     <button 
                                         onClick={handleFullscreen}
                                         className="text-white hover:text-cyan-400 transition-colors p-2 bg-white/5 rounded-lg"
@@ -633,6 +776,15 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                 @keyframes chevronPulse {
                     0%, 100% { opacity: 0.3; }
                     50% { opacity: 1; }
+                }
+
+                @keyframes scaleUpFadeIn {
+                    from { opacity: 0; transform: scale(0.95); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+
+                .animate-scale-up-fade-in {
+                    animation: scaleUpFadeIn 0.2s ease-out forwards;
                 }
 
                 .animate-scale-up-fade-out {
