@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { Montserrat, Inter } from 'next/font/google';
 import './globals.css';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { getGenres, Genre, getLanguages, Language } from '@/lib/vtagu.api';
+import { ReduxProvider } from './providers';
+import ConditionalLayout from '@/components/layout/ConditionalLayout';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -21,9 +21,6 @@ export const metadata: Metadata = {
   title: 'VTAGU Primetime | TV Optimized',
   description: 'Premium streaming entertainment platform.',
 };
-
-import { ReduxProvider } from './providers';
-import NewsPopup from '@/components/shared/NewsPopup';
 
 export default async function RootLayout({
   children,
@@ -45,18 +42,13 @@ export default async function RootLayout({
     console.error("Error fetching languages in RootLayout:", error);
   }
 
-
   return (
-
     <html lang="en" className={`${montserrat.variable} ${inter.variable}`}>
       <body className={`${montserrat.className} antialiased`}>
         <ReduxProvider>
-          <Navbar genres={genres} languages={languages} />
-          <div className="pt-24 min-h-screen">
+          <ConditionalLayout genres={genres} languages={languages}>
             {children}
-          </div>
-          {/* <NewsPopup /> */}
-          <Footer />
+          </ConditionalLayout>
         </ReduxProvider>
       </body>
     </html>

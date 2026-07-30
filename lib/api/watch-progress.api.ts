@@ -100,6 +100,15 @@ export const watchProgressApi = {
         method: 'GET',
       });
       
+      // 404 = user has no watch history yet — this is a valid empty state, not an error
+      if (res.status === 404) {
+        return {
+          status: true,
+          message: 'No watch history found',
+          data: [],
+        };
+      }
+
       if (!res.ok) {
         throw new Error(`Failed to fetch watch progress: ${res.status}`);
       }
@@ -115,6 +124,7 @@ export const watchProgressApi = {
       };
     }
   },
+
 
   /**
    * Get progress for a specific content item

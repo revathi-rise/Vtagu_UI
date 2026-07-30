@@ -724,3 +724,121 @@ export async function exitWatchSession(sessionId: string): Promise<any> {
   }
 }
 
+// ----------------------------------------------------
+// Shorts (Vertical Video) Endpoints
+// ----------------------------------------------------
+
+export interface Short {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  video_url: string;
+  thumbnail_url: string;
+  duration: string;
+  languages: string;
+  genre_id: number;
+  is_free: boolean;
+  is_featured: boolean;
+  is_active: boolean;
+  view_count: number;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Public: fetch active shorts — optional limit for home page teaser */
+export async function getActiveShorts(limit?: number): Promise<Short[]> {
+  const params = limit ? `?limit=${limit}` : '';
+  const url = `${API_BASE}/shorts/active${params}`;
+  try {
+    const res = await fetchWithRetry(url, { next: { revalidate: 300 } }); // 5-min cache
+    if (!res.ok) throw new Error(`Failed to fetch active shorts. Status: ${res.status}`);
+    const result = await res.json();
+    return result.data || [];
+  } catch (err: any) {
+    console.error('Error fetching active shorts:', err);
+    return [];
+  }
+}
+
+
+/** Admin: fetch all shorts (active + inactive) */
+export async function getAllShorts(): Promise<Short[]> {
+  const url = `${API_BASE}/shorts`;
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const res = await fetchWithRetry(url, {
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    });
+    if (!res.ok) throw new Error(`Failed to fetch shorts. Status: ${res.status}`);
+    const result = await res.json();
+    return result.data || [];
+  } catch (err: any) {
+    console.error('Error fetching all shorts:', err);
+    return [];
+  }
+}
+
+/** Admin: create a short */
+export async function createShort(data: Partial<Short>): Promise<any> {
+  const url = `${API_BASE}/shorts`;
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const res = await fetchWithRetry(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(data),
+    });
+    return await res.json();
+  } catch (err: any) {
+    throw err;
+  }
+}
+
+/** Admin: update a short */
+export async function updateShort(id: number, data: Partial<Short>): Promise<any> {
+  const url = `${API_BASE}/shorts/${id}`;
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const res = await fetchWithRetry(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(data),
+    });
+    return await res.json();
+  } catch (err: any) {
+    throw err;
+  }
+}
+
+/** Admin: delete a short */
+export async function deleteShort(id: number): Promise<any> {
+  const url = `${API_BASE}/shorts/${id}`;
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const res = await fetchWithRetry(url, {
+      method: 'DELETE',
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    });
+    return await res.json();
+  } catch (err: any) {
+    throw err;
+  }
+}
+
+/** Public: increment view count for a short */
+export async function incrementShortView(id: number): Promise<void> {
+  const url = `${API_BASE}/shorts/${id}/view`;
+  try {
+    await fetch(url, { method: 'POST' });
+  } catch {
+    // silently fail — view tracking is non-critical
+  }
+}

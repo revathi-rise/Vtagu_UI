@@ -1,11 +1,13 @@
 import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
 import EpisodicVanguard from '@/components/home/EpisodicVanguard';
 import Footer from '@/components/layout/Footer';
 import ContinueWatching from '@/components/home/continueWatching';
 import InteractiveHero from '@/components/home/InteractiveHero';
 import MovieSection from '@/components/home/MovieSection';
 import MovieGenres from '@/components/home/MovieGenres';
-import { getPosters, getInteractiveMovies, getEpisodes, getMovies, getGenres } from '@/lib/vtagu.api';
+import ShortsSection from '@/components/home/ShortsSection';
+import { getPosters, getInteractiveMovies, getEpisodes, getMovies, getGenres, getActiveShorts } from '@/lib/vtagu.api';
 
 const HeroSection = dynamic(() => import("@/components/home/HeroSection"))
 
@@ -16,34 +18,38 @@ export const metadata = {
 };
 
 export default async function Home() {
-  const [posters, interactiveMovies, episodes, movies, genres] = await Promise.all([
+  // Shorts fetch runs in parallel but is non-blocking for the rest of the page
+  const [posters, movies, genres, episodes, interactiveMovies, shorts] = await Promise.all([
     getPosters("home"),
-    getInteractiveMovies(),
-    getEpisodes(),
     getMovies(),
     getGenres(),
+    getEpisodes(),
+    getInteractiveMovies(),
+    getActiveShorts(8),       // limit to 8 for faster load on home page
   ]);
-  console.log(posters);
   
   return (
     <main className="bg-[#0f0a10] selection:bg-primary/30 min-h-screen">
       
       {/* 1. Banner */}
       <HeroSection posters={posters} movies={movies} episodes={episodes} />
-      
-      {/* 2. Continue Watching */}
+
+      {/* 2. Shorts — high up for fast discovery */}
+      <ShortsSection shorts={shorts} />
+
+      {/* 3. Continue Watching */}
       <ContinueWatching />
 
-      {/* 3. Movies Section */}
+      {/* 4. Movies Section */}
       <MovieSection movies={movies} />
-      
-      {/* 4. Interactive Section */}
+
+      {/* 5. Interactive Section */}
       <InteractiveHero interactiveMovies={interactiveMovies} />
       
-      {/* 5. Episodes Section */}
+      {/* 6. Episodes Section */}
       <EpisodicVanguard episodes={episodes} />
 
-      {/* 6. Genre Section */}
+      {/* 7. Genre Section */}
       <MovieGenres genres={genres} />
     </main>
   );
