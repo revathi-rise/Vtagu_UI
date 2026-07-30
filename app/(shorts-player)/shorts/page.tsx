@@ -93,19 +93,22 @@ function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: Sh
 
       const tryPlay = () => {
         video.play().catch((err: Error) => {
-          // NotSupportedError = no valid source yet; AbortError = interrupted by scroll — both are fine to swallow
+          // NotSupportedError = no valid source yet; AbortError = interrupted by scroll — swallow both
           if (err.name !== 'NotSupportedError' && err.name !== 'AbortError') {
-            console.warn('[ShortCard] play() error:', err.name);
+            console.warn('[ShortCard] play() error:', err.name, err.message);
           }
           setPaused(true);
         });
       };
 
-      // If browser has enough data, play immediately; otherwise wait
-      if (video.readyState >= 3) {
+      // readyState >= 2 means browser has current frame data — enough to start
+      if (video.readyState >= 2) {
         tryPlay();
       } else {
+        // Wait for canplay (fires earlier than canplaythrough)
         video.addEventListener('canplay', tryPlay, { once: true });
+        // Also load explicitly in case browser paused network activity
+        video.load();
         return () => video.removeEventListener('canplay', tryPlay);
       }
     } else {
@@ -115,11 +118,12 @@ function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: Sh
     }
   }, [isActive, short.video_url]);
 
-  // Sync mute
+  // Sync mute state imperatively — the HTML `muted` attr is static, JS .muted controls runtime
   useEffect(() => {
     const video = videoRef.current;
-    if (video) video.muted = isMuted;
-  }, [isMuted]);
+    if (!video) return;
+    video.muted = isMuted;
+  }, [isMuted, isActive]); // re-sync when active card changes too
 
   // Progress bar
   useEffect(() => {
@@ -179,10 +183,11 @@ function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: Sh
           ref={videoRef}
           src={short.video_url}
           poster={short.thumbnail_url || undefined}
-          muted={isMuted}
+          muted        // HTML attribute — required for autoplay policy in all browsers
+          autoPlay={isActive}
           loop
           playsInline
-          preload="metadata"
+          preload={isActive ? 'auto' : 'none'}
           onError={() => setPaused(true)}
           onClick={togglePlay}
           style={{
@@ -259,22 +264,36 @@ function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: Sh
         right: 16, bottom: 100,
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24,
       }}>
-        {/* Mute */}
-        <button
-          onClick={onToggleMute}
-          style={{
-            width: 48, height: 48, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.12)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            color: '#fff', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'all 0.2s',
-          }}
-          title={isMuted ? 'Unmute' : 'Mute'}
-        >
-          {isMuted ? <VolumeOffIcon /> : <VolumeOnIcon />}
-        </button>
+        {/* Mute / Unmute */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+          <button
+            onClick={onToggleMute}
+            style={{
+              width: 48, height: 48, borderRadius: '50%',
+              background: isMuted
+                ? 'rgba(255,80,80,0.25)'
+                : 'rgba(255,255,255,0.12)',
+              backdropFilter: 'blur(8px)',
+              border: isMuted
+                ? '1px solid rgba(255,80,80,0.5)'
+                : '1px solid rgba(255,255,255,0.2)',
+              color: '#fff', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.2s',
+            }}
+            title={isMuted ? 'Tap to unmute' : 'Mute'}
+          >
+            {isMuted ? <VolumeOffIcon /> : <VolumeOnIcon />}
+          </button>
+          {isMuted && (
+            <span style={{
+              color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: 700,
+              textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'center',
+            }}>
+              Unmute
+            </span>
+          )}
+        </div>
 
         {/* Share */}
         <button
@@ -365,7 +384,7 @@ export default function ShortsPage() {
   const [shorts, setShorts] = useState<Short[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true); // MUST start muted — browsers block autoplay of unmuted video
   const containerRef = useRef<HTMLDivElement>(null);
   const countedViews = useRef<Set<number>>(new Set());
 
