@@ -3,6 +3,7 @@
 import { useRef, useState, useCallback, memo } from 'react';
 import Link from 'next/link';
 import { Short } from '@/lib/vtagu.api';
+import UniversalVideoPlayer, { UniversalVideoPlayerHandle } from '@/components/ui/UniversalVideoPlayer';
 
 // ─── Card ─────────────────────────────────────────────────────────────────────
 
@@ -18,7 +19,7 @@ const formatViews = (n: number) => {
 };
 
 const ShortsTeaserCard = memo(function ShortsTeaserCard({ short, index }: ShortsTeaserCardProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<UniversalVideoPlayerHandle>(null);
   const [hovering, setHovering] = useState(false);
   // Don't set src until hover — prevents 12 concurrent video fetches on mount
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
@@ -31,7 +32,7 @@ const ShortsTeaserCard = memo(function ShortsTeaserCard({ short, index }: Shorts
       setVideoSrc(short.video_url);
     } else {
       // src already set — play directly only if element has enough data
-      const v = videoRef.current;
+      const v = videoRef.current?.videoElement;
       if (v && v.readyState >= 2) {
         v.play().catch((err: Error) => {
           if (err.name !== 'NotSupportedError' && err.name !== 'AbortError') {
@@ -44,20 +45,20 @@ const ShortsTeaserCard = memo(function ShortsTeaserCard({ short, index }: Shorts
 
   const handleMouseLeave = useCallback(() => {
     setHovering(false);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
+    if (videoRef.current?.videoElement) {
+      videoRef.current.videoElement.pause();
+      videoRef.current.videoElement.currentTime = 0;
     }
   }, []);
 
-  // Once src is set, play the video
+  // Once src is set, play the video (not used via onCanPlay on UniversalVideoPlayer since it handles autoPlay internally, but kept for logic consistency if needed)
   const handleVideoCanPlay = useCallback(() => {
-    if (hovering) videoRef.current?.play().catch(() => {});
+    if (hovering) videoRef.current?.videoElement?.play().catch(() => { });
   }, [hovering]);
 
   return (
     <Link
-      href="/shorts"
+      href={`/shorts?id=${short.id}`}
       style={{ textDecoration: 'none', flexShrink: 0 }}
       title={short.title}
       prefetch={false}
@@ -107,24 +108,24 @@ const ShortsTeaserCard = memo(function ShortsTeaserCard({ short, index }: Shorts
 
         {/* Video — src set ONLY on first hover, preload=none prevents any network request */}
         {videoSrc && (
-          <video
-            ref={videoRef}
-            src={videoSrc}
-            muted
-            loop
-            playsInline
-            preload="none"
-            onCanPlay={handleVideoCanPlay}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              opacity: hovering ? 1 : 0,
-              transition: 'opacity 0.2s',
-            }}
-          />
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            opacity: hovering ? 1 : 0,
+            transition: 'opacity 0.2s',
+          }}>
+            <UniversalVideoPlayer
+              ref={videoRef}
+              src={videoSrc}
+              muted={true}
+              loop={true}
+              autoPlay={hovering}
+              showControls={false}
+              className="w-full h-full object-cover"
+            />
+          </div>
         )}
 
         {/* Bottom gradient */}
@@ -214,6 +215,8 @@ interface ShortsSectionProps {
 }
 
 export default function ShortsSection({ shorts }: ShortsSectionProps) {
+  console.log(shorts, "shorts");
+  
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -234,14 +237,13 @@ export default function ShortsSection({ shorts }: ShortsSectionProps) {
   };
 
   return (
-    <section style={{ padding: '40px 0 32px', position: 'relative' }}>
+    <section className='max-w-[90%] mx-auto' style={{ padding: '40px 0 32px', position: 'relative' }}>
       {/* Section header */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 20px 24px',
-        maxWidth: 1400, margin: '0 auto',
       }}>
-        <div>
+        <div className="">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
             <div style={{
               width: 10, height: 10, borderRadius: '50%',

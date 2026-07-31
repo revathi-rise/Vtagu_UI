@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Short, getActiveShorts, incrementShortView } from '@/lib/vtagu.api';
+import UniversalVideoPlayer, { UniversalVideoPlayerHandle } from '@/components/ui/UniversalVideoPlayer';
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 
@@ -71,14 +72,14 @@ interface ShortCardProps {
 }
 
 function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: ShortCardProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<UniversalVideoPlayerHandle>(null);
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
   const viewedRef = useRef(false);
 
   // Auto-play / pause based on active state
   useEffect(() => {
-    const video = videoRef.current;
+    const video = videoRef.current?.videoElement;
     if (!video) return;
 
     if (isActive) {
@@ -120,14 +121,14 @@ function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: Sh
 
   // Sync mute state imperatively — the HTML `muted` attr is static, JS .muted controls runtime
   useEffect(() => {
-    const video = videoRef.current;
+    const video = videoRef.current?.videoElement;
     if (!video) return;
     video.muted = isMuted;
   }, [isMuted, isActive]); // re-sync when active card changes too
 
   // Progress bar
   useEffect(() => {
-    const video = videoRef.current;
+    const video = videoRef.current?.videoElement;
     if (!video) return;
     const onTime = () => {
       if (video.duration) setProgress((video.currentTime / video.duration) * 100);
@@ -142,7 +143,7 @@ function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: Sh
   }, [short.id, onViewCounted]);
 
   const togglePlay = () => {
-    const video = videoRef.current;
+    const video = videoRef.current?.videoElement;
     if (!video || !short.video_url) return;
     if (video.paused) {
       video.play().catch((err: Error) => {
@@ -179,26 +180,27 @@ function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: Sh
     >
       {/* Video — only render if URL exists */}
       {short.video_url ? (
-        <video
-          ref={videoRef}
-          src={short.video_url}
-          poster={short.thumbnail_url || undefined}
-          muted        // HTML attribute — required for autoplay policy in all browsers
-          autoPlay={isActive}
-          loop
-          playsInline
-          preload={isActive ? 'auto' : 'none'}
-          onError={() => setPaused(true)}
+        <div 
           onClick={togglePlay}
           style={{
             height: '100%',
-            maxWidth: '100%',
+            width: '100%',
             aspectRatio: '9/16',
-            objectFit: 'cover',
             cursor: 'pointer',
             display: 'block',
           }}
-        />
+        >
+          <UniversalVideoPlayer
+            ref={videoRef}
+            src={short.video_url}
+            poster={short.thumbnail_url || undefined}
+            muted={isMuted}
+            autoPlay={isActive}
+            loop={true}
+            showControls={false}
+            className="w-full h-full object-cover"
+          />
+        </div>
       ) : (
         /* Fallback when no video URL — show thumbnail or gradient */
         <div style={{
@@ -392,6 +394,24 @@ export default function ShortsPage() {
     getActiveShorts().then((data) => {
       setShorts(data);
       setLoading(false);
+      
+      // Auto-scroll to the requested short ID if present in the URL
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const targetId = params.get('id');
+        if (targetId) {
+          const targetIndex = data.findIndex(s => s.id.toString() === targetId);
+          if (targetIndex !== -1) {
+            setActiveIndex(targetIndex);
+            setTimeout(() => {
+              const container = containerRef.current;
+              if (container && container.children[targetIndex]) {
+                (container.children[targetIndex] as HTMLElement).scrollIntoView();
+              }
+            }, 100);
+          }
+        }
+      }
     });
   }, []);
 

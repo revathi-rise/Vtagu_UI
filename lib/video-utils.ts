@@ -36,11 +36,8 @@ export function getFallbackVideoUrl(contentId: string): string {
 export function isYouTubeUrl(url: string | null | undefined): boolean {
   if (!url || typeof url !== 'string') return false;
   
-  const youtubePatterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)/,
-  ];
-  
-  return youtubePatterns.some(pattern => pattern.test(url));
+  const lowerUrl = url.toLowerCase();
+  return lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be');
 }
 
 /**
@@ -67,6 +64,10 @@ export function getYouTubeVideoId(url: string): string | null {
   // youtube.com/v/videoId
   else if (url.includes('/v/')) {
     videoId = url.split('/v/')[1]?.split('?')[0] || '';
+  }
+  // youtube.com/shorts/videoId
+  else if (url.includes('/shorts/')) {
+    videoId = url.split('/shorts/')[1]?.split('?')[0] || '';
   }
   
   return videoId || null;
