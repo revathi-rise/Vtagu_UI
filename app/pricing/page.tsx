@@ -84,10 +84,10 @@ export default async function PricingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0a0a0c] text-white selection:bg-cyan-500/30">
+    <main className="min-h-screen bg-[#0a0a0c] text-white selection:bg-cyan-500/30 overflow-x-hidden">
       
       {/* SECTION 1: HERO */}
-      <section className="relative pt-32 pb-16 md:pt-40 md:pb-28 px-6 text-center overflow-hidden">
+      <section className="relative pt-24 pb-12 sm:pt-32 sm:pb-16 md:pt-40 md:pb-24 px-4 sm:px-6 text-center overflow-hidden">
         {/* Cinematic Image Background */}
         <div className="absolute inset-0 z-0">
           <Image 
@@ -102,29 +102,29 @@ export default async function PricingPage() {
         </div>
 
         {/* Cinematic background elements */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-[#3299ff]/20 blur-[180px] rounded-full pointer-events-none opacity-40" />
-        <div className="absolute top-40 left-1/4 w-[400px] h-[400px] bg-[#9248ff]/8 blur-[140px] rounded-full pointer-events-none opacity-40" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[300px] sm:h-[600px] bg-[#3299ff]/20 blur-[140px] sm:blur-[180px] rounded-full pointer-events-none opacity-40" />
+        <div className="absolute top-40 left-1/4 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-[#9248ff]/8 blur-[100px] sm:blur-[140px] rounded-full pointer-events-none opacity-40" />
         
         <div className="relative z-10 max-w-[95%] md:max-w-[90%] mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-cyan-400 mb-6 md:mb-8 animate-fade-in">
+          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3.5 py-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.25em] sm:tracking-[0.3em] text-cyan-400 mb-4 sm:mb-6 md:mb-8 animate-fade-in">
             <Star size={12} fill="currentColor" className="animate-pulse" />
             Vtagu Premium Experience
           </div>
           
-          <h1 className="text-3xl sm:text-4xl md:text-[45px] font-black tracking-tight md:tracking-[0.04em] mb-4 md:mb-6 leading-[1.1] md:leading-[0.9]" style={{ fontFamily: 'var(--font-montserrat)' }}>
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-[54px] font-black tracking-tight md:tracking-[0.04em] mb-3 sm:mb-4 md:mb-6 leading-[1.15] md:leading-[1.05]" style={{ fontFamily: 'var(--font-montserrat)' }}>
             Pick the Plan That 
             <span className="block md:inline text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 md:pl-2">Powers Your Entertainment</span>
           </h1>
           
-          <p className="text-white/50 text-base md:text-xl max-w-2xl mx-auto leading-relaxed font-medium" style={{ fontFamily: 'var(--font-inter)' }}>
+          <p className="text-white/60 text-sm sm:text-base md:text-lg lg:text-xl max-w-2xl mx-auto leading-relaxed font-medium" style={{ fontFamily: 'var(--font-inter)' }}>
             Experience cinema-grade streaming with flexible plans tailored for every screen. No commitments, just pure storytelling.
           </p>
         </div>
       </section>
 
       {/* SECTION 2: PRICING CARDS */}
-      <section className="px-6 pb-32 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+      <section className="px-4 sm:px-6 pb-16 sm:pb-24 md:pb-32 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 items-stretch">
           {plans.map((plan) => {
             const style = planStyles[plan.name.toLowerCase()] || planStyles.starter;
             const Icon = style.icon;
@@ -136,8 +136,8 @@ export default async function PricingPage() {
                 <div 
                   key={plan.planId}
                   className={`
-                    relative flex flex-col rounded-[2rem] md:rounded-[2.5rem] border bg-gradient-to-br p-6 md:p-8
-                    transition-all duration-700 hover:scale-[1.03] group
+                    relative flex flex-col rounded-[1.75rem] sm:rounded-[2rem] md:rounded-[2.5rem] border bg-gradient-to-br p-5 sm:p-6 md:p-8
+                    transition-all duration-500 hover:scale-[1.02] sm:hover:scale-[1.03] group
                     ${isActivePlan ? 'from-emerald-500/10 to-emerald-500/5 border-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.1)]' : style.color} 
                     ${isActivePlan ? 'border-emerald-500/30' : style.borderColor} 
                     ${isActivePlan ? '' : style.glow}
@@ -147,8 +147,8 @@ export default async function PricingPage() {
                 >
                   {/* Badge */}
                   {(style.badge || isActivePlan || isInteractiveOnly) && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <div className={`px-5 py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white whitespace-nowrap shadow-2xl ${
+                    <div className="absolute -top-3.5 sm:-top-4 left-1/2 -translate-x-1/2">
+                      <div className={`px-4 sm:px-5 py-1 sm:py-1.5 rounded-full text-[8.5px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white whitespace-nowrap shadow-2xl ${
                         isActivePlan
                           ? 'bg-gradient-to-r from-emerald-500 to-teal-600'
                           : (isInteractiveOnly
@@ -165,43 +165,43 @@ export default async function PricingPage() {
                   )}
 
                   {/* Header */}
-                  <div className="mb-6 md:mb-8">
-                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 md:mb-6 group-hover:rotate-12 transition-transform duration-500 ${isActivePlan ? 'text-emerald-400' : style.iconColor}`}>
-                      <Icon size={24} className="md:w-7 md:h-7" />
+                  <div className="mb-5 sm:mb-6 md:mb-8">
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 sm:mb-4 md:mb-6 group-hover:rotate-12 transition-transform duration-500 ${isActivePlan ? 'text-emerald-400' : style.iconColor}`}>
+                      <Icon size={20} className="sm:w-6 sm:h-6 md:w-7 md:h-7" />
                     </div>
-                    <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter uppercase mb-1 italic">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tighter uppercase mb-1 italic">
                       {plan.name}
                     </h2>
-                    <div className="text-[9px] md:text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
+                    <div className="text-[9px] md:text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">
                       {plan.validity} ACCESS
                     </div>
                     
                     {isInteractiveOnly && (
-                      <div className="mt-3 bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[10px] font-semibold p-3 rounded-2xl">
+                      <div className="mt-3 bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[10px] font-semibold p-2.5 sm:p-3 rounded-xl sm:rounded-2xl leading-relaxed">
                         Recommended: Interactive Movies only. Standard streaming is not included.
                       </div>
                     )}
                   </div>
 
                   {/* Price */}
-                  <div className="mb-8 md:mb-10">
+                  <div className="mb-6 sm:mb-8 md:mb-10">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-white/40 text-lg md:text-xl font-bold italic">₹</span>
-                      <span className="text-5xl md:text-6xl font-black text-white tracking-tighter">
+                      <span className="text-white/40 text-base sm:text-lg md:text-xl font-bold italic">₹</span>
+                      <span className="text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tighter">
                         {plan.price}
                       </span>
-                      <span className="text-white/30 text-xs md:text-sm font-bold uppercase tracking-widest ml-1">
+                      <span className="text-white/40 text-xs md:text-sm font-bold uppercase tracking-widest ml-1">
                         / {plan.validity.split(' ')[1] === 'Year' ? 'yr' : 'mo'}
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {plan.discount > 0 && (
-                        <div className="text-cyan-400 text-[11px] font-black uppercase tracking-widest bg-cyan-400/10 px-3 py-1 rounded-full inline-block">
+                        <div className="text-cyan-400 text-[10px] sm:text-[11px] font-black uppercase tracking-widest bg-cyan-400/10 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full inline-block">
                           Save {plan.discount}% Off
                         </div>
                       )}
                       {isActivePlan && (
-                        <div className="text-emerald-400 text-[11px] font-black uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full inline-block">
+                        <div className="text-emerald-400 text-[10px] sm:text-[11px] font-black uppercase tracking-widest bg-emerald-500/10 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full inline-block">
                           Subscribed
                         </div>
                       )}
@@ -214,19 +214,19 @@ export default async function PricingPage() {
                   </div>
 
                   {/* Main Features Summary */}
-                  <ul className="space-y-4 mb-10 flex-1">
+                  <ul className="space-y-3 sm:space-y-4 mb-8 sm:mb-10 flex-1">
                      {/* Stream Quality / Standard Streams */}
                      {!isInteractiveOnly ? (
-                       <li className="flex items-center gap-3 text-sm font-bold text-white/80">
-                          <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-                             <Check size={12} className="text-cyan-400" />
+                       <li className="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-bold text-white/80">
+                          <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0">
+                             <Check size={11} className="text-cyan-400" />
                           </div>
                           {plan.quality} Stream Quality
                        </li>
                      ) : (
-                       <li className="flex items-center gap-3 text-sm font-bold text-white/30">
-                          <div className="w-5 h-5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-                             <X size={12} className="text-red-400" />
+                       <li className="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-bold text-white/30">
+                          <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
+                             <X size={11} className="text-red-400" />
                           </div>
                           No Standard Video Streams
                        </li>
@@ -234,16 +234,16 @@ export default async function PricingPage() {
 
                      {/* Screens limit */}
                      {!isInteractiveOnly ? (
-                       <li className="flex items-center gap-3 text-sm font-bold text-white/80">
-                          <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-                             <Check size={12} className="text-cyan-400" />
+                       <li className="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-bold text-white/80">
+                          <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0">
+                             <Check size={11} className="text-cyan-400" />
                           </div>
                           {plan.screens} Active Screen{Number(plan.screens) > 1 ? 's' : ''}
                        </li>
                      ) : (
-                       <li className="flex items-center gap-3 text-sm font-bold text-white/30">
-                          <div className="w-5 h-5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-                             <X size={12} className="text-red-400" />
+                       <li className="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-bold text-white/30">
+                          <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
+                             <X size={11} className="text-red-400" />
                           </div>
                           No Concurrent Standard Screens
                        </li>
@@ -251,15 +251,15 @@ export default async function PricingPage() {
 
                      {/* Interactive Movies Access */}
                      {(plan.isInteractiveIncluded === 1 || plan.is_interactive_included === 1) ? (
-                       <li className="flex items-center gap-3 text-sm font-bold text-white/80">
-                          <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-                             <Check size={12} className="text-cyan-400" />
+                       <li className="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-bold text-white/80">
+                          <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0">
+                             <Check size={11} className="text-cyan-400" />
                           </div>
                           {isInteractiveOnly ? "Premium Interactive Movies Only" : "Includes Premium Interactive Movies"}
                        </li>
                      ) : (
-                       <li className="flex items-center gap-3 text-sm font-bold text-white/30">
-                          <div className="w-5 h-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center opacity-40">
+                       <li className="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-bold text-white/30">
+                          <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center opacity-40 shrink-0">
                              <span className="w-1.5 h-px bg-white/50" />
                           </div>
                           No Interactive Movies
@@ -267,25 +267,25 @@ export default async function PricingPage() {
                      )}
 
                      {/* Device Compatibility */}
-                     <li className="flex items-center gap-3 text-sm font-bold text-white/80">
-                        <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-                           <Check size={12} className="text-cyan-400" />
+                     <li className="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-bold text-white/80">
+                        <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0">
+                           <Check size={11} className="text-cyan-400" />
                         </div>
                         {getCompatibilityLabel(plan.compatibility)}
                      </li>
 
                      {/* Unlimited library */}
-                     <li className="flex items-center gap-3 text-sm font-bold text-white/80">
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${plan.unlimited === 1 ? 'bg-cyan-500/10 border border-cyan-500/30' : 'bg-white/5 border border-white/10 opacity-40'}`}>
-                          {plan.unlimited === 1 ? <Check size={12} className="text-cyan-400" /> : <div className="w-1.5 h-px bg-white/50" />}
+                     <li className="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-bold text-white/80">
+                        <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shrink-0 ${plan.unlimited === 1 ? 'bg-cyan-500/10 border border-cyan-500/30' : 'bg-white/5 border border-white/10 opacity-40'}`}>
+                          {plan.unlimited === 1 ? <Check size={11} className="text-cyan-400" /> : <div className="w-1.5 h-px bg-white/50" />}
                         </div>
                         <span className={plan.unlimited === 1 ? '' : 'text-white/30'}>Unlimited Library</span>
                      </li>
 
                      {/* Free cancellation */}
-                     <li className="flex items-center gap-3 text-sm font-bold text-white/80">
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${plan.cancellation === 1 ? 'bg-cyan-500/10 border border-cyan-500/30' : 'bg-white/5 border border-white/10 opacity-40'}`}>
-                          {plan.cancellation === 1 ? <Check size={12} className="text-cyan-400" /> : <div className="w-1.5 h-px bg-white/50" />}
+                     <li className="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-bold text-white/80">
+                        <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shrink-0 ${plan.cancellation === 1 ? 'bg-cyan-500/10 border border-cyan-500/30' : 'bg-white/5 border border-white/10 opacity-40'}`}>
+                          {plan.cancellation === 1 ? <Check size={11} className="text-cyan-400" /> : <div className="w-1.5 h-px bg-white/50" />}
                         </div>
                         <span className={plan.cancellation === 1 ? '' : 'text-white/30'}>Cancel Anytime</span>
                      </li>
@@ -295,7 +295,7 @@ export default async function PricingPage() {
                   <Link
                     href={isActivePlan ? "/account" : (isLoggedIn ? `/checkout?plan=${plan.planId}` : `/register?plan=${plan.planId}`)}
                     className={`
-                      w-full py-5 rounded-[1.5rem] text-xs font-black uppercase tracking-[0.2em] text-center transition-all duration-300 flex items-center justify-center gap-2 group/btn
+                      w-full py-3.5 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl md:rounded-[1.5rem] text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-center transition-all duration-300 flex items-center justify-center gap-2 group/btn
                       ${isActivePlan 
                         ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-[0_15px_40px_rgba(16,185,129,0.3)]' 
                         : (style.featured 
@@ -314,16 +314,16 @@ export default async function PricingPage() {
         </div>
 
         {/* Minimal Footer Note */}
-        <div className="mt-20 text-center">
-          <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.4em] mb-4">
+        <div className="mt-12 sm:mt-16 md:mt-20 text-center">
+          <p className="text-white/30 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] mb-4">
             Security & Trust Guaranteed
           </p>
-          <div className="flex justify-center items-center gap-8 opacity-20 grayscale">
+          <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8 opacity-30 grayscale">
              {/* Simple brand icons or text */}
-             <span className="text-xs font-bold uppercase tracking-widest">VISA</span>
-             <span className="text-xs font-bold uppercase tracking-widest">MASTERCARD</span>
-             <span className="text-xs font-bold uppercase tracking-widest">UPI</span>
-             <span className="text-xs font-bold uppercase tracking-widest">RAZORPAY</span>
+             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest">VISA</span>
+             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest">MASTERCARD</span>
+             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest">UPI</span>
+             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest">RAZORPAY</span>
           </div>
         </div>
       </section>

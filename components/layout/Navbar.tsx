@@ -18,7 +18,7 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
   const [interactiveMovies, setInteractiveMovies] = useState<InteractiveMovie[]>([]);
   const [genresList, setGenresList] = useState<Genre[]>(genres);
   console.log(genresList);
-  
+
   const [languagesList, setLanguagesList] = useState<Language[]>(languages);
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
@@ -119,20 +119,19 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
         className={`
           flex items-center justify-between gap-2 sm:gap-6 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]
           ${scrolled
-            ? "relative mt-2 sm:mt-6 px-3 sm:px-6 py-1.5 sm:py-2 rounded-full bg-secondary/85 backdrop-blur-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.15),0_0_0_1px_rgba(255,255,255,0.05)] w-[94%] lg:w-full max-w-[1440px]"
+            ? "relative mt-2 sm:mt-6 px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-full bg-secondary/85 backdrop-blur-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.15),0_0_0_1px_rgba(255,255,255,0.05)] w-[94%] lg:w-full max-w-[1440px]"
             : "relative mt-0 px-4 sm:px-18 rounded-none bg-transparent w-full border-b border-white/5"
           }
-          before:absolute before:inset-0 before:rounded-inherit before:bg-gradient-to-b before:from-white/5 before:to-transparent before:pointer-events-none
         `}
       >
         {/* Logo */}
-        <Link href="/" className="flex items-center hover:scale-105 transition-transform duration-300">
+        <Link href="/" className="flex items-center shrink-0 hover:opacity-90 transition-opacity duration-300">
           <Image
             src="/vtagu_logo.png"
             alt="PrimeTime Logo"
             width={160}
             height={80}
-            className={`${scrolled ? 'h-[70px] w-auto object-cover scale-200 px-5' : 'h-[90px] w-auto object-cover scale-150'}`}
+            className={`object-contain transition-all duration-300 ${scrolled ? 'h-[36px] sm:h-[48px] lg:h-[60px] w-auto' : 'h-[44px] sm:h-[58px] lg:h-[72px] w-auto'}`}
             priority
           />
         </Link>
@@ -179,7 +178,7 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
         </nav>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           {/* Search */}
           <button className={`flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/80 hover:text-white transition-all border border-white/10 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.3)] group active:scale-95 active:shadow-inner ${scrolled ? 'w-8 h-8 sm:w-9 sm:h-9' : 'w-10 h-10 sm:w-11 sm:h-11'}`}>
             <Search className={`group-hover:scale-110 transition-transform ${scrolled ? 'w-3.5 h-3.5 sm:w-4 sm:h-4' : 'w-4.5 h-4.5 sm:w-5 sm:h-5'}`} />
@@ -220,8 +219,8 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
               href="/login"
               className={`
                 relative flex items-center gap-3 rounded-full overflow-hidden transition-all duration-500 group active:scale-95
-                ${scrolled ? 'px-4 sm:px-6 py-4 text-[9px] sm:text-[10px]' : 'px-6 sm:px-9 py-2.5 sm:py-3.5 text-[10px] sm:text-xs'} 
-                font-black uppercase tracking-[0.25em] text-white shadow-2xl
+                ${scrolled ? 'px-3.5 sm:px-6 py-1.5 sm:py-2 text-[9px] sm:text-[10px]' : 'px-4 sm:px-8 py-2 sm:py-3 text-[10px] sm:text-xs'} 
+                font-black uppercase tracking-[0.2em] text-white shadow-2xl
               `}
             >
               {/* Animated Gradient Background */}
@@ -246,7 +245,7 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden relative z-[70] w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 shadow-lg active:scale-90 transition-all hover:bg-white/20"
+            className="lg:hidden relative z-[70] w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 shadow-lg active:scale-90 transition-all hover:bg-white/20"
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -264,16 +263,21 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
             className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-2xl lg:hidden flex flex-col"
           >
             {/* Mobile Menu Header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-white/5">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
               <Image
-                src="/vtagu_primetime_logo.png"
+                src="/vtagu_logo.png"
                 alt="PrimeTime Logo"
-                width={180}
-                height={50}
-                className="w-auto h-8 object-contain"
+                width={160}
+                height={80}
+                className="h-[40px] sm:h-[48px] w-auto object-contain"
               />
-              {/* Spacing for the fixed close button */}
-              <div className="w-10 h-10" />
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 shadow-lg active:scale-90 transition-all hover:bg-white/20"
+                aria-label="Close menu"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
             </div>
 
             {/* Mobile Menu Links */}
@@ -384,6 +388,8 @@ function DropdownNavItem({
   isInteractive?: boolean;
   isLanguage?: boolean;
 }) {
+  if (!items || items.length === 0) return null;
+
   return (
     <div className="relative group/dropdown px-1">
       <Link
@@ -508,6 +514,8 @@ function MobileDropdownNavItem({
   onClick: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+
+  if (!items || items.length === 0) return null;
 
   return (
     <div className="space-y-1">

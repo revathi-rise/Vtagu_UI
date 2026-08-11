@@ -44,7 +44,7 @@ export default function InteractiveGridHero({ interactiveMovies }: InteractiveHe
                     />
                 </div>
 
-                <div className="relative bg-gradient-to-br from-[#1a1125] via-[#141418] to-[#0a0a0c] rounded-2xl sm:rounded-[3rem] p-5 sm:p-8 md:p-12 border border-white/10 overflow-hidden shadow-2xl ring-1 ring-white/5">
+                <div className="relative bg-gradient-to-br from-[#1a1125] via-[#141418] to-[#0a0a0c] rounded-2xl sm:rounded-[3rem] p-4 sm:p-8 md:p-12 border border-white/10 overflow-hidden shadow-2xl ring-1 ring-white/5">
                     <div className="relative z-10 flex flex-col lg:flex-row lg:items-start justify-between gap-8 mb-12">
                         <div className="space-y-4 max-w-2xl">
                             <div className="inline-flex items-center gap-2 bg-primary text-black px-4 py-1.5 rounded-full font-bold text-[10px] uppercase tracking-wider shadow-lg shadow-primary/20">

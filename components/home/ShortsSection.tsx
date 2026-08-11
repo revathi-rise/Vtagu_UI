@@ -66,10 +66,9 @@ const ShortsTeaserCard = memo(function ShortsTeaserCard({ short, index }: Shorts
       <div
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        className="w-[140px] h-[249px] sm:w-[160px] sm:h-[284px]"
         style={{
           position: 'relative',
-          width: 160,
-          height: 284,
           borderRadius: 16,
           overflow: 'hidden',
           background: '#18181b',
@@ -239,11 +238,8 @@ export default function ShortsSection({ shorts }: ShortsSectionProps) {
   return (
     <section className='max-w-[90%] mx-auto' style={{ padding: '40px 0 32px', position: 'relative' }}>
       {/* Section header */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 20px 24px',
-      }}>
-        <div className="">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-5 pb-6">
+        <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
             <div style={{
               width: 10, height: 10, borderRadius: '50%',
@@ -278,15 +274,10 @@ export default function ShortsSection({ shorts }: ShortsSectionProps) {
         <Link
           href="/shorts"
           prefetch={false}
+          className="inline-flex items-center justify-center gap-2 px-5 py-3 sm:px-6 sm:py-3 rounded-full text-white text-sm font-bold no-underline shrink-0 w-full sm:w-auto transition-transform hover:scale-105"
           style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            padding: '12px 22px', borderRadius: 28,
             background: 'linear-gradient(135deg, #3299ff 0%, #9248ff 100%)',
-            color: '#fff', textDecoration: 'none',
-            fontSize: 14, fontWeight: 700,
             boxShadow: '0 4px 20px rgba(50,153,255,0.3)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            flexShrink: 0,
           }}
         >
           Watch All
@@ -365,8 +356,8 @@ export default function ShortsSection({ shorts }: ShortsSectionProps) {
 
           {/* See All card */}
           <Link href="/shorts" prefetch={false} style={{ textDecoration: 'none', flexShrink: 0, scrollSnapAlign: 'start' }}>
-            <div style={{
-              width: 160, height: 284, borderRadius: 16,
+            <div className="w-[140px] h-[249px] sm:w-[160px] sm:h-[284px]" style={{
+              borderRadius: 16,
               background: 'linear-gradient(135deg, rgba(50,153,255,0.1) 0%, rgba(146,72,255,0.1) 100%)',
               border: '2px dashed rgba(50,153,255,0.3)',
               display: 'flex', flexDirection: 'column',
