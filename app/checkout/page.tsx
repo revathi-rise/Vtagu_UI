@@ -95,14 +95,32 @@ function CheckoutContent() {
     const now = Math.floor(Date.now() / 1000);
     let days = 30; // Default 1 month
     
-    if (validityStr.toLowerCase().includes('year')) {
-      const match = validityStr.match(/(\d+)/);
+    if (!validityStr) return { timestamp_from: now, timestamp_to: now + (30 * 86400) };
+
+    const dateMatch = validityStr.match(/\d{4}-\d{2}-\d{2}/);
+    if (dateMatch) {
+      const targetTime = Math.floor(new Date(dateMatch[0] + 'T23:59:59').getTime() / 1000);
+      if (!isNaN(targetTime) && targetTime > now) {
+        return { timestamp_from: now, timestamp_to: targetTime };
+      }
+    }
+
+    const lower = validityStr.toLowerCase();
+    if (lower.includes('year')) {
+      const match = lower.match(/(\d+)/);
       const years = match ? parseInt(match[1]) : 1;
       days = years * 365;
-    } else if (validityStr.toLowerCase().includes('month')) {
-      const match = validityStr.match(/(\d+)/);
+    } else if (lower.includes('month')) {
+      const match = lower.match(/(\d+)/);
       const months = match ? parseInt(match[1]) : 1;
       days = months * 30;
+    } else if (lower.includes('day')) {
+      const match = lower.match(/(\d+)/);
+      days = match ? parseInt(match[1]) : 1;
+    } else if (lower.includes('week')) {
+      const match = lower.match(/(\d+)/);
+      const weeks = match ? parseInt(match[1]) : 1;
+      days = weeks * 7;
     }
     
     const timestamp_to = now + (days * 86400);

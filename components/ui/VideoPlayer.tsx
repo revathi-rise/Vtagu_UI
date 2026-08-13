@@ -32,6 +32,12 @@ export interface VideoPlayerProps {
         label: string;
         url: string;
     }[];
+    audioTracks?: {
+        language: string;
+        label: string;
+        url: string;
+        isDefault?: boolean;
+    }[];
 }
 
 export interface VideoPlayerHandle {
@@ -59,21 +65,112 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         showPrevious = false,
         onPrevious,
         onFullscreenRequest,
-        subtitles
+        subtitles,
+        audioTracks
     }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
     const hlsRef = useRef<any>(null);
     
     // UI State
     const [error, setError] = useState<string | null>(null);
     const [hlsLoaded, setHlsLoaded] = useState(false);
+
+    // Video State
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isMuted, setIsMuted] = useState(muted);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [showUI, setShowUI] = useState(true);
+    const [isBuffering, setIsBuffering] = useState(false);
     
     // Subtitle State
     const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
     const [activeSubtitleLanguage, setActiveSubtitleLanguage] = useState<string | null>(null);
     const [showSubtitleMenu, setShowSubtitleMenu] = useState(false);
     const [subtitleBlobs, setSubtitleBlobs] = useState<{ language: string; label: string; url: string; originalUrl: string }[]>([]);
+
+    // Audio Track State
+    const [selectedAudioTrackUrl, setSelectedAudioTrackUrl] = useState<string | null>(null);
+    const [showAudioTrackMenu, setShowAudioTrackMenu] = useState(false);
+
+    // Initialize default audio track if specified
+    useEffect(() => {
+        if (audioTracks && audioTracks.length > 0) {
+            const defaultTrack = audioTracks.find(t => t.isDefault) || audioTracks[0];
+            if (defaultTrack && defaultTrack.url) {
+                setSelectedAudioTrackUrl(defaultTrack.url);
+            }
+        }
+    }, [audioTracks]);
+
+    // Synchronize auxiliary audio element with main video element
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        if (selectedAudioTrackUrl) {
+            video.muted = true;
+            if (!audioRef.current) {
+                const audio = new Audio(selectedAudioTrackUrl);
+                audio.currentTime = video.currentTime;
+                audioRef.current = audio;
+            } else if (audioRef.current.src !== selectedAudioTrackUrl) {
+                audioRef.current.src = selectedAudioTrackUrl;
+                audioRef.current.currentTime = video.currentTime;
+            }
+
+            if (!video.paused) {
+                audioRef.current.play().catch(e => console.warn('Audio track play warning:', e));
+            }
+        } else {
+            video.muted = isMuted;
+            if (audioRef.current) {
+                audioRef.current.pause();
+            }
+        }
+
+        const handlePlay = () => {
+            if (selectedAudioTrackUrl && audioRef.current) {
+                audioRef.current.currentTime = video.currentTime;
+                audioRef.current.play().catch(console.warn);
+            }
+        };
+
+        const handlePause = () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+            }
+        };
+
+        const handleSeek = () => {
+            if (selectedAudioTrackUrl && audioRef.current) {
+                audioRef.current.currentTime = video.currentTime;
+            }
+        };
+
+        const handleRateChange = () => {
+            if (audioRef.current) {
+                audioRef.current.playbackRate = video.playbackRate;
+            }
+        };
+
+        video.addEventListener('play', handlePlay);
+        video.addEventListener('pause', handlePause);
+        video.addEventListener('seeking', handleSeek);
+        video.addEventListener('ratechange', handleRateChange);
+
+        return () => {
+            video.removeEventListener('play', handlePlay);
+            video.removeEventListener('pause', handlePause);
+            video.removeEventListener('seeking', handleSeek);
+            video.removeEventListener('ratechange', handleRateChange);
+            if (audioRef.current) {
+                audioRef.current.pause();
+            }
+        };
+    }, [selectedAudioTrackUrl, isMuted]);
 
     useEffect(() => {
         if (!subtitles || subtitles.length === 0) {
@@ -113,14 +210,6 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             objectUrls.forEach(URL.revokeObjectURL);
         };
     }, [subtitles]);
-    
-    // Video State
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isMuted, setIsMuted] = useState(muted);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
-    const [showUI, setShowUI] = useState(true);
-    const [isBuffering, setIsBuffering] = useState(false);
 
     // Indicator Overlay State
     const [indicator, setIndicator] = useState<{ type: 'play' | 'pause' | 'forward' | 'rewind'; id: number } | null>(null);
@@ -680,6 +769,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                                                     e.stopPropagation();
                                                     playClickSound();
                                                     setShowSubtitleMenu(!showSubtitleMenu);
+                                                    setShowAudioTrackMenu(false);
                                                 }}
                                                 className={`transition-colors p-2 rounded-lg flex items-center justify-center ${subtitlesEnabled ? 'text-cyan-400 bg-cyan-400/10' : 'text-white hover:text-cyan-400 bg-white/5'}`}
                                             >
@@ -706,6 +796,61 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                                                                 className={`text-left px-4 py-2 text-sm transition-colors hover:bg-white/10 ${subtitlesEnabled && activeSubtitleLanguage === sub.language ? 'text-cyan-400 font-bold' : 'text-white'}`}
                                                             >
                                                                 {sub.label}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Audio Tracks Button & Menu */}
+                                    {audioTracks && audioTracks.length > 0 && (
+                                        <div className="relative">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    playClickSound();
+                                                    setShowAudioTrackMenu(!showAudioTrackMenu);
+                                                    setShowSubtitleMenu(false);
+                                                }}
+                                                className={`transition-colors p-2 rounded-lg flex items-center justify-center gap-1 text-xs font-bold ${selectedAudioTrackUrl ? 'text-cyan-400 bg-cyan-400/10' : 'text-white hover:text-cyan-400 bg-white/5'}`}
+                                                title="Audio Tracks / Dubbed Languages"
+                                            >
+                                                <Volume2 size={18} />
+                                                <span className="hidden sm:inline">Audio</span>
+                                            </button>
+                                            
+                                            {/* Audio Tracks Popup Menu */}
+                                            {showAudioTrackMenu && (
+                                                <div className="absolute bottom-full right-0 mb-4 bg-black/90 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden min-w-[170px] z-50 shadow-2xl animate-scale-up-fade-in origin-bottom-right">
+                                                    <div className="px-4 py-2 border-b border-white/10 text-xs font-black uppercase tracking-widest text-white/50 flex items-center justify-between">
+                                                        <span>Audio Track</span>
+                                                        <Volume2 size={12} className="text-cyan-400" />
+                                                    </div>
+                                                    <div className="flex flex-col py-1">
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedAudioTrackUrl(null);
+                                                                setShowAudioTrackMenu(false);
+                                                            }}
+                                                            className={`text-left px-4 py-2 text-sm transition-colors hover:bg-white/10 ${!selectedAudioTrackUrl ? 'text-cyan-400 font-bold' : 'text-white'}`}
+                                                        >
+                                                            Original Audio
+                                                        </button>
+                                                        {audioTracks.map((track) => (
+                                                            <button 
+                                                                key={track.url}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setSelectedAudioTrackUrl(track.url);
+                                                                    setShowAudioTrackMenu(false);
+                                                                }}
+                                                                className={`text-left px-4 py-2 text-sm transition-colors hover:bg-white/10 flex items-center justify-between ${selectedAudioTrackUrl === track.url ? 'text-cyan-400 font-bold' : 'text-white'}`}
+                                                            >
+                                                                <span>{track.label}</span>
+                                                                <span className="text-[10px] uppercase text-white/40 font-mono ml-2">{track.language}</span>
                                                             </button>
                                                         ))}
                                                     </div>
