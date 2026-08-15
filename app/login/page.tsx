@@ -23,7 +23,7 @@ export default function LoginPage() {
                 alt="PrimeTime Logo"
                 width={160}
                 height={80}
-                className="h-[70px] w-auto object-cover scale-200 px-5"
+                className="h-[60px] sm:h-[70px] w-auto object-contain"
                 priority
               />
             </Link>
