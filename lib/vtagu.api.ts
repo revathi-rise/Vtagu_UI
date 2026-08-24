@@ -62,6 +62,8 @@ export interface Poster {
   reference_id?: number;
   reference_type?: string;
   status: string;
+  is_coming_soon?: boolean;
+  isComingSoon?: boolean;
   createdon?: string;
 }
 
@@ -106,6 +108,8 @@ export interface Series {
   country_id: number;
   rating: number;
   featured: number;
+  is_coming_soon?: boolean;
+  isComingSoon?: boolean;
 }
 
 export async function getSeries(): Promise<Series[]> {
@@ -134,6 +138,8 @@ export interface InteractiveMovie {
   is_free?: number;
   price?: number;
   currency?: string;
+  is_coming_soon?: boolean | number;
+  isComingSoon?: boolean;
 }
 
 export interface MovieAccessResponse {
@@ -265,6 +271,8 @@ export interface Episode {
   rating: number;
   isFeatured: boolean;
   isFree: boolean;
+  isComingSoon?: boolean;
+  is_coming_soon?: boolean;
   viewCount: number;
   media?: {
     poster_image?: { url: string; alt?: string };
@@ -289,6 +297,8 @@ export function normalizeEpisode(episode: any): Episode {
     ...episode,
     shortDescription: cleanHtmlString(episode.shortDescription || ""),
     longDescription: cleanHtmlString(episode.longDescription || ""),
+    isComingSoon: Boolean(episode.isComingSoon ?? episode.is_coming_soon ?? false),
+    is_coming_soon: Boolean(episode.isComingSoon ?? episode.is_coming_soon ?? false),
     // Provide backwards compatible fields just in case
     episodeId: episode.id || episode.episodeId,
     seasonId: episode.season_id || episode.seasonId,
@@ -342,6 +352,8 @@ export interface Movie {
   director: string;
   isFeatured: boolean;
   isFree: boolean;
+  isComingSoon?: boolean;
+  is_coming_soon?: boolean;
   movieType: number;
   contentType: number;
   ageRestriction: string;
@@ -406,6 +418,8 @@ export function normalizeMovie(movie: any): Movie {
     id: movie.id || movie.movie_id || movie.movieId,
     shortDescription: cleanHtmlString(movie.shortDescription || ""),
     longDescription: cleanHtmlString(movie.longDescription || ""),
+    isComingSoon: Boolean(movie.isComingSoon ?? movie.is_coming_soon ?? false),
+    is_coming_soon: Boolean(movie.isComingSoon ?? movie.is_coming_soon ?? false),
     posterImage: movie.media?.card_image?.url || movie.media?.image?.url || movie.posterImage || "",
     videoUrl: movie.media?.video?.url || movie.videoUrl || "",
     trailerUrl: movie.media?.trailer?.url || movie.trailerUrl || "",

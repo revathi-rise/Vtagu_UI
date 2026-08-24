@@ -65,6 +65,7 @@ export default function MovieSection({ movies }: MovieSectionProps) {
                     title={movie.title}
                     image={movie.posterImage || "https://picsum.photos/seed/movie/600/900"}
                     trailerUrl={movie.trailerUrl}
+                    isComingSoon={movie.isComingSoon || movie.is_coming_soon}
                     rating={movie.rating}
                     duration={movie.duration}
                     year={movie.releaseYear}

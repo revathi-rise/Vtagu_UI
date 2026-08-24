@@ -120,7 +120,7 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
           flex items-center justify-between gap-2 sm:gap-6 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]
           ${scrolled
             ? "relative mt-2 sm:mt-6 px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-full bg-secondary/85 backdrop-blur-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.15),0_0_0_1px_rgba(255,255,255,0.05)] w-[94%] lg:w-full max-w-[1440px]"
-            : "relative mt-0 px-4 sm:px-18 rounded-none bg-transparent w-full border-b border-white/5"
+            : "relative mt-0 px-4 sm:px-18 py-1.5 sm:py-2.5 rounded-none bg-transparent w-full border-b border-white/5"
           }
         `}
       >

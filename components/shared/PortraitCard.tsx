@@ -15,6 +15,8 @@ interface PortraitCardProps {
   duration?: string;
   year?: string | number;
   infoLabel?: string;
+  isComingSoon?: boolean;
+  trailerUrl?: string;
   onClick?: () => void;
   className?: string;
 }
@@ -29,6 +31,8 @@ export const PortraitCard = ({
   duration,
   year,
   infoLabel,
+  isComingSoon = false,
+  trailerUrl,
   onClick,
   className,
 }: PortraitCardProps) => {
@@ -74,17 +78,24 @@ export const PortraitCard = ({
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-transparent to-black/20 z-10" />
           
           {/* Top Badges */}
-          <div className="absolute top-3 left-3 right-3 flex items-start justify-between z-20">
-            {badge && (
-              <span className={cn(
-                "text-[10px] font-black uppercase px-2.5 py-1 rounded-md text-white tracking-widest shadow-lg",
-                badge === 'FREE' ? "bg-green-500" : "bg-primary"
-              )}>
-                {badge}
-              </span>
-            )}
+          <div className="absolute top-3 left-3 right-3 flex items-start justify-between z-20 flex-wrap gap-1">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {isComingSoon && (
+                <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-md text-white tracking-widest bg-gradient-to-r from-amber-500 to-red-600 shadow-lg shadow-amber-500/30 animate-pulse">
+                  Coming Soon
+                </span>
+              )}
+              {badge && (
+                <span className={cn(
+                  "text-[10px] font-black uppercase px-2.5 py-1 rounded-md text-white tracking-widest shadow-lg",
+                  badge === 'FREE' ? "bg-green-500" : "bg-primary"
+                )}>
+                  {badge}
+                </span>
+              )}
+            </div>
             {rating && (
-              <div className="flex items-center gap-1 bg-black/80 backdrop-blur-md px-2 py-1 rounded-md text-[10px] font-bold text-yellow-400 border border-white/10 shadow-lg">
+              <div className="flex items-center gap-1 bg-black/80 backdrop-blur-md px-2 py-1 rounded-md text-[10px] font-bold text-yellow-400 border border-white/10 shadow-lg ml-auto">
                 <Star size={10} className="fill-yellow-400" />
                 {rating}
               </div>

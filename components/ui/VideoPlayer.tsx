@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { Play, Pause, Maximize, Volume2, VolumeX, SkipForward, SkipBack, AlertCircle, ChevronRight, ChevronLeft, Subtitles } from 'lucide-react';
+import { Play, Pause, Maximize, Minimize2, Volume2, VolumeX, SkipForward, SkipBack, AlertCircle, ChevronRight, ChevronLeft, Subtitles } from 'lucide-react';
 
 declare global {
     interface Window {
@@ -27,6 +27,8 @@ export interface VideoPlayerProps {
     showPrevious?: boolean;
     onPrevious?: () => void;
     onFullscreenRequest?: () => void;
+    showMinimize?: boolean;
+    onMinimize?: () => void;
     subtitles?: {
         language: string;
         label: string;
@@ -65,6 +67,8 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         showPrevious = false,
         onPrevious,
         onFullscreenRequest,
+        showMinimize = false,
+        onMinimize,
         subtitles,
         audioTracks
     }, ref) => {
@@ -614,6 +618,20 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         }
     };
 
+    const handleMinimizeToggle = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        playClickSound();
+        if (onMinimize) {
+            onMinimize();
+        } else if (videoRef.current) {
+            if (document.pictureInPictureElement) {
+                document.exitPictureInPicture().catch(console.warn);
+            } else if (document.pictureInPictureEnabled) {
+                videoRef.current.requestPictureInPicture().catch(console.warn);
+            }
+        }
+    };
+
     return (
         <div 
             ref={containerRef}
@@ -859,12 +877,23 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                                         </div>
                                     )}
 
-                                    <button 
-                                        onClick={handleFullscreen}
-                                        className="text-white hover:text-cyan-400 transition-colors p-2 bg-white/5 rounded-lg"
-                                    >
-                                        <Maximize size={18} />
-                                    </button>
+                                    {showMinimize && (
+                                         <button 
+                                             onClick={handleMinimizeToggle}
+                                             className="text-white hover:text-cyan-400 transition-colors p-2 bg-white/5 rounded-lg"
+                                             title="Minimize / Floating Player"
+                                         >
+                                             <Minimize2 size={18} />
+                                         </button>
+                                     )}
+
+                                     <button 
+                                         onClick={handleFullscreen}
+                                         className="text-white hover:text-cyan-400 transition-colors p-2 bg-white/5 rounded-lg"
+                                         title="Fullscreen"
+                                     >
+                                         <Maximize size={18} />
+                                     </button>
                                 </div>
                             </div>
                         </div>

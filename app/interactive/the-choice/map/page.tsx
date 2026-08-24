@@ -4,7 +4,7 @@ import { Network, Focus } from 'lucide-react';
 
 export default function DecisionsMapPage() {
     return (
-        <main className="p-8 pt-28 lg:p-12 lg:pt-32 flex flex-col gap-12 max-w-[1400px] mx-auto w-full">
+        <main className="px-4 py-6 sm:p-8 pt-24 sm:pt-28 lg:p-12 lg:pt-32 flex flex-col gap-8 sm:gap-12 max-w-[1400px] mx-auto w-full">
             <div className="flex flex-col gap-3">
               <h1 className="text-4xl font-extrabold text-white tracking-tight drop-shadow-md flex items-center gap-4">
                  <Network className="text-[#9248FF]" size={40} />

@@ -154,6 +154,7 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
                         badge={movie.isFree ? 'FREE' : 'PREMIUM'}
                         badgeColor={movie.isFree ? 'green' : 'orange'}
                         trailerUrl={movie.trailerUrl}
+                        isComingSoon={movie.isComingSoon || movie.is_coming_soon}
                       />
                     </Link>
                   </div>
@@ -190,6 +191,7 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
                         badge="STORY"
                         badgeColor="blue"
                         trailerUrl={movie.trailer_video_url}
+                        isComingSoon={Boolean(movie.isComingSoon || movie.is_coming_soon)}
                       />
                     </Link>
                   </div>
@@ -226,6 +228,7 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
                         badge={episode.isFree ? 'FREE' : 'PREMIUM'}
                         badgeColor={episode.isFree ? 'green' : 'orange'}
                         trailerUrl={episode.media?.trailer?.url || episode.url}
+                        isComingSoon={episode.isComingSoon || episode.is_coming_soon}
                       />
                     </Link>
                   </div>

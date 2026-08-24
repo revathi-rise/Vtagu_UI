@@ -30,7 +30,7 @@ export default function ConditionalLayout({ genres, languages, children }: Condi
   return (
     <>
       <Navbar genres={genres} languages={languages} />
-      <div className="pt-24 min-h-screen">
+      <div className="md:pt-24 pt-16 min-h-screen">
         {children}
       </div>
       <Footer />

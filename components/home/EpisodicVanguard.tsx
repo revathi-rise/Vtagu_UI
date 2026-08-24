@@ -84,6 +84,7 @@ export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
                       image={typeof epImage === 'string' ? epImage : `https://picsum.photos/seed/${Number(epId) + 100}/800/450`}
                       previewGif={episode.media?.trailer?.url ? undefined : mockGifs[index % mockGifs.length]}
                       trailerUrl={episode.media?.trailer?.url}
+                      isComingSoon={episode.isComingSoon || episode.is_coming_soon}
                       subtitle={`S${epSeason} • EPISODE`}
                       description={epDesc}
                       badge={episode.isFeatured ? "FEATURED" : "PREMIUM"}

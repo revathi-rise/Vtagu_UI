@@ -8,7 +8,7 @@ export default function MoviesHero() {
   const [isMuted, setIsMuted] = useState(true);
 
   return (
-    <section className="relative h-[85vh] min-h-[600px] w-full pt-[90px] overflow-hidden flex items-end pb-24">
+    <section className="relative h-[70vh] sm:h-[85vh] min-h-[480px] sm:min-h-[600px] w-full pt-[80px] sm:pt-[90px] overflow-hidden flex items-end pb-12 sm:pb-24">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
         <VideoPlayer 
@@ -28,7 +28,7 @@ export default function MoviesHero() {
       <div className="absolute inset-0 bg-gradient-to-b from-[#0f0a19]/80 via-transparent to-transparent" />
 
       {/* Content */}
-      <div className="relative tv-container mx-auto px-5 tablet:px-10 w-full z-10 flex justify-between items-end pb-12">
+      <div className="relative tv-container mx-auto px-4 sm:px-5 tablet:px-10 w-full z-10 flex justify-between items-end pb-6 sm:pb-12">
         <motion.div 
           initial={{ y: 30, opacity: 0 }} 
           animate={{ y: 0, opacity: 1 }} 
@@ -36,11 +36,11 @@ export default function MoviesHero() {
           className="max-w-2xl text-white flex flex-col justify-end h-full"
         >
           {/* Top Badge */}
-          <div className="flex items-center gap-3 mb-6">
-            <span className="bg-cyan-400 text-black text-[10px] font-black uppercase px-2 py-1 tracking-widest rounded-sm shadow-[0_0_15px_rgba(34,211,238,0.5)]">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <span className="bg-cyan-400 text-black text-[9px] sm:text-[10px] font-black uppercase px-2 py-1 tracking-widest rounded-sm shadow-[0_0_15px_rgba(34,211,238,0.5)]">
               Top 1
             </span>
-            <span className="text-xs md:text-sm font-black tracking-[0.2em] text-white uppercase shadow-black drop-shadow-md">
+            <span className="text-[10px] sm:text-xs md:text-sm font-black tracking-[0.2em] text-white uppercase shadow-black drop-shadow-md">
               Movies Today
             </span>
           </div>
@@ -48,7 +48,7 @@ export default function MoviesHero() {
           <img 
             src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Sintel_title_logo.png/800px-Sintel_title_logo.png" 
             alt="Sintel" 
-            className="w-[280px] md:w-[450px] mb-6 object-contain drop-shadow-2xl filter brightness-0 invert" 
+            className="w-[180px] sm:w-[280px] md:w-[450px] mb-4 sm:mb-6 object-contain drop-shadow-2xl filter brightness-0 invert" 
           />
 
           {/* Metadata */}

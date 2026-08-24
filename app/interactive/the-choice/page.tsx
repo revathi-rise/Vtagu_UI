@@ -16,7 +16,7 @@ export default function InteractiveMoviePage() {
     return (
         <>
             {/* Page Content */}
-            <main className="p-8 pt-28 lg:p-12 lg:pt-32 flex flex-col gap-12 max-w-[1400px] mx-auto w-full">
+            <main className="px-4 py-6 sm:p-8 pt-24 sm:pt-28 lg:p-12 lg:pt-32 flex flex-col gap-8 sm:gap-12 max-w-[1400px] mx-auto w-full">
                 <Hero />
                 <StatsCards />
                 <InteractivePreview />

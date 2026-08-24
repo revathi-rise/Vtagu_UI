@@ -86,6 +86,7 @@ console.log(movies, "movies");
                         badge={index < 10 ? `#${index + 1} Today` : (movie.isFree ? 'FREE' : 'PREMIUM')}
                         badgeColor={index < 10 ? 'purple' : (movie.isFree ? 'green' : 'orange')}
                         trailerUrl={movie.trailerUrl}
+                        isComingSoon={movie.isComingSoon || movie.is_coming_soon}
                       />
                     </Link>
                   </div>

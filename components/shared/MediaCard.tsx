@@ -20,6 +20,7 @@ interface MediaCardProps {
   progress?: number;
   infoLabel?: string; // New prop to handle dynamic labels like "EPISODE", "GENRE", etc.
   trailerUrl?: string;
+  isComingSoon?: boolean;
   onClick?: () => void;
   className?: string;
   variant?: 'portrait' | 'landscape';
@@ -42,6 +43,7 @@ export const MediaCard = ({
   className,
   variant = 'portrait',
   trailerUrl,
+  isComingSoon = false,
 }: MediaCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -147,17 +149,24 @@ export const MediaCard = ({
           <div className="absolute inset-0 bg-gradient-to-t from-[#0f0a10] via-transparent to-black/20 z-10" />
 
           {/* Top Badges */}
-          <div className="absolute top-3 left-3 right-3 flex items-start justify-between z-20">
-            {badge && (
-              <span className={cn(
-                "text-[9px] font-black uppercase px-2.5 py-1 rounded-md text-white tracking-widest",
-                badgeColors[badgeColor]
-              )}>
-                {badge}
-              </span>
-            )}
+          <div className="absolute top-3 left-3 right-3 flex items-start justify-between z-20 flex-wrap gap-1">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {isComingSoon && (
+                <span className="text-[9px] font-black uppercase px-2.5 py-1 rounded-md text-white tracking-widest bg-gradient-to-r from-amber-500 to-red-600 shadow-[0_0_15px_rgba(245,158,11,0.6)] animate-pulse">
+                  Coming Soon
+                </span>
+              )}
+              {badge && (
+                <span className={cn(
+                  "text-[9px] font-black uppercase px-2.5 py-1 rounded-md text-white tracking-widest",
+                  badgeColors[badgeColor]
+                )}>
+                  {badge}
+                </span>
+              )}
+            </div>
             {rating && (
-              <div className="flex items-center gap-1 bg-black/80 backdrop-blur-md px-2 py-1 rounded-md text-[10px] font-bold text-yellow-400 border border-white/10">
+              <div className="flex items-center gap-1 bg-black/80 backdrop-blur-md px-2 py-1 rounded-md text-[10px] font-bold text-yellow-400 border border-white/10 ml-auto">
                 <Star size={10} className="fill-yellow-400" />
                 {rating}
               </div>

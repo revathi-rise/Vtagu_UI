@@ -107,6 +107,7 @@ export default async function EpisodesPage() {
                       badge={episode.isFeatured ? "Featured" : (index < 10 ? `#${index + 1} Today` : `S${epSeason}`)}
                       badgeColor={episode.isFeatured ? "orange" : (index < 10 ? 'purple' : 'blue')}
                       trailerUrl={episode.media?.trailer?.url}
+                      isComingSoon={episode.isComingSoon || episode.is_coming_soon}
                     />
                   </Link>
                 </div>

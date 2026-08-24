@@ -15,14 +15,16 @@ interface HoverVideoCardProps {
   onMouseLeave: () => void;
   transformOrigin?: 'left' | 'center' | 'right';
   layout?: 'featured' | 'coming-soon' | 'row';
+  isComingSoon?: boolean;
 }
 
 export default function HoverVideoCard({
   title, description, image, videoSrc, date,
   isHovered, onMouseEnter, onMouseLeave,
-  transformOrigin = 'center', layout = 'featured'
+  transformOrigin = 'center', layout = 'featured',
+  isComingSoon: explicitIsComingSoon
 }: HoverVideoCardProps) {
-  const isComingSoon = layout === 'coming-soon';
+  const isComingSoon = explicitIsComingSoon ?? (layout === 'coming-soon');
   const isRow = layout === 'row';
 
   return (

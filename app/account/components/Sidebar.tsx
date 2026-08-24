@@ -32,12 +32,13 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     { id: "billing", label: "Billing", icon: CreditCard },
     { id: "devices", label: "Devices", icon: Laptop },
     { id: "privacy", label: "Privacy", icon: Shield },
+    { id: "help", label: "Help Center", icon: HelpCircle },
   ];
 
   return (
     <aside className="w-full lg:w-64 shrink-0 flex flex-col gap-2">
       {/* Nav Items */}
-      <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 scrollbar-hide">
+      <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -45,13 +46,13 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex items-center gap-3 px-5 py-4 rounded-xl font-semibold transition-all w-full text-left whitespace-nowrap ${
+              className={`flex items-center gap-3 px-4 lg:px-5 py-3 lg:py-4 rounded-xl font-semibold transition-all w-auto lg:w-full shrink-0 text-left whitespace-nowrap ${
                 isActive 
                   ? "bg-[#25183d] text-[#b28cff] shadow-sm" 
                   : "text-gray-400 hover:text-white hover:bg-white/5"
               }`}
             >
-              <Icon size={20} className={isActive ? "text-[#b28cff]" : "text-gray-400"} />
+              <Icon size={18} className={isActive ? "text-[#b28cff]" : "text-gray-400"} />
               {item.label}
             </button>
           );
@@ -62,22 +63,10 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
       <div className="hidden lg:block h-px w-full bg-white/10 my-4" />
 
       <button 
-        onClick={() => setActiveTab("help")}
-        className={`flex items-center gap-3 px-5 py-4 rounded-xl font-semibold transition-all w-full text-left mt-2 lg:mt-0 ${
-          activeTab === "help"
-            ? "bg-[#25183d] text-[#b28cff] shadow-sm"
-            : "text-gray-400 hover:text-white hover:bg-[#25183d]"
-        }`}
-      >
-        <HelpCircle size={20} className={activeTab === "help" ? "text-[#b28cff]" : "text-gray-400"} />
-        Help Center
-      </button>
-
-      <button 
         onClick={handleLogout}
-        className="flex items-center gap-3 px-5 py-4 rounded-xl font-semibold transition-all w-full text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 mt-auto"
+        className="flex items-center gap-3 px-4 lg:px-5 py-3 lg:py-4 rounded-xl font-semibold transition-all w-full text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 mt-2 lg:mt-auto"
       >
-        <LogOut size={20} />
+        <LogOut size={18} />
         Log Out
       </button>
     </aside>

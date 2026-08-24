@@ -30,6 +30,8 @@ interface WatchTrackingVideoPlayerProps {
   onEnded?: () => void;
   onSkip?: () => void;
   onFullscreenRequest?: () => void;
+  showMinimize?: boolean;
+  onMinimize?: () => void;
   subtitles?: {
       language: string;
       label: string;

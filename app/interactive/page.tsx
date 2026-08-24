@@ -104,6 +104,7 @@ export default async function InteractiveListing() {
                                             badge={index === 0 ? "TRENDING" : "STORY"}
                                             badgeColor={index === 0 ? "purple" : "blue"}
                                             trailerUrl={movie.trailer_video_url}
+                                            isComingSoon={Boolean(movie.isComingSoon || movie.is_coming_soon)}
                                         />
                                     </Link>
                                 </div>

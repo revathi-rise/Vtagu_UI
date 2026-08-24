@@ -140,7 +140,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                                 <Zap size={14} fill="black" />
                                 Interactive Original
                             </div>
-                            <h1 className="text-6xl md:text-8xl font-bold mb-3 tracking-tighter animate-in fade-in slide-in-from-bottom-6 duration-1000">
+                            <h1 className="text-[28px] md:text-[40px] font-bold mb-3 tracking-tighter animate-in fade-in slide-in-from-bottom-6 duration-1000">
                                 {movie.title}
                             </h1>
                             {movie.languages && (
@@ -166,7 +166,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                     </div>
 
                     {/* Content Section - Simplified (Removed Sidebar) */}
-                    <div className="max-w-[90%] mx-auto py-24">
+                    <div className="max-w-[90%] mx-auto md:py-24 py-12">
                         <div className="max-w-6xl mx-auto space-y-20">
 
                             {/* Scene Manager - Centered & Expanded */}
@@ -201,15 +201,15 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                     </div>
 
                     {/* Footer Infusion Section */}
-                    <section className="bg-gradient-to-b from-[#0c0816] to-black py-32 border-t border-white/5">
+                    <section className="bg-gradient-to-b from-[#0c0816] to-black py-12 md:py-32 border-t border-white/5">
                         <div className="max-w-[90%] mx-auto text-center space-y-8">
-                            <h2 className="text-4xl md:text-6xl font-bold tracking-tighter">
+                            <h2 className="text-[18px] md:text-[32px] font-bold tracking-tighter">
                                 The <span className="text-gradient">Future</span> of Cinema
                             </h2>
-                            <p className="text-white/40 max-w-2xl mx-auto text-xl leading-relaxed">
+                            <p className="text-white/40 max-w-2xl mx-auto text-[12px] md:text-xl leading-relaxed">
                                 No longer just a spectator. Step into the director's chair and guide the fate of the characters in this next-generation interactive epic.
                             </p>
-                            <div className="pt-10">
+                            <div className="pt-6 md:pt-10">
                                 <button className="inline-flex items-center gap-3 text-cyan-400 font-black text-sm uppercase tracking-[0.3em] group hover:text-white transition-colors">
                                     View More Interactive Originals
                                     <ArrowRight size={20} className="group-hover:translate-x-3 transition-transform" />

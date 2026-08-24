@@ -95,6 +95,7 @@ export default function InteractiveGridHero({ interactiveMovies }: InteractiveHe
                                         badge="USB READY"
                                         badgeColor="blue"
                                         trailerUrl={movie.trailer_video_url}
+                                        isComingSoon={Boolean(movie.isComingSoon || movie.is_coming_soon)}
                                         onClick={() => {
                                             if (typeof window !== 'undefined' && sessionStorage.getItem('vtagu_authorized') === 'true') {
                                                 router.push(`/interactive/${movie.interactive_movie_id}`);

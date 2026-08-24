@@ -156,8 +156,8 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
 
     return (
         <div className="space-y-8">
-            <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold flex items-center gap-3">
+            <div className="flex flex-col md:flex-row items-center justify-between">
+                <h2 className="text-3xl font-bold flex items-center gap-3 mb-3">
                     <Target className="text-cyan-400" />
                     Interactive <span className="text-gradient">Core</span>
                 </h2>
