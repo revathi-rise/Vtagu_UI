@@ -1,32 +1,26 @@
 'use client';
 
-import React, { useState } from 'react';
-import { LayoutGrid, Zap, ChevronRight } from 'lucide-react';
+import React from 'react';
+import { LayoutGrid, Zap, ChevronRight, ArrowLeft, ArrowRight } from 'lucide-react';
 import SectionTitle from './SectionTitle';
 import { MediaCard } from '../shared/MediaCard';
 import { InteractiveMovie } from '@/lib/vtagu.api';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay, FreeMode } from 'swiper/modules';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/free-mode';
-import { PasswordModal } from '../shared/PasswordModal';
 
 interface InteractiveHeroProps {
     interactiveMovies: InteractiveMovie[];
 }
 
-import { useRouter } from 'next/navigation';
-
 export default function InteractiveGridHero({ interactiveMovies }: InteractiveHeroProps) {
     const router = useRouter();
-    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-    const [pendingMovieId, setPendingMovieId] = useState<number | null>(null);
 
     if (!interactiveMovies || interactiveMovies.length === 0) return null;
-    console.log(interactiveMovies);
 
     const displayMovies = interactiveMovies;
 
@@ -97,12 +91,7 @@ export default function InteractiveGridHero({ interactiveMovies }: InteractiveHe
                                         trailerUrl={movie.trailer_video_url}
                                         isComingSoon={Boolean(movie.isComingSoon || movie.is_coming_soon)}
                                         onClick={() => {
-                                            if (typeof window !== 'undefined' && sessionStorage.getItem('vtagu_authorized') === 'true') {
-                                                router.push(`/interactive/${movie.interactive_movie_id}`);
-                                            } else {
-                                                setPendingMovieId(movie.interactive_movie_id);
-                                                setIsPasswordModalOpen(true);
-                                            }
+                                            router.push(`/interactive/${movie.interactive_movie_id}`);
                                         }}
                                         className="cursor-pointer"
                                         variant="portrait"
@@ -121,17 +110,6 @@ export default function InteractiveGridHero({ interactiveMovies }: InteractiveHe
                     </div>
                 </div>
             </div>
-
-            <PasswordModal
-                isOpen={isPasswordModalOpen}
-                onClose={() => setIsPasswordModalOpen(false)}
-                onSuccess={() => {
-                    if (pendingMovieId) {
-                        router.push(`/interactive/${pendingMovieId}`);
-                    }
-                    setIsPasswordModalOpen(false);
-                }}
-            />
         </section>
     );
 }
