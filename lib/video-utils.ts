@@ -97,21 +97,37 @@ export function isRumbleUrl(url: string | null | undefined): boolean {
  * Extract Rumble embed URL or Video ID
  */
 export function getRumbleEmbedUrl(url: string | null | undefined): string | null {
-  if (!url || !isRumbleUrl(url)) return null;
+  if (!url || typeof url !== 'string') return null;
 
-  // Already an embed URL format: rumble.com/embed/<id>
-  if (url.includes('rumble.com/embed/')) {
-    const parts = url.split('rumble.com/embed/')[1]?.split('/')[0]?.split('?')[0];
-    if (parts) {
+  const rawUrl = url.trim();
+  if (!rawUrl.toLowerCase().includes('rumble.com')) return null;
+
+  // 1. Direct embed URL format: rumble.com/embed/<id>
+  if (rawUrl.includes('rumble.com/embed/')) {
+    const parts = rawUrl.split('rumble.com/embed/')[1]?.split('/')[0]?.split('?')[0];
+    if (parts && parts.length > 0) {
       return `https://rumble.com/embed/${parts}/`;
     }
-    return url;
+    return rawUrl;
   }
 
-  // Watch URL format: rumble.com/v123abc-title.html or rumble.com/v123abc
-  const match = url.match(/rumble\.com\/(v[a-zA-Z0-9]+)/i);
-  if (match && match[1]) {
-    return `https://rumble.com/embed/${match[1]}/`;
+  // 2. Rumble Shorts format: rumble.com/shorts/<id> or rumble.com/shorts/v7es40e...
+  const shortsMatch = rawUrl.match(/rumble\.com\/shorts\/(v[a-zA-Z0-9]+|[a-zA-Z0-9_-]+)/i);
+  if (shortsMatch && shortsMatch[1]) {
+    const videoId = shortsMatch[1].split('-')[0].split('.')[0];
+    return `https://rumble.com/embed/${videoId}/`;
+  }
+
+  // 3. Rumble Watch format: rumble.com/v123abc-title.html or rumble.com/v123abc
+  const watchMatch = rawUrl.match(/rumble\.com\/(?:[a-zA-Z0-9_-]+\/)*(v[a-zA-Z0-9]+)/i);
+  if (watchMatch && watchMatch[1]) {
+    return `https://rumble.com/embed/${watchMatch[1]}/`;
+  }
+
+  // 4. Fallback match for any 'v' video ID token in the URL path
+  const fallbackMatch = rawUrl.match(/\/(v[a-zA-Z0-9]{4,})/i);
+  if (fallbackMatch && fallbackMatch[1]) {
+    return `https://rumble.com/embed/${fallbackMatch[1]}/`;
   }
 
   return null;
