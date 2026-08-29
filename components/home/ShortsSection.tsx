@@ -4,7 +4,7 @@ import { useRef, useState, useCallback, memo } from 'react';
 import Link from 'next/link';
 import { Short } from '@/lib/vtagu.api';
 import UniversalVideoPlayer, { UniversalVideoPlayerHandle } from '@/components/ui/UniversalVideoPlayer';
-import { getShortThumbnailUrl, FALLBACK_SHORT_POSTERS } from '@/lib/video-utils';
+import { getShortThumbnailUrl, FALLBACK_SHORT_POSTERS, getVideoUrl } from '@/lib/video-utils';
 
 // ─── Card ─────────────────────────────────────────────────────────────────────
 
@@ -27,10 +27,10 @@ const ShortsTeaserCard = memo(function ShortsTeaserCard({ short, index }: Shorts
 
   const handleMouseEnter = useCallback(() => {
     setHovering(true);
-    if (!short.video_url) return; // no source — nothing to play
     if (!videoSrc) {
-      // First hover: set src lazily — play is triggered via onCanPlay
-      setVideoSrc(short.video_url);
+      // First hover: set valid src lazily with CORS-friendly fallback
+      const validUrl = getVideoUrl(short.video_url, short.id?.toString() || 'short', true);
+      setVideoSrc(validUrl);
     } else {
       // src already set — play directly only if element has enough data
       const v = videoRef.current?.videoElement;
@@ -42,7 +42,7 @@ const ShortsTeaserCard = memo(function ShortsTeaserCard({ short, index }: Shorts
         });
       }
     }
-  }, [short.video_url, videoSrc]);
+  }, [short.video_url, short.id, videoSrc]);
 
   const handleMouseLeave = useCallback(() => {
     setHovering(false);

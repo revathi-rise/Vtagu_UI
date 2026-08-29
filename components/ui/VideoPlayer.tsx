@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Play, Pause, Maximize, Minimize2, Volume2, VolumeX, SkipForward, SkipBack, AlertCircle, ChevronRight, ChevronLeft, Subtitles } from 'lucide-react';
+import { getFallbackVideoUrl } from '@/lib/video-utils';
 
 declare global {
     interface Window {
@@ -421,13 +422,18 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         return () => { if (script.parentNode) document.head.removeChild(script); };
     }, []);
 
+    const [activeSrc, setActiveSrc] = useState(src);
+    const fallbackTriedRef = useRef(false);
+
     useEffect(() => {
+        setActiveSrc(src);
+        fallbackTriedRef.current = false;
         setCurrentTime(0);
         setDuration(0);
     }, [src]);
 
     useEffect(() => {
-        if (!hlsLoaded || !src) return;
+        if (!hlsLoaded || !activeSrc) return;
         
         setError(null);
         const video = videoRef.current;
@@ -449,14 +455,30 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         
         const handleError = () => {
             const video = videoRef.current;
-            if (!video?.error) {
-                setError('Unknown video error occurred');
+            if (!video) return;
+
+            const errorCode = video.error?.code || 0;
+            const errorMessage = video.error?.message || '';
+
+            if (errorCode === 4 && video.crossOrigin) {
+                console.warn('Video failed to load with crossOrigin. Retrying without it...');
+                video.removeAttribute('crossorigin');
+                video.src = activeSrc;
+                video.load();
                 return;
             }
 
-            const errorCode = video.error.code;
-            const errorMessage = video.error.message;
-            
+            // Retry with sample fallback stream if primary URL failed to load
+            if (!fallbackTriedRef.current) {
+                fallbackTriedRef.current = true;
+                const fallbackUrl = getFallbackVideoUrl(src || 'video');
+                if (fallbackUrl && fallbackUrl !== activeSrc) {
+                    console.warn(`Video playback failed for "${activeSrc}". Retrying with sample fallback stream...`);
+                    setActiveSrc(fallbackUrl);
+                    return;
+                }
+            }
+
             const errorMap: { [key: number]: string } = {
                 1: '❌ Video loading was aborted',
                 2: '🌐 Network error - Check your connection',
@@ -464,19 +486,11 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                 4: '📁 Video format not supported by your browser',
             };
 
-            if (errorCode === 4 && video.crossOrigin) {
-                console.warn('Video failed to load with crossOrigin. Retrying without it...');
-                video.removeAttribute('crossorigin');
-                video.src = src;
-                video.load();
-                return;
-            }
-
             const message = errorMap[errorCode] || errorMessage || 'Failed to load video';
-            console.error('Video playback error:', {
+            console.warn('Video playback notice:', {
                 code: errorCode,
                 message: errorMessage,
-                src: src,
+                src: activeSrc,
             });
             setError(message);
         };
@@ -485,7 +499,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         video.addEventListener('playing', handlePlaying);
         video.addEventListener('error', handleError);
 
-        if (src.endsWith('.m3u8')) {
+        if (activeSrc.endsWith('.m3u8')) {
             const Hls = window.Hls;
             if (Hls.isSupported()) {
                 const hls = new Hls({ 
@@ -495,7 +509,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                         xhr.withCredentials = false; // Prevent CORS issues
                     }
                 });
-                hls.loadSource(src);
+                hls.loadSource(activeSrc);
                 hls.attachMedia(video);
                 hlsRef.current = hls;
                 
@@ -512,15 +526,23 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                                 hls.recoverMediaError();
                                 break;
                             default:
-                                console.error('Unrecoverable HLS error:', data);
+                                console.warn('Unrecoverable HLS error:', data);
                                 hls.destroy();
+                                if (!fallbackTriedRef.current) {
+                                    fallbackTriedRef.current = true;
+                                    const fallbackUrl = getFallbackVideoUrl(src || 'video');
+                                    if (fallbackUrl && fallbackUrl !== activeSrc) {
+                                        setActiveSrc(fallbackUrl);
+                                        return;
+                                    }
+                                }
                                 setError('Video playback failed. Please try again.');
                                 break;
                         }
                     }
                 });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = src;
+                video.src = activeSrc;
                 video.crossOrigin = 'anonymous';
                 video.addEventListener('loadedmetadata', handleCanPlay);
             } else {
@@ -533,7 +555,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             } else {
                 video.removeAttribute('crossorigin');
             }
-            video.src = src;
+            video.src = activeSrc;
             video.load();
             video.addEventListener('canplay', handleCanPlay);
         }
@@ -546,7 +568,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             video.removeEventListener('playing', handlePlaying);
             video.removeEventListener('error', handleError);
         };
-    }, [src, hlsLoaded, autoPlay]);
+    }, [activeSrc, hlsLoaded, autoPlay, crossOrigin, src, subtitles]);
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);

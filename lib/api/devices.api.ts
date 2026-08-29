@@ -30,6 +30,17 @@ export const devicesApi = {
     return res.json();
   },
 
+  // Get Device Registration & Limit Status
+  getStatus: async (userId: number): Promise<ApiResponse> => {
+    const url = `${API_BASE}/user-devices/user/${userId}/status`;
+    logger.debug(`Calling getStatus devices API: ${url}`);
+    
+    const res = await fetchWithAuth(url, {
+      method: 'GET',
+    });
+    return res.json();
+  },
+
   // Get Active Devices (User)
   getActive: async (userId: number): Promise<ApiResponse> => {
     const url = `${API_BASE}/user-devices/user/${userId}/active`;
