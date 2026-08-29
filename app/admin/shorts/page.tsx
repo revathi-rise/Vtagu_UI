@@ -186,7 +186,7 @@ function ShortForm({ form, onChange, onSubmit, onCancel, saving, isEdit }: Short
             <input
               style={inputStyle}
               value={form.video_url}
-              placeholder="https://cdn.example.com/short.mp4"
+              placeholder="e.g. MP4, HLS (.m3u8), YouTube, or Rumble URL"
               onChange={(e) => onChange('video_url', e.target.value)}
             />
           </Field>

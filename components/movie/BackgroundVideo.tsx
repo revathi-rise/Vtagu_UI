@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { isRumbleUrl, getRumbleEmbedUrl } from '@/lib/video-utils';
 
 interface BackgroundVideoProps {
   videoUrl: string;
@@ -15,6 +16,9 @@ export default function BackgroundVideo({ videoUrl, posterImage, posterAlt }: Ba
   const { scrollY } = useScroll();
   const playerRef = useRef<any>(null);
   const fadeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const isRumble = isRumbleUrl(videoUrl);
+  const rumbleEmbedUrl = isRumble ? getRumbleEmbedUrl(videoUrl) : null;
 
   // Safety check for posterImage to avoid 'Invalid URL' errors
   const safePosterImage = (posterImage && (posterImage.startsWith('http') || posterImage.startsWith('/') || posterImage.startsWith('data:')))
@@ -157,6 +161,21 @@ export default function BackgroundVideo({ videoUrl, posterImage, posterAlt }: Ba
         placeholder="blur"
         blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
       />
+
+      {/* Rumble Player */}
+      {isRumble && rumbleEmbedUrl && (
+        <motion.div
+          style={{ opacity: videoOpacity, filter: videoBlur }}
+          className="absolute inset-0 overflow-hidden pointer-events-none z-[5]"
+        >
+          <iframe
+            src={`${rumbleEmbedUrl}?pub=4&autoplay=2&muted=1`}
+            className="absolute top-1/2 left-1/2 w-[125%] h-[125%] -translate-x-1/2 -translate-y-1/2 scale-[1.3] pointer-events-none border-none"
+            allow="autoplay; encrypted-media"
+            onLoad={() => setVideoPlaying(true)}
+          />
+        </motion.div>
+      )}
 
       {/* YouTube Player */}
       {videoId && (

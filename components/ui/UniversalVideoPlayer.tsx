@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useImperativeHandle, forwardRef } from 'react';
-import { getVideoType, getYouTubeVideoId } from '@/lib/video-utils';
+import { getVideoType, getYouTubeVideoId, getRumbleEmbedUrl } from '@/lib/video-utils';
 import VideoPlayer, { VideoPlayerHandle, VideoPlayerProps } from './VideoPlayer';
 import YouTubePlayer, { YouTubePlayerHandle } from './YouTubePlayer';
 
@@ -94,6 +94,27 @@ const UniversalVideoPlayer = forwardRef<UniversalVideoPlayerHandle, UniversalVid
           onTimeUpdate={handleTimeUpdate}
           onEnded={onEnded}
           {...rest}
+        />
+      );
+    }
+
+    if (videoType === 'rumble') {
+      const rumbleEmbedUrl = getRumbleEmbedUrl(src);
+      if (!rumbleEmbedUrl) {
+        return (
+          <div className="w-full h-full flex items-center justify-center bg-black text-red-500 font-bold text-sm">
+            <p>Invalid Rumble URL</p>
+          </div>
+        );
+      }
+
+      return (
+        <iframe
+          src={rumbleEmbedUrl}
+          className="w-full h-full border-none"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          title={contentId}
         />
       );
     }

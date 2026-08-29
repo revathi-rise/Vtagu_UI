@@ -84,14 +84,50 @@ export function getYouTubeEmbedUrl(videoUrl: string): string | null {
 }
 
 /**
+ * Detect if URL is a Rumble video
+ */
+export function isRumbleUrl(url: string | null | undefined): boolean {
+  if (!url || typeof url !== 'string') return false;
+  
+  const lowerUrl = url.toLowerCase();
+  return lowerUrl.includes('rumble.com');
+}
+
+/**
+ * Extract Rumble embed URL or Video ID
+ */
+export function getRumbleEmbedUrl(url: string | null | undefined): string | null {
+  if (!url || !isRumbleUrl(url)) return null;
+
+  // Already an embed URL format: rumble.com/embed/<id>
+  if (url.includes('rumble.com/embed/')) {
+    const parts = url.split('rumble.com/embed/')[1]?.split('/')[0]?.split('?')[0];
+    if (parts) {
+      return `https://rumble.com/embed/${parts}/`;
+    }
+    return url;
+  }
+
+  // Watch URL format: rumble.com/v123abc-title.html or rumble.com/v123abc
+  const match = url.match(/rumble\.com\/(v[a-zA-Z0-9]+)/i);
+  if (match && match[1]) {
+    return `https://rumble.com/embed/${match[1]}/`;
+  }
+
+  return null;
+}
+
+/**
  * Detect video type from URL
  */
-export type VideoType = 'native' | 'youtube' | 'iframe' | 'unknown';
+export type VideoType = 'native' | 'youtube' | 'rumble' | 'iframe' | 'unknown';
 
 export function getVideoType(url: string | null | undefined): VideoType {
   if (!url || typeof url !== 'string') return 'unknown';
   
   if (isYouTubeUrl(url)) return 'youtube';
+
+  if (isRumbleUrl(url)) return 'rumble';
   
   if (url.includes('iframe.mediadelivery.net') || url.includes('iframe') || url.includes('/embed/')) {
     return 'iframe';
@@ -119,6 +155,11 @@ export function isValidVideoUrl(url: string | null | undefined): boolean {
     // Check if it's YouTube
     if (isYouTubeUrl(url)) {
       return !!getYouTubeVideoId(url);
+    }
+
+    // Check if it's Rumble
+    if (isRumbleUrl(url)) {
+      return !!getRumbleEmbedUrl(url);
     }
 
     // Check if it's a valid iframe/embed source

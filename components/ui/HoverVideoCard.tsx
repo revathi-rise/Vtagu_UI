@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Play, Plus, BellRing } from 'lucide-react';
-import VideoPlayer from './VideoPlayer';
+import UniversalVideoPlayer from './UniversalVideoPlayer';
 
 interface HoverVideoCardProps {
   title: string;
@@ -60,7 +60,7 @@ export default function HoverVideoCard({
         {/* Video Overlay */}
         <div className={`absolute inset-0 bg-black transition-opacity duration-700 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
           {isHovered && (
-             <VideoPlayer 
+             <UniversalVideoPlayer 
                src={videoSrc || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"} 
                autoPlay
                loop

@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Play, Info, Volume2, VolumeX } from "lucide-react";
-import VideoPlayer from "@/components/ui/VideoPlayer";
+import UniversalVideoPlayer from "@/components/ui/UniversalVideoPlayer";
 
 export default function MoviesHero() {
   const [isMuted, setIsMuted] = useState(true);
@@ -11,7 +11,7 @@ export default function MoviesHero() {
     <section className="relative h-[70vh] sm:h-[85vh] min-h-[480px] sm:min-h-[600px] w-full pt-[80px] sm:pt-[90px] overflow-hidden flex items-end pb-12 sm:pb-24">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
-        <VideoPlayer 
+        <UniversalVideoPlayer 
           className="w-full h-full object-cover scale-105"
           autoPlay 
           loop 
