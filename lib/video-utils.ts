@@ -93,6 +93,47 @@ export function isRumbleUrl(url: string | null | undefined): boolean {
   return lowerUrl.includes('rumble.com');
 }
 
+const rumbleEmbedCache = new Map<string, string>();
+
+/**
+ * Asynchronously fetch true Rumble iframe embed URL via Rumble oEmbed API
+ */
+export async function fetchRumbleEmbedUrl(url: string | null | undefined): Promise<string | null> {
+  if (!url || typeof url !== 'string' || !isRumbleUrl(url)) return null;
+
+  const rawUrl = url.trim();
+
+  // If already a Rumble embed URL (e.g. rumble.com/embed/v...)
+  if (rawUrl.includes('rumble.com/embed/')) {
+    return rawUrl;
+  }
+
+  if (rumbleEmbedCache.has(rawUrl)) {
+    return rumbleEmbedCache.get(rawUrl)!;
+  }
+
+  try {
+    const oembedEndpoint = `https://rumble.com/api/Media/oembed.json?url=${encodeURIComponent(rawUrl)}`;
+    const res = await fetch(oembedEndpoint);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.html) {
+        const match = data.html.match(/src=["']([^"']+)["']/i);
+        if (match && match[1]) {
+          const embedSrc = match[1];
+          rumbleEmbedCache.set(rawUrl, embedSrc);
+          return embedSrc;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[Rumble] oEmbed fetch failed, falling back to static embed resolver:', err);
+  }
+
+  // Fallback to static embed URL solver if oEmbed is unreachable
+  return getRumbleEmbedUrl(rawUrl);
+}
+
 /**
  * Extract Rumble embed URL or Video ID
  */
@@ -106,28 +147,14 @@ export function getRumbleEmbedUrl(url: string | null | undefined): string | null
   if (rawUrl.includes('rumble.com/embed/')) {
     const parts = rawUrl.split('rumble.com/embed/')[1]?.split('/')[0]?.split('?')[0];
     if (parts && parts.length > 0) {
-      return `https://rumble.com/embed/${parts}/`;
+      return `https://rumble.com/embed/${parts}/?pub=4`;
     }
     return rawUrl;
   }
 
-  // 2. Rumble Shorts format: rumble.com/shorts/<id> or rumble.com/shorts/v7es40e...
-  const shortsMatch = rawUrl.match(/rumble\.com\/shorts\/(v[a-zA-Z0-9]+|[a-zA-Z0-9_-]+)/i);
-  if (shortsMatch && shortsMatch[1]) {
-    const videoId = shortsMatch[1].split('-')[0].split('.')[0];
-    return `https://rumble.com/embed/${videoId}/`;
-  }
-
-  // 3. Rumble Watch format: rumble.com/v123abc-title.html or rumble.com/v123abc
-  const watchMatch = rawUrl.match(/rumble\.com\/(?:[a-zA-Z0-9_-]+\/)*(v[a-zA-Z0-9]+)/i);
-  if (watchMatch && watchMatch[1]) {
-    return `https://rumble.com/embed/${watchMatch[1]}/`;
-  }
-
-  // 4. Fallback match for any 'v' video ID token in the URL path
-  const fallbackMatch = rawUrl.match(/\/(v[a-zA-Z0-9]{4,})/i);
-  if (fallbackMatch && fallbackMatch[1]) {
-    return `https://rumble.com/embed/${fallbackMatch[1]}/`;
+  // 2. Return cached oEmbed embed URL if previously fetched
+  if (rumbleEmbedCache.has(rawUrl)) {
+    return rumbleEmbedCache.get(rawUrl)!;
   }
 
   return null;

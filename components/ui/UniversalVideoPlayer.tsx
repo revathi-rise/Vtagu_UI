@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useRef, useState, useImperativeHandle, forwardRef } from 'react';
-import { getVideoType, getYouTubeVideoId, getRumbleEmbedUrl } from '@/lib/video-utils';
+import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
+import { getVideoType, getYouTubeVideoId, getRumbleEmbedUrl, fetchRumbleEmbedUrl, getFallbackVideoUrl } from '@/lib/video-utils';
 import VideoPlayer, { VideoPlayerHandle, VideoPlayerProps } from './VideoPlayer';
 import YouTubePlayer, { YouTubePlayerHandle } from './YouTubePlayer';
+import RumblePlayer, { RumblePlayerHandle } from './RumblePlayer';
 
 export interface UniversalVideoPlayerHandle {
   play: () => void;
@@ -37,6 +38,7 @@ const UniversalVideoPlayer = forwardRef<UniversalVideoPlayerHandle, UniversalVid
   ) => {
     const nativePlayerRef = useRef<VideoPlayerHandle>(null);
     const youtubePlayerRef = useRef<YouTubePlayerHandle>(null);
+    const rumblePlayerRef = useRef<RumblePlayerHandle>(null);
     const videoType = getVideoType(src);
 
     const handleTimeUpdate = (currentTime: number, duration: number) => {
@@ -49,6 +51,8 @@ const UniversalVideoPlayer = forwardRef<UniversalVideoPlayerHandle, UniversalVid
       play: () => {
         if (videoType === 'youtube') {
           youtubePlayerRef.current?.play?.();
+        } else if (videoType === 'rumble') {
+          rumblePlayerRef.current?.play?.();
         } else {
           nativePlayerRef.current?.play?.();
         }
@@ -56,6 +60,8 @@ const UniversalVideoPlayer = forwardRef<UniversalVideoPlayerHandle, UniversalVid
       pause: () => {
         if (videoType === 'youtube') {
           youtubePlayerRef.current?.pause?.();
+        } else if (videoType === 'rumble') {
+          rumblePlayerRef.current?.pause?.();
         } else {
           nativePlayerRef.current?.pause?.();
         }
@@ -70,6 +76,8 @@ const UniversalVideoPlayer = forwardRef<UniversalVideoPlayerHandle, UniversalVid
       requestFullScreen: () => {
         if (videoType === 'youtube') {
           youtubePlayerRef.current?.requestFullScreen?.();
+        } else if (videoType === 'rumble') {
+          rumblePlayerRef.current?.requestFullScreen?.();
         } else {
           nativePlayerRef.current?.requestFullScreen?.();
         }
@@ -99,22 +107,14 @@ const UniversalVideoPlayer = forwardRef<UniversalVideoPlayerHandle, UniversalVid
     }
 
     if (videoType === 'rumble') {
-      const rumbleEmbedUrl = getRumbleEmbedUrl(src);
-      if (!rumbleEmbedUrl) {
-        return (
-          <div className="w-full h-full flex items-center justify-center bg-black text-red-500 font-bold text-sm">
-            <p>Invalid Rumble URL</p>
-          </div>
-        );
-      }
-
       return (
-        <iframe
-          src={rumbleEmbedUrl}
-          className="w-full h-full border-none"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
+        <RumblePlayer
+          ref={rumblePlayerRef}
+          src={src}
           title={contentId}
+          onTimeUpdate={handleTimeUpdate}
+          onEnded={onEnded}
+          {...rest}
         />
       );
     }
