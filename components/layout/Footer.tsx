@@ -1,6 +1,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Facebook, Twitter, Instagram, Youtube, Globe, ArrowUpRight, Play, Film, Sparkles, Smartphone, ShieldCheck, Mail } from 'lucide-react';
+import { Facebook, Instagram, Youtube, Globe, ArrowUpRight, Play, Film, Sparkles, Smartphone, ShieldCheck, Mail } from 'lucide-react';
+
+const XIcon = ({ size = 20, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
 
 export default function Footer() {
   return (
@@ -25,7 +31,7 @@ export default function Footer() {
             </Link>
             <div className="flex items-center gap-3 pt-1">
               <SocialButton Icon={Facebook} href="#" label="Facebook" />
-              <SocialButton Icon={Twitter} href="#" label="Twitter" />
+              <SocialButton Icon={XIcon} href="#" label="X" />
               <SocialButton Icon={Instagram} href="#" label="Instagram" />
               <SocialButton Icon={Youtube} href="#" label="Youtube" />
             </div>
@@ -94,7 +100,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between pt-8 sm:pt-10 border-t border-white/[0.03] text-white/30 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.25em] gap-4">
           <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-center sm:text-left">
-            <p>© 2024 VTAGU PRIMETIME · ALL RIGHTS RESERVED</p>
+            <p>© 2026 VTAGU PRIMETIME · ALL RIGHTS RESERVED</p>
             <div className="hidden sm:block w-px h-3.5 bg-white/10" />
             <div className="flex items-center gap-4 sm:gap-6">
               <button className="hover:text-white transition-colors">Terms</button>

@@ -48,9 +48,6 @@ export default async function Home() {
       
       {/* 6. Episodes Section */}
       <EpisodicVanguard episodes={episodes} />
-
-      {/* 7. Genre Section */}
-      <MovieGenres genres={genres} />
     </main>
   );
 }

@@ -34,7 +34,7 @@ export default function LoginPage() {
         </div>
 
         <div className="flex justify-between items-center text-[10px] text-gray-500 mt-12 py-4">
-          <p>© 2024 PrimeTime. All rights reserved.</p>
+          <p>© 2026 PrimeTime. All rights reserved.</p>
           <div className="flex gap-4">
             <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
             <Link href="#" className="hover:text-white transition-colors">Terms</Link>
