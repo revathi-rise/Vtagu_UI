@@ -4,6 +4,7 @@ import './globals.css';
 import { getGenres, Genre, getLanguages, Language } from '@/lib/vtagu.api';
 import { ReduxProvider } from './providers';
 import ConditionalLayout from '@/components/layout/ConditionalLayout';
+import { AlertProvider } from '@/components/shared/CustomAlertModal';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -46,9 +47,11 @@ export default async function RootLayout({
     <html lang="en" className={`${montserrat.variable} ${inter.variable}`}>
       <body className={`${montserrat.className} antialiased`}>
         <ReduxProvider>
-          <ConditionalLayout genres={genres} languages={languages}>
-            {children}
-          </ConditionalLayout>
+          <AlertProvider>
+            <ConditionalLayout genres={genres} languages={languages}>
+              {children}
+            </ConditionalLayout>
+          </AlertProvider>
         </ReduxProvider>
       </body>
     </html>

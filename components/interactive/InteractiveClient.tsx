@@ -34,9 +34,22 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
 
     const checkAccess = async () => {
         setCheckingAccess(true);
+        
+        // Immediate client check: If movie is free or price is 0, play directly without modal
+        const isMovieFree = Number(movie.is_free) === 1 || Number((movie as any).isFree) === 1 || Number(movie.price) === 0;
+        if (isMovieFree) {
+            setAccessData({ hasAccess: true, reason: 'free', price: 0, currency: movie.currency || 'INR' });
+            setIsAuthorized(true);
+            setCheckingAccess(false);
+            return;
+        }
+
         try {
             const userId = getUserId();
             const result = await checkMovieAccess(movie.interactive_movie_id, userId);
+            if (result.price === 0 || result.reason === 'free') {
+                result.hasAccess = true;
+            }
             setAccessData(result);
             setIsAuthorized(result.hasAccess);
         } catch (error) {

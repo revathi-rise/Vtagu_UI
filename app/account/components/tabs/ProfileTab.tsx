@@ -5,9 +5,11 @@ import { PenSquare, Save, X, Loader2, ChevronDown } from 'lucide-react';
 import { authApi } from '@/lib/api/auth.api';
 import { userApi } from '@/lib/api/user.api';
 import { useRouter } from 'next/navigation';
+import { useAlert } from '@/components/shared/CustomAlertModal';
 
 export default function ProfileTab({ profile }: { profile: any }) {
   const router = useRouter();
+  const { showAlert } = useAlert();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -37,12 +39,13 @@ export default function ProfileTab({ profile }: { profile: any }) {
       const res = await userApi.uploadImage(file);
       if (res.status && res.url) {
         setFormData(prev => ({ ...prev, profile_picture: res.url }));
+        showAlert({ title: "Image Uploaded", message: "Profile picture uploaded successfully!", type: "success" });
       } else {
-        alert(res.message || "Failed to upload image");
+        showAlert({ title: "Upload Failed", message: res.message || "Failed to upload image", type: "error" });
       }
     } catch (error) {
       console.error("Image upload error:", error);
-      alert("An error occurred during image upload");
+      showAlert({ title: "Error", message: "An error occurred during image upload", type: "error" });
     } finally {
       setIsUploading(false);
     }
@@ -127,12 +130,13 @@ export default function ProfileTab({ profile }: { profile: any }) {
           localStorage.setItem('user', JSON.stringify(updatedUser));
         }
         router.refresh(); // Refresh server component data
+        showAlert({ title: "Profile Updated", message: "Your profile details have been saved successfully!", type: "success" });
       } else {
-        alert(res.message || "Failed to update profile");
+        showAlert({ title: "Update Failed", message: res.message || "Failed to update profile", type: "error" });
       }
     } catch (error) {
       console.error("Update error:", error);
-      alert("An error occurred while updating profile");
+      showAlert({ title: "Error", message: "An error occurred while updating profile", type: "error" });
     } finally {
       setIsLoading(false);
     }

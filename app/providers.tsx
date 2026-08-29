@@ -6,8 +6,9 @@ import { ReactNode } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 export function ReduxProvider({ children }: { children: ReactNode }) {
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
   return (
-    <GoogleOAuthProvider clientId="852761465276-g21622mqo3sca6sbnmdesp5rfp3ujsmc.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={googleClientId}>
       <Provider store={store}>{children}</Provider>
     </GoogleOAuthProvider>
   );

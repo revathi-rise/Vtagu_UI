@@ -856,3 +856,92 @@ export async function incrementShortView(id: number): Promise<void> {
     // silently fail — view tracking is non-critical
   }
 }
+
+/* ==========================================================================
+   Watchlist (My List) API
+   ========================================================================== */
+
+export interface WatchlistItem {
+  id: number;
+  userId: number;
+  contentId: number;
+  contentType: string;
+  createdAt: string;
+  details?: any;
+}
+
+export async function getUserWatchlist(userId: number | string): Promise<WatchlistItem[]> {
+  const url = `${API_BASE}/watchlist/user/${userId}`;
+  try {
+    const res = await fetchWithRetry(url, { cache: 'no-store' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.data || [];
+  } catch (err: any) {
+    console.error('Error fetching user watchlist:', err);
+    return [];
+  }
+}
+
+export async function toggleWatchlist(
+  userId: number | string,
+  contentId: number | string,
+  contentType: string = 'movie'
+): Promise<{ status: boolean; message: string; inWatchlist: boolean }> {
+  const url = `${API_BASE}/watchlist/toggle`;
+  try {
+    const res = await fetchWithRetry(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: Number(userId),
+        contentId: Number(contentId),
+        contentType,
+      }),
+    });
+    return await res.json();
+  } catch (err: any) {
+    console.error('Error toggling watchlist:', err);
+    return { status: false, message: err.message || 'Error updating watchlist', inWatchlist: false };
+  }
+}
+
+export async function checkWatchlist(
+  userId: number | string,
+  contentId: number | string,
+  contentType: string = 'movie'
+): Promise<boolean> {
+  const url = `${API_BASE}/watchlist/check?userId=${userId}&contentId=${contentId}&contentType=${contentType}`;
+  try {
+    const res = await fetchWithRetry(url, { cache: 'no-store' });
+    if (!res.ok) return false;
+    const data = await res.json();
+    return !!data.inWatchlist;
+  } catch (err: any) {
+    return false;
+  }
+}
+
+export async function removeFromWatchlist(
+  userId: number | string,
+  contentId: number | string,
+  contentType: string = 'movie'
+): Promise<boolean> {
+  const url = `${API_BASE}/watchlist/remove`;
+  try {
+    const res = await fetchWithRetry(url, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: Number(userId),
+        contentId: Number(contentId),
+        contentType,
+      }),
+    });
+    const data = await res.json();
+    return !!data.status;
+  } catch (err: any) {
+    return false;
+  }
+}
+

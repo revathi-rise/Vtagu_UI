@@ -55,14 +55,16 @@ export const PaywallGateModal = ({ isOpen, price, currency, movieId, movieTitle 
             </div>
 
             <div className="w-full space-y-4 pt-4">
-              {/* Option 1: Buy Movie Separately */}
-              <Link
-                href={`/checkout?type=movie&id=${movieId}`}
-                className="flex items-center justify-center gap-3 w-full bg-white hover:bg-white/90 text-black font-black py-4.5 rounded-2xl transition-all duration-300 shadow-lg text-sm uppercase tracking-[0.15em] active:scale-95"
-              >
-                <CreditCard size={18} />
-                Unlock Movie Separately • {currency} {price}
-              </Link>
+              {/* Option 1: Buy Movie Separately (Only if price > 0) */}
+              {price > 0 && (
+                <Link
+                  href={`/checkout?type=movie&id=${movieId}`}
+                  className="flex items-center justify-center gap-3 w-full bg-white hover:bg-white/90 text-black font-black py-4.5 rounded-2xl transition-all duration-300 shadow-lg text-sm uppercase tracking-[0.15em] active:scale-95"
+                >
+                  <CreditCard size={18} />
+                  Unlock Movie Separately • {currency} {price}
+                </Link>
+              )}
 
               {/* Option 2: Subscribe to Interactive Plan */}
               <Link

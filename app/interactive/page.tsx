@@ -83,33 +83,40 @@ export default async function InteractiveListing() {
                     </div>
 
                     <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-16 gap-x-8">
-                        {movies.map((movie, index) => (
-                            <div key={movie.interactive_movie_id} className="relative group">
-                                {/* Elegant Numbering for Interactive Hub */}
-                                {index < 10 && (
-                                    <div className="absolute -left-8 top-1/2 -translate-y-1/2 text-[100px] font-black text-white/5 select-none z-0 group-hover:text-primary/10 transition-colors pointer-events-none">
-                                        {index + 1}
+                        {movies.map((movie, index) => {
+                            const isComingSoon = Boolean(Number(movie.is_coming_soon) === 1 || movie.is_coming_soon === true || movie.isComingSoon);
+                            const isFree = Number(movie.is_free) === 1 || Number((movie as any).isFree) === 1 || Number(movie.price) === 0;
+                            const badgeText = isComingSoon ? undefined : (isFree ? "FREE" : "PAID");
+                            const badgeColor: 'green' | 'purple' = isFree ? "green" : "purple";
+
+                            return (
+                                <div key={movie.interactive_movie_id} className="relative group">
+                                    {/* Elegant Numbering for Interactive Hub */}
+                                    {index < 10 && (
+                                        <div className="absolute -left-8 top-1/2 -translate-y-1/2 text-[100px] font-black text-white/5 select-none z-0 group-hover:text-primary/10 transition-colors pointer-events-none">
+                                            {index + 1}
+                                        </div>
+                                    )}
+                                    
+                                    <div className="relative z-10">
+                                        <Link href={`/interactive/${movie.interactive_movie_id}`}>
+                                            <MediaCard
+                                                variant="portrait"
+                                                title={movie.title}
+                                                description={movie.description}
+                                                image={movie.card_image || "/journey_of_ashwin.png"}
+                                                subtitle={movie.languages || "Interactive"}
+                                                year={movie.created_at ? new Date(movie.created_at).getFullYear() : undefined}
+                                                badge={badgeText}
+                                                badgeColor={badgeColor}
+                                                trailerUrl={movie.trailer_video_url}
+                                                isComingSoon={isComingSoon}
+                                            />
+                                        </Link>
                                     </div>
-                                )}
-                                
-                                <div className="relative z-10">
-                                    <Link href={`/interactive/${movie.interactive_movie_id}`}>
-                                        <MediaCard
-                                            variant="portrait"
-                                            title={movie.title}
-                                            description={movie.description}
-                                            image={movie.card_image || "/journey_of_ashwin.png"}
-                                            subtitle={movie.languages || "Interactive"}
-                                            year={movie.created_at ? new Date(movie.created_at).getFullYear() : undefined}
-                                            badge={index === 0 ? "TRENDING" : "STORY"}
-                                            badgeColor={index === 0 ? "purple" : "blue"}
-                                            trailerUrl={movie.trailer_video_url}
-                                            isComingSoon={Boolean(movie.isComingSoon || movie.is_coming_soon)}
-                                        />
-                                    </Link>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </div>

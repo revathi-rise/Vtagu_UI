@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { LayoutGrid, Zap, ChevronRight, ArrowLeft, ArrowRight } from 'lucide-react';
 import SectionTitle from './SectionTitle';
 import { MediaCard } from '../shared/MediaCard';
@@ -54,10 +55,13 @@ export default function InteractiveGridHero({ interactiveMovies }: InteractiveHe
                             </p>
                         </div>
 
-                        <button className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-widest hover:text-white transition-all group/btn">
-                            Live Narratives
+                        <Link 
+                            href="/interactive"
+                            className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-widest hover:text-white transition-all group/btn"
+                        >
+                            Explore Interactive
                             <ChevronRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
-                        </button>
+                        </Link>
                     </div>
 
                     <div className="relative z-10 group/slider">
@@ -78,26 +82,33 @@ export default function InteractiveGridHero({ interactiveMovies }: InteractiveHe
                             }}
                             className="!px-1 !py-6 -my-6"
                         >
-                            {displayMovies.map((movie) => (
-                                <SwiperSlide key={movie.interactive_movie_id} className="!overflow-visible">
-                                    <MediaCard
-                                        title={movie.title}
-                                        description={movie.description}
-                                        image={movie.card_image || "/journey_of_ashwin.png"}
-                                        subtitle={movie.languages || "Interactive"}
-                                        year={movie.created_at ? new Date(movie.created_at).getFullYear() : undefined}
-                                        badge="USB READY"
-                                        badgeColor="blue"
-                                        trailerUrl={movie.trailer_video_url}
-                                        isComingSoon={Boolean(movie.isComingSoon || movie.is_coming_soon)}
-                                        onClick={() => {
-                                            router.push(`/interactive/${movie.interactive_movie_id}`);
-                                        }}
-                                        className="cursor-pointer"
-                                        variant="portrait"
-                                    />
-                                </SwiperSlide>
-                            ))}
+                            {displayMovies.map((movie) => {
+                                const isComingSoon = Boolean(Number(movie.is_coming_soon) === 1 || movie.is_coming_soon === true || movie.isComingSoon);
+                                const isFree = Number(movie.is_free) === 1 || Number((movie as any).isFree) === 1 || Number(movie.price) === 0;
+                                const badgeText = isComingSoon ? undefined : (isFree ? "FREE" : "PAID");
+                                const badgeColor: 'green' | 'purple' = isFree ? "green" : "purple";
+
+                                return (
+                                    <SwiperSlide key={movie.interactive_movie_id} className="!overflow-visible">
+                                        <MediaCard
+                                            title={movie.title}
+                                            description={movie.description}
+                                            image={movie.card_image || "/journey_of_ashwin.png"}
+                                            subtitle={movie.languages || "Interactive"}
+                                            year={movie.created_at ? new Date(movie.created_at).getFullYear() : undefined}
+                                            badge={badgeText}
+                                            badgeColor={badgeColor}
+                                            trailerUrl={movie.trailer_video_url}
+                                            isComingSoon={isComingSoon}
+                                            onClick={() => {
+                                                router.push(`/interactive/${movie.interactive_movie_id}`);
+                                            }}
+                                            className="cursor-pointer"
+                                            variant="portrait"
+                                        />
+                                    </SwiperSlide>
+                                );
+                            })}
                         </Swiper>
 
                         {/* Navigation */}

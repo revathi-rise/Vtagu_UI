@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Play, Plus, Star, ChevronLeft, ChevronRight, Globe, Volume2, VolumeX } from "lucide-react";
+import { Play, Plus, Check, Star, ChevronLeft, ChevronRight, Globe, Volume2, VolumeX } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Poster, Movie, Episode } from "@/lib/vtagu.api";
+import { Poster, Movie, Episode, toggleWatchlist, checkWatchlist } from "@/lib/vtagu.api";
+import { useAlert } from '../shared/CustomAlertModal';
+import { getUserId } from "@/lib/api-client";
 import HeroThumbnailSlider from "./HeroThumbnailSlider";
 
 export interface HeroItem {
@@ -19,6 +21,8 @@ export interface HeroItem {
   link: string;
   languages?: string;
   trailerUrl?: string;
+  referenceType?: string;
+  referenceId?: number;
 }
 
 interface HeroSectionProps {
@@ -30,8 +34,11 @@ interface HeroSectionProps {
 const IMAGE_BASE_URL = "https://www.vtagu.in/";
 
 export default function HeroSection({ posters = [], movies = [], episodes = [] }: HeroSectionProps) {
+  const { showAlert } = useAlert();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
+  const [inWatchlist, setInWatchlist] = useState(false);
+  const userId = getUserId();
 
   // Map API posters to HeroItem format
   const items: HeroItem[] = posters.map((poster) => {
@@ -65,11 +72,46 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
       rating,
       link: link || "#",
       languages: poster.languages || "",
-      trailerUrl: poster.trailer_url || ""
+      trailerUrl: poster.trailer_url || "",
+      referenceType: poster.reference_type || 'movie',
+      referenceId: poster.reference_id || poster.poster_id,
     };
   });
 
   const currentItem = items[activeIndex];
+
+  useEffect(() => {
+    async function verifyWatchlist() {
+      if (!userId || !currentItem) {
+        setInWatchlist(false);
+        return;
+      }
+      const isSaved = await checkWatchlist(
+        userId,
+        currentItem.referenceId || currentItem.id,
+        currentItem.referenceType || 'movie'
+      );
+      setInWatchlist(isSaved);
+    }
+    verifyWatchlist();
+  }, [userId, activeIndex, currentItem]);
+
+  const handleWatchlistToggle = async () => {
+    if (!userId) {
+      showAlert("Please log in to add items to your watchlist.");
+      return;
+    }
+    if (!currentItem) return;
+
+    const res = await toggleWatchlist(
+      userId,
+      currentItem.referenceId || currentItem.id,
+      currentItem.referenceType || 'movie'
+    );
+    if (res.status) {
+      setInWatchlist(res.inWatchlist);
+    }
+  };
 
   if (items.length === 0) return null;
 
@@ -223,9 +265,26 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
                   <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-black" />
                   Watch Now
                 </Link>
-                <button className="flex-1 sm:flex-none h-11 sm:h-14 px-6 sm:px-10 flex items-center justify-center gap-2 sm:gap-3 rounded-full glass-panel text-white font-bold uppercase tracking-widest transition-all hover:bg-white/10 active:scale-95 border-white/20 text-sm sm:text-base">
-                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-                  Watchlist
+                <button
+                  onClick={handleWatchlistToggle}
+                  className={cn(
+                    "flex-1 sm:flex-none h-11 sm:h-14 px-6 sm:px-10 flex items-center justify-center gap-2 sm:gap-3 rounded-full text-white font-bold uppercase tracking-widest transition-all active:scale-95 text-sm sm:text-base",
+                    inWatchlist
+                      ? "bg-green-600/80 hover:bg-green-600 border border-green-400/30"
+                      : "glass-panel hover:bg-white/10 border-white/20"
+                  )}
+                >
+                  {inWatchlist ? (
+                    <>
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                      In List
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                      Watchlist
+                    </>
+                  )}
                 </button>
               </div>
             </motion.div>
