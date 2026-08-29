@@ -4,6 +4,7 @@ import { useRef, useState, useCallback, memo } from 'react';
 import Link from 'next/link';
 import { Short } from '@/lib/vtagu.api';
 import UniversalVideoPlayer, { UniversalVideoPlayerHandle } from '@/components/ui/UniversalVideoPlayer';
+import { getShortThumbnailUrl, FALLBACK_SHORT_POSTERS } from '@/lib/video-utils';
 
 // ─── Card ─────────────────────────────────────────────────────────────────────
 
@@ -56,6 +57,15 @@ const ShortsTeaserCard = memo(function ShortsTeaserCard({ short, index }: Shorts
     if (hovering) videoRef.current?.videoElement?.play().catch(() => { });
   }, [hovering]);
 
+  const [thumbnailSrc, setThumbnailSrc] = useState<string>(() => getShortThumbnailUrl(short, index));
+
+  const handleImgError = () => {
+    const fallback = FALLBACK_SHORT_POSTERS[Math.abs(index) % FALLBACK_SHORT_POSTERS.length];
+    if (thumbnailSrc !== fallback) {
+      setThumbnailSrc(fallback);
+    }
+  };
+
   return (
     <Link
       href={`/shorts?id=${short.id}`}
@@ -81,29 +91,23 @@ const ShortsTeaserCard = memo(function ShortsTeaserCard({ short, index }: Shorts
           willChange: 'transform',
         }}
       >
-        {/* Thumbnail — always visible, lazy-loaded */}
-        {short.thumbnail_url ? (
-          <img
-            src={short.thumbnail_url}
-            alt={short.title}
-            loading="lazy"
-            decoding="async"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              opacity: hovering ? 0 : 1,
-              transition: 'opacity 0.2s',
-            }}
-          />
-        ) : (
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: `linear-gradient(135deg, hsl(${(index * 47) % 360}, 60%, 20%) 0%, hsl(${(index * 47 + 60) % 360}, 60%, 12%) 100%)`,
-          }} />
-        )}
+        {/* Thumbnail — always visible, lazy-loaded with fallback */}
+        <img
+          src={thumbnailSrc}
+          alt={short.title}
+          loading="lazy"
+          decoding="async"
+          onError={handleImgError}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: hovering ? 0 : 1,
+            transition: 'opacity 0.2s',
+          }}
+        />
 
         {/* Video — src set ONLY on first hover, preload=none prevents any network request */}
         {videoSrc && (

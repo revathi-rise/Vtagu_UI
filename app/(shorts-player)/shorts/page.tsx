@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Short, getActiveShorts, incrementShortView } from '@/lib/vtagu.api';
 import UniversalVideoPlayer, { UniversalVideoPlayerHandle } from '@/components/ui/UniversalVideoPlayer';
+import { getShortThumbnailUrl } from '@/lib/video-utils';
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 
@@ -193,7 +194,7 @@ function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: Sh
           <UniversalVideoPlayer
             ref={videoRef}
             src={short.video_url}
-            poster={short.thumbnail_url || undefined}
+            poster={getShortThumbnailUrl(short)}
             muted={isMuted}
             autoPlay={isActive}
             loop={true}
@@ -202,14 +203,12 @@ function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: Sh
           />
         </div>
       ) : (
-        /* Fallback when no video URL — show thumbnail or gradient */
+        /* Fallback when no video URL — show thumbnail */
         <div style={{
           height: '100%',
           width: '100%',
           aspectRatio: '9/16',
-          background: short.thumbnail_url
-            ? `url(${short.thumbnail_url}) center/cover no-repeat`
-            : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+          background: `url(${getShortThumbnailUrl(short)}) center/cover no-repeat`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

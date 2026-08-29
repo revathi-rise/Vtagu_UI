@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Short, getAllShorts, createShort, updateShort, deleteShort } from '@/lib/vtagu.api';
+import { getShortThumbnailUrl } from '@/lib/video-utils';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -605,19 +606,11 @@ export default function AdminShortsPage() {
                         width: 48, height: 76, borderRadius: 8, overflow: 'hidden',
                         background: '#27272a', flexShrink: 0,
                       }}>
-                        {s.thumbnail_url ? (
-                          <img
-                            src={s.thumbnail_url}
-                            alt={s.title}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <div style={{
-                            width: '100%', height: '100%',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 20,
-                          }}>🎬</div>
-                        )}
+                        <img
+                          src={getShortThumbnailUrl(s, i)}
+                          alt={s.title}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
                       </div>
                     </td>
 

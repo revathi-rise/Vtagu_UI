@@ -161,3 +161,39 @@ export function getVideoUrl(
   console.warn(`Using fallback video for contentId: ${contentId}`);
   return getFallbackVideoUrl(contentId);
 }
+
+export const FALLBACK_SHORT_POSTERS = [
+  'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1542204165-65bf26472b9b?q=80&w=600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1509281373149-e957c6296406?q=80&w=600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1515630278258-407f66498911?q=80&w=600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1541873676-a18131494184?q=80&w=600&auto=format&fit=crop',
+];
+
+/**
+ * Resolves a thumbnail URL for a short item with YouTube and fallback support
+ */
+export function getShortThumbnailUrl(short: any, index: number = 0): string {
+  if (!short) return FALLBACK_SHORT_POSTERS[index % FALLBACK_SHORT_POSTERS.length];
+
+  // 1. Check explicit thumbnail properties
+  const url = short.thumbnail_url || short.thumbnail || short.poster_url || short.poster || short.poster_image || short.image;
+  if (url && typeof url === 'string' && url.trim().length > 0) {
+    return url.trim();
+  }
+
+  // 2. Extract YouTube thumbnail if video_url is a YouTube link
+  if (short.video_url && typeof short.video_url === 'string') {
+    const ytId = getYouTubeVideoId(short.video_url);
+    if (ytId) {
+      return `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+    }
+  }
+
+  // 3. Fallback vertical poster image
+  const seed = (typeof short.id === 'number' ? short.id : 0) + index;
+  return FALLBACK_SHORT_POSTERS[Math.abs(seed) % FALLBACK_SHORT_POSTERS.length];
+}
