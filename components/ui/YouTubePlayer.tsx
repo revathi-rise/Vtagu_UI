@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useImperativeHandle, forwardRef, useEffect } from 'react';
-import { AlertCircle, Maximize, Play, Pause, Volume2, VolumeX, SkipForward, SkipBack, ChevronRight, ChevronLeft } from 'lucide-react';
+import { AlertCircle, Maximize, Minimize2, Play, Pause, Volume2, VolumeX, SkipForward, SkipBack, ChevronRight, ChevronLeft } from 'lucide-react';
 
 export interface YouTubePlayerHandle {
   play: () => void;
@@ -22,6 +22,8 @@ interface YouTubePlayerProps {
   showPrevious?: boolean;
   onPrevious?: () => void;
   onFullscreenRequest?: () => void;
+  showMinimize?: boolean;
+  onMinimize?: () => void;
 }
 
 const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
@@ -38,6 +40,8 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
     showPrevious = false,
     onPrevious,
     onFullscreenRequest,
+    showMinimize = true,
+    onMinimize,
   }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const ytWrapperRef = useRef<HTMLDivElement>(null);
@@ -475,6 +479,14 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
       }
     };
 
+    const handleMinimizeToggle = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      playClickSound();
+      if (onMinimize) {
+        onMinimize();
+      }
+    };
+
     if (error) {
       return (
         <div className={`relative w-full bg-black flex items-center justify-center ${className}`} style={{ aspectRatio: '16/9' }}>
@@ -613,9 +625,19 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
                                 Skip <SkipForward size={14} />
                             </button>
                         )}
+                        {showMinimize && (
+                            <button 
+                                onClick={handleMinimizeToggle}
+                                className="text-white hover:text-cyan-400 transition-colors p-2 bg-white/5 rounded-lg"
+                                title="Minimize / Floating Player"
+                            >
+                                <Minimize2 size={18} />
+                            </button>
+                        )}
                         <button 
                             onClick={handleFullscreen}
                             className="text-white hover:text-cyan-400 transition-colors p-2 bg-white/5 rounded-lg"
+                            title="Fullscreen"
                         >
                             <Maximize size={18} />
                         </button>

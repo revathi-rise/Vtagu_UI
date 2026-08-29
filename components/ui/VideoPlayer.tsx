@@ -67,7 +67,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         showPrevious = false,
         onPrevious,
         onFullscreenRequest,
-        showMinimize = false,
+        showMinimize = true,
         onMinimize,
         subtitles,
         audioTracks
