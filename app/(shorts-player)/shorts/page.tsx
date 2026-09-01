@@ -80,81 +80,62 @@ function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: Sh
 
   // Auto-play / pause based on active state
   useEffect(() => {
-    const video = videoRef.current?.videoElement;
-    if (!video) return;
-
     if (isActive) {
-      // Guard: skip play if there is no valid source
       if (!short.video_url) {
         setPaused(true);
         return;
       }
-      video.currentTime = 0;
       viewedRef.current = false;
       setPaused(false);
-
-      const tryPlay = () => {
-        video.play().catch((err: Error) => {
-          // NotSupportedError = no valid source yet; AbortError = interrupted by scroll — swallow both
-          if (err.name !== 'NotSupportedError' && err.name !== 'AbortError') {
-            console.warn('[ShortCard] play() error:', err.name, err.message);
-          }
-          setPaused(true);
-        });
-      };
-
-      // readyState >= 2 means browser has current frame data — enough to start
-      if (video.readyState >= 2) {
-        tryPlay();
-      } else {
-        // Wait for canplay (fires earlier than canplaythrough)
-        video.addEventListener('canplay', tryPlay, { once: true });
-        // Also load explicitly in case browser paused network activity
-        video.load();
-        return () => video.removeEventListener('canplay', tryPlay);
+      try {
+        videoRef.current?.play();
+      } catch (err) {
+        setPaused(true);
       }
     } else {
-      video.pause();
-      video.currentTime = 0;
+      try {
+        videoRef.current?.pause();
+      } catch (err) {}
       setProgress(0);
+      setPaused(true);
     }
   }, [isActive, short.video_url]);
 
   // Sync mute state imperatively — the HTML `muted` attr is static, JS .muted controls runtime
   useEffect(() => {
+    // Only native player needs manual sync if it missed the prop update
     const video = videoRef.current?.videoElement;
-    if (!video) return;
-    video.muted = isMuted;
-  }, [isMuted, isActive]); // re-sync when active card changes too
+    if (video) {
+      video.muted = isMuted;
+    }
+  }, [isMuted, isActive]);
 
-  // Progress bar
-  useEffect(() => {
-    const video = videoRef.current?.videoElement;
-    if (!video) return;
-    const onTime = () => {
-      if (video.duration) setProgress((video.currentTime / video.duration) * 100);
-      // Count view after 3 seconds
-      if (!viewedRef.current && video.currentTime >= 3) {
-        viewedRef.current = true;
-        onViewCounted(short.id);
-      }
-    };
-    video.addEventListener('timeupdate', onTime);
-    return () => video.removeEventListener('timeupdate', onTime);
-  }, [short.id, onViewCounted]);
+  // Progress bar and view count logic moved to handleTimeUpdate
+  const handleTimeUpdate = (currentTime: number, duration: number) => {
+    if (duration) setProgress((currentTime / duration) * 100);
+    // Count view after 3 seconds
+    if (!viewedRef.current && currentTime >= 3) {
+      viewedRef.current = true;
+      onViewCounted(short.id);
+    }
+  };
 
   const togglePlay = () => {
-    const video = videoRef.current?.videoElement;
-    if (!video || !short.video_url) return;
-    if (video.paused) {
-      video.play().catch((err: Error) => {
-        if (err.name !== 'NotSupportedError' && err.name !== 'AbortError') {
-          console.warn('[ShortCard] togglePlay error:', err.name);
-        }
-      });
+    if (!short.video_url) return;
+    
+    if (paused) {
+      try {
+        videoRef.current?.play();
+      } catch (err) {
+        console.warn('[ShortCard] togglePlay play error:', err);
+      }
       setPaused(false);
     } else {
-      video.pause();
+      try {
+        videoRef.current?.pause();
+      } catch (err) {
+        console.warn('[ShortCard] togglePlay pause error:', err);
+      }
       setPaused(true);
     }
   };
@@ -200,6 +181,7 @@ function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: Sh
             loop={true}
             showControls={false}
             className="w-full h-full object-cover"
+            onTimeUpdate={handleTimeUpdate}
           />
         </div>
       ) : (
@@ -458,6 +440,7 @@ export default function ShortsPage() {
     if (!countedViews.current.has(id)) {
       countedViews.current.add(id);
       incrementShortView(id);
+      setShorts((prev) => prev.map(s => s.id === id ? { ...s, view_count: (s.view_count || 0) + 1 } : s));
     }
   }, []);
 
