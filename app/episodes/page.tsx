@@ -48,7 +48,7 @@ export default async function EpisodesPage() {
       .filter((ep): ep is NonNullable<typeof ep> => ep !== null && ep !== undefined)
       .map((episode, index) => {
         const epId = episode.id || episode.episodeId || index;
-        const epSlug = episode.slug || epId?.toString();
+        const epSlug = epId?.toString();
         const epSeason = episode.season_id || episode.seasonId || 1;
         const rawImage = episode.media?.poster_image?.url || episode.image;
         const epImage = resolveImageUrl(rawImage) || "https://images.unsplash.com/photo-1542281286-9e0a16bb7366?q=80&w=2000&auto=format&fit=crop";
@@ -87,7 +87,7 @@ export default async function EpisodesPage() {
             {episodes.map((episode, index) => {
               if (!episode) return null;
               const epId = episode.id || episode.episodeId || index;
-              const epSlug = episode.slug || epId?.toString();
+              const epSlug = epId?.toString();
               const epSeason = episode.season_id || episode.seasonId || 1;
               const rawImage = episode.media?.card_image?.url || episode.media?.poster_image?.url || episode.image;
               const epImage = resolveImageUrl(rawImage) || "https://images.unsplash.com/photo-1542281286-9e0a16bb7366?q=80&w=800&auto=format&fit=crop";

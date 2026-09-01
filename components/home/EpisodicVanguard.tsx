@@ -67,7 +67,7 @@ export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
           >
             {episodes.map((episode, index) => {
               const epId = episode.id || episode.episodeId;
-              const epSlug = episode.slug || slugify(episode.title);
+              const epSlug = episode.slug || epId.toString();
               const epSeason = episode.season_id || episode.seasonId;
               const epImage = episode.media?.card_image?.url || episode.media?.poster_image?.url || episode.image || `https://picsum.photos/seed/${Number(epId) + 100}/800/450`;
               const epDesc = episode.shortDescription || `Watch the latest episode of ${episode.title}. Experience premium episodic storytelling at its best.`;

@@ -323,7 +323,9 @@ export async function getEpisodes(): Promise<Episode[]> {
 }
 
 export async function getEpisodeById(id: string | number, userId?: string | null): Promise<Episode | null> {
-  const url = `${API_BASE}/episodes/${id}${userId ? `?userId=${userId}` : ''}`;
+  const url = `${API_BASE}/episodes/${encodeURIComponent(id)}${userId ? `?userId=${userId}` : ''}`;
+  console.log(url);
+
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
     if (!res.ok) {
@@ -444,7 +446,7 @@ export async function getMovies(): Promise<Movie[]> {
 }
 
 export async function getMovieBySlug(slug: string, userId?: string | null): Promise<Movie | null> {
-  const url = `${API_BASE}/movies/${slug}${userId ? `?userId=${userId}` : ''}`;
+  const url = `${API_BASE}/movies/${encodeURIComponent(slug)}${userId ? `?userId=${userId}` : ''}`;
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
     if (!res.ok) {

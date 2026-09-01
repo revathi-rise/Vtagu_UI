@@ -58,7 +58,7 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
       if (episode) {
         rating = episode.rating ? episode.rating.toString() : "";
         if (!link) {
-          link = `/episodes/${episode.slug || episode.id}`;
+          link = `/episodes/${episode.id || episode.episodeId}`;
         }
       }
     }

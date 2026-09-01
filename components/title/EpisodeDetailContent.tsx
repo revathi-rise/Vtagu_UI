@@ -71,7 +71,7 @@ export default function EpisodeDetailContent({ episode, iframeSrc }: EpisodeDeta
             {/* Poster */}
             <div className="relative w-full lg:w-[330px] flex-shrink-0 aspect-[4/3] rounded-[2rem] overflow-hidden skeuo-glass-specular shadow-[0_30px_60px_rgba(0,0,0,0.8)]">
               <Image
-                src={episode.media?.card_image?.url || ""}
+                src={episode.media?.card_image?.url || "https://images.unsplash.com/photo-1542281286-9e0a16bb7366?auto=format&fit=crop&q=80&w=800"}
                 alt={episode.title}
                 fill
                 className="object-cover"

@@ -31,7 +31,7 @@ export default function MovieDetailsClient({ movie }: MovieDetailsClientProps) {
           {/* Back Button with Premium Glassmorphism */}
           <Link
             href="/"
-            className="absolute top-30 left-0 flex items-center gap-3 text-white/60 hover:text-white transition-all group"
+            className="w-fit mb-6 flex items-center gap-3 text-white/60 hover:text-white transition-all group"
           >
             <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center bg-white/5 backdrop-blur-md group-hover:bg-white/10 group-hover:border-white/20">
               <ChevronLeft size={22} />
@@ -67,7 +67,7 @@ export default function MovieDetailsClient({ movie }: MovieDetailsClientProps) {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tight leading-none text-white skeuo-title-3d uppercase"
+              className="text-[28px] md:text-[40px] font-mo font-black mb-6 tracking-tight leading-none text-white skeuo-title-3d uppercase"
             >
               {movie.title}
             </motion.h1>
@@ -76,7 +76,7 @@ export default function MovieDetailsClient({ movie }: MovieDetailsClientProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 1 }}
-              className="text-lg lg:text-xl text-white/60 mb-12 leading-relaxed font-medium max-w-2xl tracking-tight [&_p]:inline [&_p]:m-0 [&_p]:p-0"
+              className="text-lg lg:text-xl text-white/60 mb-12 leading-relaxed font-medium max-w-2xl tracking-tight [&_p]:inline [&_p]:m-0 [&_p]:p-0 [&_*]:!bg-transparent"
               dangerouslySetInnerHTML={{ __html: movie.shortDescription }}
             />
 
@@ -125,7 +125,7 @@ export default function MovieDetailsClient({ movie }: MovieDetailsClientProps) {
                   The Storyline
                 </h3>
                 <div
-                  className="text-2xl lg:text-3xl text-white/90 leading-[1.6] font-light tracking-tight space-y-4"
+                  className="text-[24px] text-white/90 leading-[1.6] font-light tracking-tight space-y-4 [&_*]:!bg-transparent"
                   dangerouslySetInnerHTML={{ __html: movie.longDescription }}
                 />
               </div>

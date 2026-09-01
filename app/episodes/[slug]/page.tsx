@@ -90,6 +90,7 @@ export default async function EpisodeDetailsPage({ params }: PageProps) {
         currency={(episode as any).currency || 'INR'}
         movieId={episode.id || (episode as any).episodeId}
         movieTitle={episode.title}
+        contentType="episode"
       />
       {/* Hero — real episode data */}
       <TitleHero

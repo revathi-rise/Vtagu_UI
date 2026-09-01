@@ -11,9 +11,10 @@ interface PaywallProps {
   currency: string;
   movieId: number;
   movieTitle: string;
+  contentType?: 'movie' | 'episode';
 }
 
-export const PaywallGateModal = ({ isOpen, price, currency, movieId, movieTitle }: PaywallProps) => {
+export const PaywallGateModal = ({ isOpen, price, currency, movieId, movieTitle, contentType = 'movie' }: PaywallProps) => {
   if (!isOpen) return null;
 
   return (
@@ -50,7 +51,10 @@ export const PaywallGateModal = ({ isOpen, price, currency, movieId, movieTitle 
                 Unlock {movieTitle}
               </h2>
               <p className="text-white/60 text-sm mt-3 leading-relaxed max-w-sm mx-auto">
-                This choice-driven narrative is premium content. You can purchase lifetime access to this experience or subscribe to get unlimited access to all interactive films.
+                {contentType === 'episode' 
+                  ? "This episode is premium content. You can purchase lifetime access to this episode or subscribe to get unlimited access to all premium series."
+                  : "This choice-driven narrative is premium content. You can purchase lifetime access to this experience or subscribe to get unlimited access to all interactive films."
+                }
               </p>
             </div>
 
@@ -58,11 +62,11 @@ export const PaywallGateModal = ({ isOpen, price, currency, movieId, movieTitle 
               {/* Option 1: Buy Movie Separately (Only if price > 0) */}
               {price > 0 && (
                 <Link
-                  href={`/checkout?type=movie&id=${movieId}`}
+                  href={`/checkout?type=${contentType}&id=${movieId}`}
                   className="flex items-center justify-center gap-3 w-full bg-white hover:bg-white/90 text-black font-black py-4.5 rounded-2xl transition-all duration-300 shadow-lg text-sm uppercase tracking-[0.15em] active:scale-95"
                 >
                   <CreditCard size={18} />
-                  Unlock Movie Separately • {currency} {price}
+                  Unlock {contentType === 'episode' ? 'Episode' : 'Movie'} Separately • {currency} {price}
                 </Link>
               )}
 
@@ -72,7 +76,7 @@ export const PaywallGateModal = ({ isOpen, price, currency, movieId, movieTitle 
                 className="flex items-center justify-center gap-3 w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-95 text-white font-black py-4.5 rounded-2xl transition-all duration-300 shadow-lg text-sm uppercase tracking-[0.15em] active:scale-95"
               >
                 <Sparkles size={18} />
-                Get Interactive Pass (All Movies)
+                Get Premium Pass (All {contentType === 'episode' ? 'Series' : 'Movies'})
               </Link>
             </div>
 

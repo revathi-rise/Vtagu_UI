@@ -41,7 +41,7 @@ export default function EpisodeSection({ episodes = [], currentEpisodeId }: Epis
             .filter((episode): episode is NonNullable<typeof episode> => episode !== null && episode !== undefined)
             .map((episode, index) => {
               const epId = episode.id || episode.episodeId || index;
-              const epSlug = episode.slug || epId.toString();
+              const epSlug = epId.toString();
               const isCurrent = epId === currentEpisodeId;
               
               // Use card_image for grid cards
