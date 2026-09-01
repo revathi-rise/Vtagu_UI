@@ -1,11 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import { Star, Clock, Calendar, Globe, User, Plus, Share2, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Movie } from '@/lib/vtagu.api';
+import { Movie, incrementMovieView } from '@/lib/vtagu.api';
 
 // Components
 import WatchNowButton from '@/components/ui/WatchNowButton';
@@ -16,6 +16,12 @@ interface MovieDetailsClientProps {
 }
 
 export default function MovieDetailsClient({ movie }: MovieDetailsClientProps) {
+  useEffect(() => {
+    if (movie?.id) {
+      incrementMovieView(movie.id);
+    }
+  }, [movie?.id]);
+
   return (
     <main className="min-h-screen bg-[#0B0A10] text-white selection:bg-blue-500/30 font-inter">
       {/* Hero Section with High-Performance Video Background */}

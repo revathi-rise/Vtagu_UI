@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Play, Layers, Film, Maximize2 } from 'lucide-react';
-import { Episode } from '@/lib/vtagu.api';
+import { Episode, incrementEpisodeView } from '@/lib/vtagu.api';
 import VideoPlayerModal from '@/components/ui/VideoPlayerModal';
 
 interface EpisodeDetailContentProps {
@@ -13,6 +13,13 @@ interface EpisodeDetailContentProps {
 
 export default function EpisodeDetailContent({ episode, iframeSrc }: EpisodeDetailContentProps) {
   const [playerOpen, setPlayerOpen] = useState(false);
+
+  useEffect(() => {
+    const epId = episode.id || episode.episodeId;
+    if (epId) {
+      incrementEpisodeView(epId);
+    }
+  }, [episode.id, episode.episodeId]);
 
   const epImage = episode.media?.poster_image?.url || episode.image;
  

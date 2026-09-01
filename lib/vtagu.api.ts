@@ -859,6 +859,26 @@ export async function incrementShortView(id: number): Promise<void> {
   }
 }
 
+/** Public: increment view count for a movie */
+export async function incrementMovieView(id: number): Promise<void> {
+  const url = `${API_BASE}/movies/${id}/view`;
+  try {
+    await fetch(url, { method: 'POST' });
+  } catch {
+    // silently fail
+  }
+}
+
+/** Public: increment view count for an episode */
+export async function incrementEpisodeView(id: number): Promise<void> {
+  const url = `${API_BASE}/episodes/${id}/view`;
+  try {
+    await fetch(url, { method: 'POST' });
+  } catch {
+    // silently fail
+  }
+}
+
 /* ==========================================================================
    Watchlist (My List) API
    ========================================================================== */
