@@ -35,7 +35,7 @@ export async function getGenres(): Promise<Genre[]> {
   const url = `${API_BASE}/genres`;
   
   try {
-    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
 
     if (!res.ok) {
       throw new Error(`Failed to fetch genres. Status: ${res.status}`);
@@ -84,7 +84,7 @@ export async function getPosters(pageType?: string, language?: string, limit?: n
   const fullUrl = `${url}${queryString ? `?${queryString}` : ''}`;
 
   try {
-    const res = await fetchWithRetry(fullUrl, { next: { revalidate: 60 } });
+    const res = await fetchWithRetry(fullUrl, { next: { revalidate: 0 } });
     if (!res.ok) {
         throw new Error(`Failed to fetch posters. Status: ${res.status}`);
     }
@@ -115,7 +115,7 @@ export interface Series {
 export async function getSeries(): Promise<Series[]> {
   const url = `${API_BASE}/series`;
   try {
-    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
       throw new Error(`Failed to fetch series. Status: ${res.status}`);
     }
@@ -218,7 +218,7 @@ export interface Choice {
 export async function getInteractiveMovies(): Promise<InteractiveMovie[]> {
   const url = `${API_BASE}/interactive-movies`;
   try {
-    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });    
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });    
     if (!res.ok) {
       throw new Error(`Failed to fetch interactive movies. Status: ${res.status}`);
     }
@@ -310,7 +310,7 @@ export function normalizeEpisode(episode: any): Episode {
 export async function getEpisodes(): Promise<Episode[]> {
   const url = `${API_BASE}/episodes`;
   try {
-    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
       throw new Error(`Failed to fetch episodes. Status: ${res.status}`);
     }
@@ -327,7 +327,7 @@ export async function getEpisodeById(id: string | number, userId?: string | null
   console.log(url);
 
   try {
-    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
       if (res.status === 404) return null;
       throw new Error(`Failed to fetch episode. Status: ${res.status}`);
@@ -433,7 +433,7 @@ export function normalizeMovie(movie: any): Movie {
 export async function getMovies(): Promise<Movie[]> {
   const url = `${API_BASE}/movies`;
   try {
-    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
       throw new Error(`Failed to fetch movies. Status: ${res.status}`);
     }
@@ -448,7 +448,7 @@ export async function getMovies(): Promise<Movie[]> {
 export async function getMovieBySlug(slug: string, userId?: string | null): Promise<Movie | null> {
   const url = `${API_BASE}/movies/${encodeURIComponent(slug)}${userId ? `?userId=${userId}` : ''}`;
   try {
-    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
         if (res.status === 404) return null;
       throw new Error(`Failed to fetch movie detail. Status: ${res.status}`);
@@ -467,7 +467,7 @@ export async function getMovieBySlug(slug: string, userId?: string | null): Prom
 export async function getTrendingMovies(limit: number = 10): Promise<Movie[]> {
   const url = `${API_BASE}/movies/trending?limit=${limit}`;
   try {
-    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
       throw new Error(`Failed to fetch trending movies. Status: ${res.status}`);
     }
@@ -612,7 +612,7 @@ export interface Plan {
 export async function getPlans(): Promise<Plan[]> {
   const url = `${API_BASE}/plans`;
   try {
-    const res = await fetchWithRetry(url, { next: { revalidate: 3600 } });
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
       throw new Error(`Failed to fetch plans. Status: ${res.status}`);
     }
@@ -643,7 +643,7 @@ export interface LanguageMoviesResponse {
 export async function getLanguages(): Promise<Language[]> {
   const url = `${API_BASE}/languages`;
   try {
-    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
       throw new Error(`Failed to fetch active languages. Status: ${res.status}`);
     }
@@ -660,7 +660,7 @@ export async function getMoviesByLanguage(slug: string): Promise<LanguageMoviesR
   console.log(url,"url");
   
   try {
-    const res = await fetchWithRetry(url, { next: { revalidate: 60 } });
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
       if (res.status === 404) {
         return { 
@@ -768,7 +768,7 @@ export async function getActiveShorts(limit?: number): Promise<Short[]> {
   const params = limit ? `?limit=${limit}` : '';
   const url = `${API_BASE}/shorts/active${params}`;
   try {
-    const res = await fetchWithRetry(url, { next: { revalidate: 300 } }); // 5-min cache
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } }); // No cache
     if (!res.ok) throw new Error(`Failed to fetch active shorts. Status: ${res.status}`);
     const result = await res.json();
     return result.data || [];
