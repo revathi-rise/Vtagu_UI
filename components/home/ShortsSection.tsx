@@ -28,8 +28,8 @@ const ShortsTeaserCard = memo(function ShortsTeaserCard({ short, index }: Shorts
   const handleMouseEnter = useCallback(() => {
     setHovering(true);
     if (!videoSrc) {
-      // First hover: set valid src lazily with CORS-friendly fallback
-      const validUrl = getVideoUrl(short.video_url, short.id?.toString() || 'short', true);
+      // First hover: set valid src lazily
+      const validUrl = getVideoUrl(short.video_url, short.id?.toString() || 'short', false);
       setVideoSrc(validUrl);
     } else {
       // src already set — play directly only if element has enough data

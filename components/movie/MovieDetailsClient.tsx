@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Star, Clock, Calendar, Globe, User, Plus, Share2, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -10,12 +10,16 @@ import { Movie, incrementMovieView } from '@/lib/vtagu.api';
 // Components
 import WatchNowButton from '@/components/ui/WatchNowButton';
 import DynamicBackgroundVideo from '@/components/movie/DynamicBackgroundVideo';
+import { PaywallGateModal } from '@/components/interactive/PaywallGateModal';
 
 interface MovieDetailsClientProps {
   movie: Movie;
+  initialUserId?: string | null;
 }
 
 export default function MovieDetailsClient({ movie }: MovieDetailsClientProps) {
+  const [showPaywallModal, setShowPaywallModal] = useState(false);
+
   useEffect(() => {
     if (movie?.id) {
       incrementMovieView(movie.id);
@@ -24,6 +28,15 @@ export default function MovieDetailsClient({ movie }: MovieDetailsClientProps) {
 
   return (
     <main className="min-h-screen bg-[#0B0A10] text-white selection:bg-blue-500/30 font-inter">
+      <PaywallGateModal
+        isOpen={showPaywallModal}
+        price={(movie as any).price || 0}
+        currency={(movie as any).currency || 'INR'}
+        movieId={movie.id}
+        movieTitle={movie.title}
+        contentType="movie"
+      />
+
       {/* Hero Section with High-Performance Video Background */}
       <div className="relative w-full h-[90vh] lg:h-[100vh] overflow-hidden">
         <DynamicBackgroundVideo
@@ -99,6 +112,7 @@ export default function MovieDetailsClient({ movie }: MovieDetailsClientProps) {
                 contentId={movie.id?.toString() || ""}
                 contentType="movie"
                 internal={true}
+                onLockedClick={() => setShowPaywallModal(true)}
               />
 
               <button className="flex items-center justify-center w-16 h-16 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/20 transition-all group">

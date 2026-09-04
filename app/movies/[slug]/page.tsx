@@ -2,6 +2,8 @@ import React from 'react';
 import { getMovieBySlug, getMovies } from '@/lib/vtagu.api';
 import { notFound } from 'next/navigation';
 import MovieDetailsClient from '@/components/movie/MovieDetailsClient';
+import { cookies } from 'next/headers';
+import { PaywallGateModal } from '@/components/interactive/PaywallGateModal';
 
 interface MovieDetailsPageProps {
   params: Promise<{
@@ -31,11 +33,27 @@ export async function generateStaticParams() {
 
 export default async function MovieDetailsPage({ params }: MovieDetailsPageProps) {
   const { slug } = await params;
-  const movie = await getMovieBySlug(slug);
+  const cookieStore = await cookies();
+  const userId = cookieStore.get('userId')?.value || null;
+  const movie = await getMovieBySlug(slug, userId);
 
   if (!movie) {
     notFound();
   }
 
-  return <MovieDetailsClient movie={movie} />;
+  const showPaywall = !movie.isFree && !movie.videoUrl;
+
+  return (
+    <>
+      <PaywallGateModal
+        isOpen={showPaywall}
+        price={(movie as any).price || 0}
+        currency={(movie as any).currency || 'INR'}
+        movieId={movie.id}
+        movieTitle={movie.title}
+        contentType="movie"
+      />
+      <MovieDetailsClient movie={movie} initialUserId={userId} />
+    </>
+  );
 }
