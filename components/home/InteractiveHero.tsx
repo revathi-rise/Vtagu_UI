@@ -84,7 +84,7 @@ export default function InteractiveGridHero({ interactiveMovies }: InteractiveHe
                         >
                             {displayMovies.map((movie) => {
                                 const isComingSoon = Boolean(Number(movie.is_coming_soon) === 1 || movie.is_coming_soon === true || movie.isComingSoon);
-                                const isFree = Number(movie.is_free) === 1 || Number((movie as any).isFree) === 1 || Number(movie.price) === 0;
+                                const isFree = Number(movie.is_free) === 1 || Number((movie as any).isFree) === 1;
                                 const badgeText = isComingSoon ? undefined : (isFree ? "FREE" : "PAID");
                                 const badgeColor: 'green' | 'purple' = isFree ? "green" : "purple";
 

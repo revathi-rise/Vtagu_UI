@@ -85,7 +85,7 @@ export default async function InteractiveListing() {
                     <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-16 gap-x-8">
                         {movies.map((movie, index) => {
                             const isComingSoon = Boolean(Number(movie.is_coming_soon) === 1 || movie.is_coming_soon === true || movie.isComingSoon);
-                            const isFree = Number(movie.is_free) === 1 || Number((movie as any).isFree) === 1 || Number(movie.price) === 0;
+                            const isFree = Number(movie.is_free) === 1 || Number((movie as any).isFree) === 1;
                             const badgeText = isComingSoon ? undefined : (isFree ? "FREE" : "PAID");
                             const badgeColor: 'green' | 'purple' = isFree ? "green" : "purple";
 

@@ -209,7 +209,7 @@ export const MediaCard = ({
           {description && (
             <div className="hidden sm:block overflow-hidden transition-all duration-300 max-h-0 sm:group-hover/card:max-h-[100px] sm:group-hover/card:mt-2">
               <div 
-                className="text-[11px] text-white/40 line-clamp-4 leading-relaxed font-medium [&_p]:inline [&_p]:m-0 [&_p]:p-0"
+                className="text-[11px] text-white/40 line-clamp-4 leading-relaxed font-medium [&_p]:inline [&_p]:m-0 [&_p]:p-0 [&_*]:!bg-transparent"
                 dangerouslySetInnerHTML={{ __html: description }}
               />
             </div>

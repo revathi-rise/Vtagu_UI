@@ -291,14 +291,21 @@ export interface Episode {
   image?: number | string | null;
 }
 
+const parseBool = (val: any): boolean => {
+  if (val === 1 || val === '1' || val === true || val === 'true') return true;
+  return false;
+};
+
 export function normalizeEpisode(episode: any): Episode {
   if (!episode) return episode;
   return {
     ...episode,
     shortDescription: cleanHtmlString(episode.shortDescription || ""),
     longDescription: cleanHtmlString(episode.longDescription || ""),
-    isComingSoon: Boolean(episode.isComingSoon ?? episode.is_coming_soon ?? false),
-    is_coming_soon: Boolean(episode.isComingSoon ?? episode.is_coming_soon ?? false),
+    isComingSoon: parseBool(episode.isComingSoon ?? episode.is_coming_soon),
+    is_coming_soon: parseBool(episode.isComingSoon ?? episode.is_coming_soon),
+    isFree: parseBool(episode.isFree ?? episode.free ?? episode.is_free),
+    isFeatured: parseBool(episode.isFeatured ?? episode.featured ?? episode.is_featured),
     // Provide backwards compatible fields just in case
     episodeId: episode.id || episode.episodeId,
     seasonId: episode.season_id || episode.seasonId,
@@ -420,8 +427,10 @@ export function normalizeMovie(movie: any): Movie {
     id: movie.id || movie.movie_id || movie.movieId,
     shortDescription: cleanHtmlString(movie.shortDescription || ""),
     longDescription: cleanHtmlString(movie.longDescription || ""),
-    isComingSoon: Boolean(movie.isComingSoon ?? movie.is_coming_soon ?? false),
-    is_coming_soon: Boolean(movie.isComingSoon ?? movie.is_coming_soon ?? false),
+    isComingSoon: parseBool(movie.isComingSoon ?? movie.is_coming_soon),
+    is_coming_soon: parseBool(movie.isComingSoon ?? movie.is_coming_soon),
+    isFree: parseBool(movie.isFree ?? movie.free ?? movie.is_free),
+    isFeatured: parseBool(movie.isFeatured ?? movie.featured ?? movie.is_featured),
     posterImage: movie.media?.card_image?.url || movie.media?.image?.url || movie.posterImage || "",
     videoUrl: movie.media?.video?.url || movie.videoUrl || "",
     trailerUrl: movie.media?.trailer?.url || movie.trailerUrl || "",
