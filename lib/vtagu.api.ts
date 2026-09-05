@@ -223,7 +223,9 @@ export async function getInteractiveMovies(): Promise<InteractiveMovie[]> {
       throw new Error(`Failed to fetch interactive movies. Status: ${res.status}`);
     }
     const result = await res.json();
-    return result.data || [];
+    if (Array.isArray(result.data)) return result.data;
+    if (Array.isArray(result)) return result;
+    return [];
   } catch (err: any) {
     return [];
   }
@@ -238,7 +240,9 @@ export async function getScenes(movieId: number): Promise<Scene[]> {
       throw new Error(`Failed to fetch scenes. Status: ${res.status}`);
     }
     const result = await res.json();
-    return result.data || result;
+    if (Array.isArray(result.data)) return result.data;
+    if (Array.isArray(result)) return result;
+    return [];
   } catch (err: any) {
     return [];
   }
@@ -252,7 +256,9 @@ export async function getChoices(sceneId: number): Promise<Choice[]> {
       throw new Error(`Failed to fetch choices. Status: ${res.status}`);
     }
     const result = await res.json();
-    return result.data || result;
+    if (Array.isArray(result.data)) return result.data;
+    if (Array.isArray(result)) return result;
+    return [];
   } catch (err: any) {
     return [];
   }

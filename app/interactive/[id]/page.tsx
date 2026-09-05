@@ -8,14 +8,24 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const { id } = await params;
-    const movies = await getInteractiveMovies();
-    const movie = movies.find(m => m.interactive_movie_id.toString() === id);
+    try {
+        const { id } = await params;
+        const movies = await getInteractiveMovies();
+        const movie = Array.isArray(movies)
+            ? movies.find(m => m?.interactive_movie_id?.toString() === id || String(m?.interactive_movie_id) === String(id))
+            : null;
 
-    return {
-        title: movie ? `${movie.title} - Interactive Experience` : 'Interactive Experience',
-        description: movie?.description || 'Step into the narrative.',
-    };
+        return {
+            title: movie ? `${movie.title} - Interactive Experience` : 'Interactive Experience',
+            description: movie?.description || 'Step into the narrative.',
+        };
+    } catch (error) {
+        console.error('Error generating metadata for interactive movie:', error);
+        return {
+            title: 'Interactive Experience',
+            description: 'Step into the narrative.',
+        };
+    }
 }
 
 export default async function InteractiveMoviePage({ params }: Props) {
@@ -25,7 +35,9 @@ export default async function InteractiveMoviePage({ params }: Props) {
     try {
         // Fetch all movies to find the specific one (SSR)
         const movies = await getInteractiveMovies();
-        const movie = movies.find(m => m.interactive_movie_id.toString() === id);
+        const movie = Array.isArray(movies)
+            ? movies.find(m => m?.interactive_movie_id?.toString() === id || String(m?.interactive_movie_id) === String(id))
+            : null;
 
         if (!movie) {
             return (
@@ -45,7 +57,7 @@ export default async function InteractiveMoviePage({ params }: Props) {
         return (
             <InteractiveClient
                 movie={movie}
-                initialScenes={scenes}
+                initialScenes={Array.isArray(scenes) ? scenes : []}
             />
         );
     } catch (error) {

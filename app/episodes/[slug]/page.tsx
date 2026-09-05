@@ -80,18 +80,8 @@ export default async function EpisodeDetailsPage({ params }: PageProps) {
       ? epImage
       : 'https://images.unsplash.com/photo-1542281286-9e0a16bb7366?auto=format&fit=crop&q=80&w=1920';
 
-  const showPaywall = !episode.isFree && !iframeSrc;
-
   return (
     <main className="min-h-screen bg-[#0B0A10] text-white">
-      <PaywallGateModal
-        isOpen={showPaywall}
-        price={(episode as any).price || 0}
-        currency={(episode as any).currency || 'INR'}
-        movieId={episode.id || (episode as any).episodeId}
-        movieTitle={episode.title}
-        contentType="episode"
-      />
       {/* Hero — real episode data */}
       <TitleHero
         title={episode.title}

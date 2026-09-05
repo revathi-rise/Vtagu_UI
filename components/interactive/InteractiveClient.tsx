@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Scene, Choice, InteractiveMovie, getChoices, checkMovieAccess } from '@/lib/vtagu.api';
+import { Scene, Choice, InteractiveMovie, getChoices, getScenes, checkMovieAccess } from '@/lib/vtagu.api';
 import { Play, ChevronRight, Zap, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import SceneManager, { SceneManagerHandle } from './SceneManager';
@@ -15,9 +15,10 @@ interface InteractiveClientProps {
 
 export default function InteractiveClient({ movie, initialScenes }: InteractiveClientProps) {
     const managerRef = React.useRef<SceneManagerHandle>(null);
-    const [scenes, setScenes] = useState<Scene[]>(initialScenes);
+    const safeInitialScenes = Array.isArray(initialScenes) ? initialScenes : [];
+    const [scenes, setScenes] = useState<Scene[]>(safeInitialScenes);
     const [currentScene, setCurrentScene] = useState<Scene | null>(
-        initialScenes.find(s => s.is_start) || initialScenes[0] || null
+        safeInitialScenes.find(s => s?.is_start) || safeInitialScenes[0] || null
     );
     const [sceneHistory, setSceneHistory] = useState<Scene[]>([]);
 
@@ -32,11 +33,25 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
     } | null>(null);
     const [checkingAccess, setCheckingAccess] = useState(true);
 
+    // Fallback: If initialScenes is empty, attempt to fetch scenes client-side
+    useEffect(() => {
+        if (scenes.length === 0 && movie?.interactive_movie_id) {
+            getScenes(movie.interactive_movie_id).then((fetchedScenes) => {
+                if (Array.isArray(fetchedScenes) && fetchedScenes.length > 0) {
+                    setScenes(fetchedScenes);
+                    setCurrentScene(fetchedScenes.find(s => s?.is_start) || fetchedScenes[0] || null);
+                }
+            }).catch(err => {
+                console.error("Error fetching scenes client-side:", err);
+            });
+        }
+    }, [movie?.interactive_movie_id, scenes.length]);
+
     const checkAccess = async () => {
         setCheckingAccess(true);
         
         // Immediate client check: If movie is explicitly marked free, play directly without modal
-        const isMovieFree = Number(movie.is_free) === 1 || Number((movie as any).isFree) === 1;
+        const isMovieFree = Number(movie.is_free) === 1 || Number((movie as any).isFree) === 1 || Boolean(movie.is_free) === true || String(movie.is_free) === '1';
         if (isMovieFree) {
             setAccessData({ hasAccess: true, reason: 'free', price: 0, currency: movie.currency || 'INR' });
             setIsAuthorized(true);

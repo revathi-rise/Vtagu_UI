@@ -3,7 +3,6 @@ import { getMovieBySlug, getMovies } from '@/lib/vtagu.api';
 import { notFound } from 'next/navigation';
 import MovieDetailsClient from '@/components/movie/MovieDetailsClient';
 import { cookies } from 'next/headers';
-import { PaywallGateModal } from '@/components/interactive/PaywallGateModal';
 
 interface MovieDetailsPageProps {
   params: Promise<{
@@ -41,19 +40,7 @@ export default async function MovieDetailsPage({ params }: MovieDetailsPageProps
     notFound();
   }
 
-  const showPaywall = !movie.isFree && !movie.videoUrl;
-
   return (
-    <>
-      <PaywallGateModal
-        isOpen={showPaywall}
-        price={(movie as any).price || 0}
-        currency={(movie as any).currency || 'INR'}
-        movieId={movie.id}
-        movieTitle={movie.title}
-        contentType="movie"
-      />
-      <MovieDetailsClient movie={movie} initialUserId={userId} />
-    </>
+    <MovieDetailsClient movie={movie} initialUserId={userId} />
   );
 }
