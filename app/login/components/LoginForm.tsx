@@ -85,6 +85,8 @@ export default function LoginForm() {
 
       if (planId) {
         router.push(`/checkout?plan=${planId}`);
+      } else if (userData && userData.is_subscribed === false) {
+        router.push('/pricing');
       } else {
         router.push('/');
       }
@@ -132,6 +134,8 @@ export default function LoginForm() {
           }
           if (planId) {
             router.push(`/checkout?plan=${planId}`);
+          } else if (userData && userData.is_subscribed === false) {
+            router.push('/pricing');
           } else {
             router.push('/');
           }
