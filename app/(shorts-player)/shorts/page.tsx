@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Short, getActiveShorts, incrementShortView } from '@/lib/vtagu.api';
 import UniversalVideoPlayer, { UniversalVideoPlayerHandle } from '@/components/ui/UniversalVideoPlayer';
 import { getShortThumbnailUrl } from '@/lib/video-utils';
+import { getUserId } from '@/lib/api-client';
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 
@@ -372,7 +373,8 @@ export default function ShortsPage() {
   const countedViews = useRef<Set<number>>(new Set());
 
   useEffect(() => {
-    getActiveShorts().then((data) => {
+    const userId = getUserId();
+    getActiveShorts(undefined, userId).then((data) => {
       setShorts(data);
       setLoading(false);
       

@@ -55,6 +55,13 @@ export const setToken = (token: string) => {
   }
 };
 
+export const setUserId = (userId: string) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('userId', userId);
+    document.cookie = `userId=${userId}; path=/; max-age=86400; SameSite=Lax`;
+  }
+};
+
 export const removeToken = () => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('token');

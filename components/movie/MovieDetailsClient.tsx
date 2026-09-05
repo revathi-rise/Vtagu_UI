@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { Star, Clock, Calendar, Globe, User, Plus, Share2, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Movie, incrementMovieView } from '@/lib/vtagu.api';
+import { Movie, getMovieBySlug, incrementMovieView } from '@/lib/vtagu.api';
+import { getUserId } from '@/lib/api-client';
 
 // Components
 import WatchNowButton from '@/components/ui/WatchNowButton';
@@ -17,14 +18,33 @@ interface MovieDetailsClientProps {
   initialUserId?: string | null;
 }
 
-export default function MovieDetailsClient({ movie }: MovieDetailsClientProps) {
+export default function MovieDetailsClient({ movie: initialMovie }: MovieDetailsClientProps) {
+  const [movie, setMovie] = useState<Movie>(initialMovie);
   const [showPaywallModal, setShowPaywallModal] = useState(false);
+
+  useEffect(() => {
+    setMovie(initialMovie);
+  }, [initialMovie]);
 
   useEffect(() => {
     if (movie?.id) {
       incrementMovieView(movie.id);
     }
   }, [movie?.id]);
+
+  // Client-side re-verification for logged in & subscribed users
+  useEffect(() => {
+    if (!movie.isFree && !movie.videoUrl && movie.slug) {
+      const userId = getUserId();
+      if (userId) {
+        getMovieBySlug(movie.slug, userId).then((freshMovie) => {
+          if (freshMovie && freshMovie.videoUrl) {
+            setMovie(freshMovie);
+          }
+        }).catch(() => {});
+      }
+    }
+  }, [movie.isFree, movie.videoUrl, movie.slug]);
 
   return (
     <main className="min-h-screen bg-[#0B0A10] text-white selection:bg-blue-500/30 font-inter">

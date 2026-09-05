@@ -779,14 +779,19 @@ export interface Short {
 }
 
 /** Public: fetch active shorts — optional limit for home page teaser */
-export async function getActiveShorts(limit?: number): Promise<Short[]> {
-  const params = limit ? `?limit=${limit}` : '';
+export async function getActiveShorts(limit?: number, userId?: string | null): Promise<Short[]> {
+  const queryParts = [];
+  if (limit) queryParts.push(`limit=${limit}`);
+  if (userId) queryParts.push(`userId=${userId}`);
+  const params = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
   const url = `${API_BASE}/shorts/active${params}`;
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 0 } }); // No cache
     if (!res.ok) throw new Error(`Failed to fetch active shorts. Status: ${res.status}`);
     const result = await res.json();
-    return result.data || [];
+    if (Array.isArray(result.data)) return result.data;
+    if (Array.isArray(result)) return result;
+    return [];
   } catch (err: any) {
     console.error('Error fetching active shorts:', err);
     return [];

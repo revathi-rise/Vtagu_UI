@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Play, Layers, Film, Maximize2 } from 'lucide-react';
-import { Episode, incrementEpisodeView } from '@/lib/vtagu.api';
+import { Episode, getEpisodeById, incrementEpisodeView } from '@/lib/vtagu.api';
+import { getUserId } from '@/lib/api-client';
 import VideoPlayerModal from '@/components/ui/VideoPlayerModal';
 
 interface EpisodeDetailContentProps {
@@ -11,8 +12,15 @@ interface EpisodeDetailContentProps {
   iframeSrc: string | null;
 }
 
-export default function EpisodeDetailContent({ episode, iframeSrc }: EpisodeDetailContentProps) {
+export default function EpisodeDetailContent({ episode: initialEpisode, iframeSrc: initialIframeSrc }: EpisodeDetailContentProps) {
+  const [episode, setEpisode] = useState<Episode>(initialEpisode);
+  const [iframeSrc, setIframeSrc] = useState<string | null>(initialIframeSrc);
   const [playerOpen, setPlayerOpen] = useState(false);
+
+  useEffect(() => {
+    setEpisode(initialEpisode);
+    setIframeSrc(initialIframeSrc);
+  }, [initialEpisode, initialIframeSrc]);
 
   useEffect(() => {
     const epId = episode.id || episode.episodeId;
@@ -20,6 +28,25 @@ export default function EpisodeDetailContent({ episode, iframeSrc }: EpisodeDeta
       incrementEpisodeView(epId);
     }
   }, [episode.id, episode.episodeId]);
+
+  // Client-side re-verification for logged-in & subscribed users
+  useEffect(() => {
+    if (!initialIframeSrc && !episode.isFree) {
+      const userId = getUserId();
+      const epSlug = episode.slug || (episode.id || episode.episodeId)?.toString();
+      if (userId && epSlug) {
+        getEpisodeById(epSlug, userId).then((freshEp) => {
+          if (freshEp) {
+            setEpisode(freshEp);
+            const freshUrl = freshEp.media?.video?.url || freshEp.url;
+            if (freshUrl && typeof freshUrl === 'string' && freshUrl.trim() !== '') {
+              setIframeSrc(freshUrl);
+            }
+          }
+        }).catch(() => {});
+      }
+    }
+  }, [initialIframeSrc, episode.isFree, episode.slug, episode.id, episode.episodeId]);
 
   const epImage = episode.media?.poster_image?.url || episode.image;
  
