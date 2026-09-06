@@ -7,25 +7,30 @@ export async function getAccountDetails() {
   const userIdStr = cookieStore.get('userId')?.value;
   const userId = userIdStr ? parseInt(userIdStr, 10) : null;
 
-  if (token && userId) {
+  if (userId) {
     try {
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       // Fetch user profile
       const profileRes = await fetch(`${API_BASE}/users/get-profile/${userId}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers,
         next: { revalidate: 0 }
       });
       const profileData = await profileRes.json();
       
       // Fetch active subscription
       const subRes = await fetch(`${API_BASE}/subscriptions/user/${userId}/active`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers,
         next: { revalidate: 0 }
       });
       const subData = await subRes.json();
 
       // Fetch devices
       const deviceRes = await fetch(`${API_BASE}/user-devices/user/${userId}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers,
         next: { revalidate: 0 }
       });
       const deviceData = await deviceRes.json();
@@ -33,7 +38,13 @@ export async function getAccountDetails() {
       if (profileData?.status && profileData?.data) {
         const user = profileData.data;
         const sub = subData?.data;
+        const activeSub = user.active_subscription || sub;
         const devices = deviceData?.data || [];
+
+        const planName = activeSub?.planName || activeSub?.plan?.name || user.plan || (user.is_subscribed ? "Active Member" : "Free Member");
+        const expiryTimestamp = activeSub?.timestamp_to;
+        const nextBilling = expiryTimestamp ? new Date(expiryTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
+        const amount = activeSub?.paid_amount !== undefined ? `INR ${activeSub.paid_amount}` : (user.plan_price ? `INR ${user.plan_price}` : "Free");
 
         return {
           profile: {
@@ -41,18 +52,21 @@ export async function getAccountDetails() {
             name: user.user_name || "User",
             email: user.email,
             avatarUrl: user.profile_picture || "https://images.unsplash.com/photo-1542204165-65bf26472b9b?q=80&w=300&auto=format&fit=crop",
-            badges: [user.plan || "Free Member"],
+            badges: [planName],
             age: user.age,
             gender: user.gender,
             mobile: user.mobile,
+            is_subscribed: user.is_subscribed,
+            isGuest: false
           },
           billing: {
-            planName: sub?.planId ? `Plan ID: ${sub.planId}` : "No Active Plan",
-            planDescription: user.plan || "Manage your subscription plan",
-            nextBillingDate: sub?.timestamp_to ? new Date(sub.timestamp_to * 1000).toLocaleDateString() : "N/A",
-            amount: sub?.price_amount ? `${sub.currency} ${sub.price_amount}` : "Free",
+            planName: planName,
+            planDescription: user.plan || (user.is_subscribed ? "Active Subscription Plan" : "Manage your subscription plan"),
+            nextBillingDate: nextBilling,
+            amount: amount,
+            is_subscribed: user.is_subscribed,
             paymentMethod: {
-              type: sub?.payment_method || "N/A",
+              type: activeSub?.payment_method || "Online",
               last4: "****",
               nameOnCard: user.user_name || "N/A",
               expiry: "N/A",
@@ -82,10 +96,11 @@ export async function getAccountDetails() {
       isGuest: true
     },
     billing: {
-      planName: "No Plan",
+      planName: "No Active Plan",
       planDescription: "Sign in to see your subscription",
       nextBillingDate: "N/A",
       amount: "N/A",
+      is_subscribed: false,
       paymentMethod: {
         type: "N/A",
         last4: "N/A",
