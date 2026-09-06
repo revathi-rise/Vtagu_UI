@@ -63,10 +63,10 @@ export default function WatchNowButton({
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.98 }}
-          className="relative flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-5 rounded-2xl font-black text-lg transition-colors overflow-hidden group shadow-[0_20px_50px_rgba(59,130,246,0.3)]"
+          className="relative flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-[12px] rounded-2xl font-black text-[18px] font-inter tracking-tight uppercase transition-all duration-300 overflow-hidden group shadow-[0_20px_50px_rgba(59,130,246,0.3)] active:scale-95"
         >
-          <Lock size={24} className="transition-transform group-hover:scale-110" />
-          <span className="tracking-tight uppercase">Subscribe to Watch</span>
+          <Lock size={22} className="transition-transform group-hover:scale-110" />
+          <span className="font-inter font-black text-[18px] tracking-tight uppercase">Subscribe to Watch</span>
         </motion.button>
       </Link>
     );
@@ -80,13 +80,11 @@ export default function WatchNowButton({
         rel="noopener noreferrer"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.98 }}
-        className="relative flex items-center gap-3 bg-white text-black px-8 py-5 rounded-2xl font-black text-lg transition-colors overflow-hidden group shadow-[0_20px_50px_rgba(255,255,255,0.15)]"
+        className="relative flex items-center justify-center gap-3 bg-white text-black px-8 py-[12px] rounded-2xl font-black text-[18px] font-inter tracking-tight uppercase transition-all duration-300 overflow-hidden group shadow-[0_20px_50px_rgba(255,255,255,0.15)] active:scale-95"
       >
-        {/* Shimmer Effect */}
         <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-black/5 to-transparent pointer-events-none" />
-
-        <Play size={24} className="fill-current transition-transform group-hover:scale-110" />
-        <span className="tracking-tight uppercase">WATCH NOW</span>
+        <Play size={22} className="fill-current transition-transform group-hover:scale-110" />
+        <span className="font-inter font-black text-[18px] tracking-tight uppercase">WATCH NOW</span>
       </motion.a>
     );
   }
@@ -97,13 +95,13 @@ export default function WatchNowButton({
         onClick={handleClick}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.98 }}
-        className="relative flex items-center gap-3 bg-white text-black px-8 py-5 rounded-2xl font-black text-lg transition-colors overflow-hidden group shadow-[0_20px_50px_rgba(255,255,255,0.15)]"
+        className="relative flex items-center justify-center gap-3 bg-white text-black px-8 py-[12px] rounded-2xl font-black text-[18px] font-inter tracking-tight uppercase transition-all duration-300 overflow-hidden group shadow-[0_20px_50px_rgba(255,255,255,0.15)] active:scale-95"
       >
         {/* Shimmer Effect */}
         <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-black/5 to-transparent pointer-events-none" />
 
-        <Play size={24} className="fill-current transition-transform group-hover:scale-110" />
-        <span className="tracking-tight uppercase">WATCH NOW</span>
+        <Play size={22} className="fill-current transition-transform group-hover:scale-110" />
+        <span className="font-inter font-black text-[18px] tracking-tight uppercase">WATCH NOW</span>
       </motion.button>
 
       <VideoPlayerModal

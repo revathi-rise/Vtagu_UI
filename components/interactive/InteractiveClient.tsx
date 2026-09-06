@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Scene, Choice, InteractiveMovie, getChoices, getScenes, checkMovieAccess } from '@/lib/vtagu.api';
-import { Play, ChevronRight, Zap, ArrowRight } from 'lucide-react';
+import { Play, ChevronRight, Zap, ArrowRight, Lock } from 'lucide-react';
 import Image from 'next/image';
 import SceneManager, { SceneManagerHandle } from './SceneManager';
 import { PaywallGateModal } from './PaywallGateModal';
@@ -25,6 +25,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
     const [choices, setChoices] = useState<Choice[]>([]);
     const [loadingChoices, setLoadingChoices] = useState(false);
     const [isAuthorized, setIsAuthorized] = useState(false);
+    const [showPaywallModal, setShowPaywallModal] = useState(false);
     const [accessData, setAccessData] = useState<{
         hasAccess: boolean;
         reason: 'free' | 'subscription' | 'single_purchase' | 'none';
@@ -139,17 +140,17 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
     return (
         <>
             <PaywallGateModal
-                isOpen={!isAuthorized}
+                isOpen={showPaywallModal}
                 price={accessData?.price || 0}
                 currency={accessData?.currency || 'INR'}
                 movieId={movie.interactive_movie_id}
                 movieTitle={movie.title}
             />
 
-            {isAuthorized && (
-                <main className="min-h-screen bg-[#0c0816] text-white overflow-x-hidden ">
-                    {/* Hero Section */}
-                    <div className="relative w-full h-[500px] md:h-[650px] lg:h-[750px] overflow-hidden">                <div className="absolute inset-0 z-0">
+            <main className="min-h-screen bg-[#0c0816] text-white overflow-x-hidden">
+                {/* Hero Section */}
+                <div className="relative w-full h-[500px] md:h-[650px] lg:h-[750px] overflow-hidden">
+                    <div className="absolute inset-0 z-0">
                         <Image
                             src={movie.banner_image || "/journey_of_ashwin_banner_img.png"}
                             alt={movie.title}
@@ -160,42 +161,53 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0c0816]/60 to-[#0c0816]" />
                     </div>
 
-                        <div className="relative z-10 max-w-[90%] mx-auto h-full flex flex-col justify-end pb-16">
-                            <div className="inline-flex items-center gap-2 bg-cyan-400 text-black px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest mb-6 w-fit shadow-lg shadow-cyan-400/20 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                                <Zap size={14} fill="black" />
-                                Interactive Original
+                    <div className="relative z-10 max-w-[90%] mx-auto h-full flex flex-col justify-end pb-16">
+                        <div className="inline-flex items-center gap-2 bg-cyan-400 text-black px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest mb-6 w-fit shadow-lg shadow-cyan-400/20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <Zap size={14} fill="black" />
+                            Interactive Original
+                        </div>
+                        <h1 className="text-[28px] md:text-[40px] font-bold mb-3 tracking-tighter animate-in fade-in slide-in-from-bottom-6 duration-1000">
+                            {movie.title}
+                        </h1>
+                        {movie.languages && (
+                            <div className="text-cyan-400 font-bold uppercase tracking-[0.25em] text-xs md:text-sm mb-6 animate-in fade-in slide-in-from-bottom-7 duration-1000">
+                                Available in: {movie.languages}
                             </div>
-                            <h1 className="text-[28px] md:text-[40px] font-bold mb-3 tracking-tighter animate-in fade-in slide-in-from-bottom-6 duration-1000">
-                                {movie.title}
-                            </h1>
-                            {movie.languages && (
-                                <div className="text-cyan-400 font-bold uppercase tracking-[0.25em] text-xs md:text-sm mb-6 animate-in fade-in slide-in-from-bottom-7 duration-1000">
-                                    Available in: {movie.languages}
-                                </div>
-                            )}
-                            <p className="text-white/60 text-[18px] line-clamp-3 max-w-3xl leading-relaxed mb-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                                {movie.description}
-                            </p>
+                        )}
+                        <p className="text-white/60 text-[18px] line-clamp-3 max-w-3xl leading-relaxed mb-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                            {movie.description}
+                        </p>
 
-                            <div className="flex flex-wrap gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                        <div className="flex flex-wrap gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                            {isAuthorized ? (
                                 <button
                                     onClick={handleRestart}
-                                    className="flex items-center gap-4 bg-white text-black px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-cyan-400 transition-all shadow-2xl shadow-white/5 active:scale-95 group"
+                                    className="flex items-center gap-3 bg-white text-black px-8 py-[12px] rounded-2xl font-black text-[18px] font-inter uppercase tracking-tight hover:bg-cyan-400 transition-all shadow-2xl shadow-white/5 active:scale-95 group"
                                 >
-                                    <Play size={20} fill="black" />
-                                    Begin Narrative
-                                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                    <Play size={22} fill="black" />
+                                    <span className="font-inter font-black text-[18px]">Begin Narrative</span>
+                                    <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
                                 </button>
-                            </div>
+                            ) : (
+                                <button
+                                    onClick={() => setShowPaywallModal(true)}
+                                    className="relative flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-[12px] rounded-2xl font-black text-[18px] font-inter tracking-tight uppercase transition-all duration-300 overflow-hidden group shadow-[0_20px_50px_rgba(59,130,246,0.3)] active:scale-95"
+                                >
+                                    <Lock size={22} className="transition-transform group-hover:scale-110" />
+                                    <span className="font-inter font-black text-[18px] tracking-tight uppercase">Subscribe to Watch</span>
+                                </button>
+                            )}
                         </div>
                     </div>
+                </div>
 
-                    {/* Content Section - Simplified (Removed Sidebar) */}
-                    <div className="max-w-[90%] mx-auto md:py-24 py-12">
-                        <div className="max-w-6xl mx-auto space-y-20">
+                {/* Content Section */}
+                <div className="max-w-[90%] mx-auto md:py-24 py-12">
+                    <div className="max-w-6xl mx-auto space-y-20">
 
-                            {/* Scene Manager - Centered & Expanded */}
-                            <div className="animate-in fade-in zoom-in duration-1000">
+                        {/* Scene Manager / Locked Banner */}
+                        <div className="animate-in fade-in zoom-in duration-1000">
+                            {isAuthorized ? (
                                 <SceneManager
                                     ref={managerRef}
                                     currentScene={currentScene}
@@ -205,7 +217,27 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                                     onPrevious={handlePrevious}
                                     hasPrevious={sceneHistory.length > 0}
                                 />
-                            </div>
+                            ) : (
+                                <div className="p-12 rounded-[2.5rem] bg-white/5 border border-white/10 flex flex-col items-center justify-center text-center gap-6 backdrop-blur-xl">
+                                    <div className="w-16 h-16 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                                        <Lock size={32} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-2xl font-black text-white uppercase tracking-tight">Premium Interactive Experience</h3>
+                                        <p className="text-white/60 max-w-md text-base leading-relaxed">
+                                            Unlock full interactive choices and shape the outcome of {movie.title} with a PrimeTime subscription.
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowPaywallModal(true)}
+                                        className="flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-[12px] rounded-2xl font-black text-[18px] font-inter tracking-tight uppercase transition-all duration-300 shadow-[0_20px_50px_rgba(59,130,246,0.3)] active:scale-95"
+                                    >
+                                        <Lock size={22} />
+                                        <span className="font-inter font-black text-[18px] tracking-tight uppercase">Subscribe to Watch</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
 
                             {/* Movie Info Grid - New Section to replace Map */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10">
@@ -251,7 +283,6 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                 }
             `}</style>
                 </main>
-            )}
         </>
     );
 }

@@ -6,6 +6,7 @@ import { Play, Layers, Film, Maximize2 } from 'lucide-react';
 import { Episode, getEpisodeById, incrementEpisodeView } from '@/lib/vtagu.api';
 import { getUserId } from '@/lib/api-client';
 import VideoPlayerModal from '@/components/ui/VideoPlayerModal';
+import WatchNowButton from '@/components/ui/WatchNowButton';
 
 interface EpisodeDetailContentProps {
   episode: Episode;
@@ -166,19 +167,19 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
                 {iframeSrc ? (
                   <button
                     onClick={() => setPlayerOpen(true)}
-                    className="bg-primary text-black px-8 py-4 rounded-full text-sm font-black uppercase tracking-widest flex items-center gap-3 hover:bg-primary/90 hover:shadow-[0_0_25px_rgba(50,153,255,0.4)] transition-all duration-300 group relative overflow-hidden active:scale-95 shadow-xl"
+                    className="bg-primary text-black px-8 py-[12px] rounded-2xl text-[18px] font-black font-inter uppercase tracking-tight flex items-center gap-3 hover:bg-primary/90 hover:shadow-[0_0_25px_rgba(50,153,255,0.4)] transition-all duration-300 group relative overflow-hidden active:scale-95 shadow-xl"
                   >
-                    <Play size={20} fill="black" className="group-hover:scale-110 transition-transform relative z-10" />
-                    <span className="relative z-10">Watch Fullscreen</span>
+                    <Play size={22} fill="black" className="group-hover:scale-110 transition-transform relative z-10" />
+                    <span className="relative z-10 font-inter font-black text-[18px]">Watch Fullscreen</span>
                   </button>
                 ) : (
-                  <button
-                    disabled
-                    className="px-8 py-4 rounded-full text-sm font-black uppercase tracking-widest flex items-center gap-3 bg-white/5 text-white/30 border border-white/10 cursor-not-allowed"
-                  >
-                    <Play size={20} />
-                    Coming Soon
-                  </button>
+                  <WatchNowButton
+                    url={iframeSrc}
+                    title={episode.title}
+                    contentId={(episode.id || episode.episodeId || "").toString()}
+                    contentType="episode"
+                    internal={true}
+                  />
                 )}
                 {episode.media?.trailer?.url && (
                   <button

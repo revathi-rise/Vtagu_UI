@@ -87,8 +87,9 @@ export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
                       isComingSoon={episode.isComingSoon || episode.is_coming_soon}
                       subtitle={`S${epSeason} • EPISODE`}
                       description={epDesc}
-                      badge={episode.isFeatured ? "FEATURED" : "PREMIUM"}
-                      badgeColor={episode.isFeatured ? "purple" : "orange"}
+                      badge={episode.isFree ? "FREE" : (episode.isFeatured ? "FEATURED" : "PAID")}
+                      badgeColor={episode.isFree ? "green" : (episode.isFeatured ? "purple" : "orange")}
+                      isFree={episode.isFree}
                       infoLabel="EPISODE"
                       duration={episode.duration}
                       rating={episode.rating}

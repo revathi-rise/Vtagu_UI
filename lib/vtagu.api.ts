@@ -438,7 +438,9 @@ export function normalizeMovie(movie: any): Movie {
     isFree: parseBool(movie.isFree ?? movie.free ?? movie.is_free),
     isFeatured: parseBool(movie.isFeatured ?? movie.featured ?? movie.is_featured),
     posterImage: movie.media?.card_image?.url || movie.media?.image?.url || movie.posterImage || "",
-    videoUrl: movie.media?.video?.url || movie.videoUrl || "",
+    videoUrl: (movie.media && movie.media.video && typeof movie.media.video.url === 'string') 
+      ? movie.media.video.url 
+      : (movie.videoUrl || ""),
     trailerUrl: movie.media?.trailer?.url || movie.trailerUrl || "",
     posterAlt: movie.media?.card_image?.alt || movie.media?.image?.alt || movie.posterAlt || "",
     trailerAlt: movie.media?.trailer?.alt || movie.trailerAlt || "",

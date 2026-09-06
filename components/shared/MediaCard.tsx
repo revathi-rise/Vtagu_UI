@@ -14,6 +14,7 @@ interface MediaCardProps {
   description?: string;
   badge?: string;
   badgeColor?: 'blue' | 'green' | 'orange' | 'purple';
+  isFree?: boolean;
   rating?: number | string;
   duration?: string;
   year?: string | number;
@@ -34,6 +35,7 @@ export const MediaCard = ({
   description,
   badge,
   badgeColor = 'orange',
+  isFree,
   rating,
   duration,
   year,
@@ -156,14 +158,21 @@ export const MediaCard = ({
                   Coming Soon
                 </span>
               )}
-              {badge && (
+              {badge ? (
                 <span className={cn(
                   "text-[9px] font-black uppercase px-2.5 py-1 rounded-md text-white tracking-widest",
-                  badgeColors[badgeColor]
+                  badgeColors[badgeColor] || "bg-primary shadow-[0_0_15px_rgba(50,153,255,0.5)]"
                 )}>
                   {badge}
                 </span>
-              )}
+              ) : isFree !== undefined ? (
+                <span className={cn(
+                  "text-[9px] font-black uppercase px-2.5 py-1 rounded-md text-white tracking-widest shadow-md",
+                  isFree ? "bg-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.5)]" : "bg-gradient-to-r from-blue-600 to-indigo-600 shadow-[0_0_15px_rgba(59,130,246,0.6)]"
+                )}>
+                  {isFree ? 'FREE' : 'PAID'}
+                </span>
+              ) : null}
             </div>
             {rating && (
               <div className="flex items-center gap-1 bg-black/80 backdrop-blur-md px-2 py-1 rounded-md text-[10px] font-bold text-yellow-400 border border-white/10 ml-auto">
