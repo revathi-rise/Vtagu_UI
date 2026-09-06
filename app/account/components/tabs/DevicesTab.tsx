@@ -1,16 +1,57 @@
-'use client';
-
-import React, { useState } from 'react';
-import { Laptop, Monitor, Smartphone, LogOut, Loader2, ShieldCheck } from 'lucide-react';
-import { devicesApi } from '@/lib/api/devices.api';
+import React, { useState, useEffect } from 'react';
+import { Laptop, Monitor, Smartphone, LogOut, Loader2, ShieldCheck, RefreshCw } from 'lucide-react';
+import { devicesApi, getOrCreateDeviceId } from '@/lib/api/devices.api';
 import { getUserId } from '@/lib/api-client';
 import { useAlert } from '@/components/shared/CustomAlertModal';
 
 export default function DevicesTab({ devices: initialDevices }: { devices: any[] }) {
   const [deviceList, setDeviceList] = useState<any[]>(initialDevices || []);
   const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [isLoadingDevices, setIsLoadingDevices] = useState(false);
   const [isLoggingOutOthers, setIsLoggingOutOthers] = useState(false);
   const { showAlert } = useAlert();
+
+  const fetchAndRegisterDevices = async () => {
+    const userIdStr = getUserId();
+    if (!userIdStr) return;
+    const userId = parseInt(userIdStr, 10);
+    const currentDeviceId = getOrCreateDeviceId();
+
+    setIsLoadingDevices(true);
+    try {
+      // 1. Auto-register / update current browser device
+      await devicesApi.registerCurrentDevice(userId);
+
+      // 2. Fetch active devices for user
+      const res = await devicesApi.getActive(userId);
+      const devices = res?.data || [];
+
+      // 3. Map devices and flag current browser session
+      const mapped = devices.map((d: any) => {
+        const isCurrent = d.device_id === currentDeviceId;
+        return {
+          id: d.id,
+          device_id: d.device_id,
+          name: d.device_name || `${d.os || 'Browser'} Device`,
+          type: d.device_type || 'desktop',
+          os: d.os,
+          ip_address: d.ip_address,
+          status: isCurrent ? 'Current Device' : (d.is_active ? 'Active' : 'Inactive'),
+          isCurrent,
+        };
+      });
+
+      setDeviceList(mapped);
+    } catch (err) {
+      console.error('Error fetching or registering devices:', err);
+    } finally {
+      setIsLoadingDevices(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAndRegisterDevices();
+  }, []);
 
   const renderIcon = (type: string) => {
     switch (type?.toLowerCase()) {
@@ -44,14 +85,13 @@ export default function DevicesTab({ devices: initialDevices }: { devices: any[]
     const userIdStr = getUserId();
     if (!userIdStr) return;
     const userId = parseInt(userIdStr, 10);
-    const currentDevice = deviceList.find(d => d.isCurrent || d.status?.toLowerCase().includes('current'));
-    const currentDeviceId = currentDevice?.device_uuid || currentDevice?.deviceId || 'current';
+    const currentDeviceId = getOrCreateDeviceId();
 
     setIsLoggingOutOthers(true);
     try {
       const res = await devicesApi.logoutOthers(userId, currentDeviceId);
       if (res.status) {
-        setDeviceList(prev => prev.filter(d => d.isCurrent || d.status?.toLowerCase().includes('current')));
+        setDeviceList(prev => prev.filter(d => d.isCurrent));
         showAlert({ title: "Devices Logged Out", message: "Logged out of all other device sessions.", type: "success" });
       } else {
         showAlert({ title: "Action Failed", message: res.message || "Failed to log out other devices.", type: "error" });

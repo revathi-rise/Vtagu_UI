@@ -1,13 +1,12 @@
-"use client";
 import React, { useState, useEffect } from 'react';
-import { Star, Wifi, CheckCircle2, Loader2, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Star, Wifi, CheckCircle2, Loader2, Sparkles, ArrowRight, ShieldCheck, Laptop } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api/auth.api';
 import { getPlans, Plan } from '@/lib/vtagu.api';
 
 export default function BillingTab({ billing }: { billing: any }) {
   const router = useRouter();
-  const [currentBilling, setCurrentBilling] = useState(billing);
+  const [currentBilling, setCurrentBilling] = useState<any>(billing || {});
   const [isChangingPlan, setIsChangingPlan] = useState(false);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
@@ -26,6 +25,10 @@ export default function BillingTab({ billing }: { billing: any }) {
           const nextBilling = expiryTimestamp ? new Date(expiryTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
           const amount = user.plan_price ? `INR ${user.plan_price}` : (activeSub?.paid_amount ? `INR ${activeSub.paid_amount}` : "Free");
 
+          const screens = activeSub?.screens || (user.plan?.toLowerCase().includes('premium') ? 4 : 2);
+          const quality = activeSub?.quality || (user.plan?.toLowerCase().includes('premium') ? '4K Ultra HD + HDR' : 'HD 1080p');
+          const isInteractiveIncluded = activeSub?.isInteractiveIncluded !== undefined ? activeSub.isInteractiveIncluded : true;
+
           const cardNum = user.card_number || "";
           const last4Str = cardNum ? (cardNum.length >= 4 ? cardNum.slice(-4) : cardNum) : "****";
 
@@ -34,6 +37,9 @@ export default function BillingTab({ billing }: { billing: any }) {
             planDescription: user.plan || (user.is_subscribed ? "Active Subscription Plan" : "Manage your subscription plan"),
             nextBillingDate: nextBilling,
             amount,
+            screens,
+            quality,
+            isInteractiveIncluded,
             is_subscribed: user.is_subscribed,
             paymentMethod: {
               type: activeSub?.payment_method || (user.upi ? "UPI" : "Online Payment"),
@@ -58,6 +64,10 @@ export default function BillingTab({ billing }: { billing: any }) {
             const nextBilling = expiryTimestamp ? new Date(expiryTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
             const amount = user.plan_price ? `INR ${user.plan_price}` : (activeSub?.paid_amount ? `INR ${activeSub.paid_amount}` : "Free");
 
+            const screens = activeSub?.screens || (user.plan?.toLowerCase().includes('premium') ? 4 : 2);
+            const quality = activeSub?.quality || (user.plan?.toLowerCase().includes('premium') ? '4K Ultra HD + HDR' : 'HD 1080p');
+            const isInteractiveIncluded = activeSub?.isInteractiveIncluded !== undefined ? activeSub.isInteractiveIncluded : true;
+
             const cardNum = user.card_number || "";
             const last4Str = cardNum ? (cardNum.length >= 4 ? cardNum.slice(-4) : cardNum) : "****";
 
@@ -66,6 +76,9 @@ export default function BillingTab({ billing }: { billing: any }) {
               planDescription: user.plan || (user.is_subscribed ? "Active Subscription Plan" : "Manage your subscription plan"),
               nextBillingDate: nextBilling,
               amount,
+              screens,
+              quality,
+              isInteractiveIncluded,
               is_subscribed: user.is_subscribed,
               paymentMethod: {
                 type: activeSub?.payment_method || (user.upi ? "UPI" : "Online Payment"),
@@ -224,10 +237,32 @@ export default function BillingTab({ billing }: { billing: any }) {
           </div>
 
           <h3 className="text-2xl font-bold text-white mb-1">{currentBilling.planName}</h3>
-          <p className="text-gray-400 text-sm mb-8 font-medium">{currentBilling.planDescription}</p>
+          <p className="text-gray-400 text-sm mb-6 font-medium">{currentBilling.planDescription}</p>
+
+          {/* Full Plan Details Breakdown */}
+          <div className="bg-[#25183d]/60 border border-[#9248FF]/20 rounded-xl p-4 mb-6 space-y-3">
+            <div className="flex items-center justify-between text-xs sm:text-sm">
+              <span className="text-gray-300 flex items-center gap-2 font-medium">
+                <Laptop size={16} className="text-[#b28cff]" /> Device / Screen Limit
+              </span>
+              <span className="text-white font-extrabold">{currentBilling.screens} Device{currentBilling.screens > 1 ? 's' : ''} Allowed</span>
+            </div>
+            <div className="flex items-center justify-between text-xs sm:text-sm">
+              <span className="text-gray-300 flex items-center gap-2 font-medium">
+                <CheckCircle2 size={16} className="text-[#b28cff]" /> Video Quality
+              </span>
+              <span className="text-white font-extrabold">{currentBilling.quality}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs sm:text-sm">
+              <span className="text-gray-300 flex items-center gap-2 font-medium">
+                <Sparkles size={16} className="text-[#b28cff]" /> Interactive Originals
+              </span>
+              <span className="text-white font-extrabold">{currentBilling.isInteractiveIncluded ? 'Included' : 'Standard'}</span>
+            </div>
+          </div>
 
           <div className="flex items-center justify-between text-sm mb-3">
-            <span className="text-gray-400 font-medium">Next Billing</span>
+            <span className="text-gray-400 font-medium">Next Billing / Expiration</span>
             <span className="text-white font-bold">{currentBilling.nextBillingDate}</span>
           </div>
           <div className="flex items-center justify-between text-sm mb-8">

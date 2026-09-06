@@ -6,7 +6,67 @@ export interface ApiResponse {
   data?: any;
 }
 
+export function getOrCreateDeviceId(): string {
+  if (typeof window === 'undefined') return 'server-device';
+  let deviceId = localStorage.getItem('vtagu_device_id');
+  if (!deviceId) {
+    deviceId = 'dev_' + Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
+    localStorage.setItem('vtagu_device_id', deviceId);
+  }
+  return deviceId;
+}
+
+export function detectDeviceInfo() {
+  if (typeof window === 'undefined') {
+    return { name: 'Unknown Device', type: 'desktop', os: 'Unknown' };
+  }
+  const ua = navigator.userAgent;
+  let os = 'Windows';
+  if (ua.includes('Mac OS')) os = 'macOS';
+  else if (ua.includes('Android')) os = 'Android';
+  else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+  else if (ua.includes('Linux')) os = 'Linux';
+
+  let type = 'desktop';
+  if (/Mobi|Android|iPhone|iPad/i.test(ua)) {
+    type = /iPad|Tablet/i.test(ua) ? 'tablet' : 'mobile';
+  }
+
+  let browser = 'Browser';
+  if (ua.includes('Chrome')) browser = 'Chrome';
+  else if (ua.includes('Safari')) browser = 'Safari';
+  else if (ua.includes('Firefox')) browser = 'Firefox';
+  else if (ua.includes('Edg')) browser = 'Edge';
+
+  const name = `${browser} on ${os}`;
+  return { name, type, os, user_agent: ua };
+}
+
 export const devicesApi = {
+  // Register Current Device Session
+  registerCurrentDevice: async (userId: number): Promise<ApiResponse | null> => {
+    try {
+      const device_id = getOrCreateDeviceId();
+      const info = detectDeviceInfo();
+      const payload = {
+        userId,
+        device_id,
+        device_name: info.name,
+        device_type: info.type,
+        os: info.os,
+        user_agent: info.user_agent,
+      };
+      const url = `${API_BASE}/user-devices/register`;
+      const res = await fetchWithAuth(url, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      return res.json();
+    } catch (err) {
+      console.error('Failed to register current device session:', err);
+      return null;
+    }
+  },
   // Register Device
   register: async (data: any): Promise<ApiResponse> => {
     const url = `${API_BASE}/user-devices/register`;
