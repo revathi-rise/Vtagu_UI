@@ -116,15 +116,18 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
   if (items.length === 0) return null;
 
   const [videoError, setVideoError] = useState(false);
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false);
 
   const nextSlide = React.useCallback(() => {
     setActiveIndex((prev) => (prev + 1) % items.length);
     setVideoError(false);
+    setIsPlayingVideo(false);
   }, [items.length]);
 
   const prevSlide = React.useCallback(() => {
     setActiveIndex((prev) => (prev - 1 + items.length) % items.length);
     setVideoError(false);
+    setIsPlayingVideo(false);
   }, [items.length]);
 
   React.useEffect(() => {
@@ -153,7 +156,7 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
           transition={{ duration: 1.2, ease: "easeOut" }}
           className="absolute inset-0"
         >
-          {currentItem.trailerUrl ? (
+          {isPlayingVideo && currentItem.trailerUrl ? (
             <video
               src={currentItem.trailerUrl}
               autoPlay
@@ -299,11 +302,18 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
         <div className="flex gap-2 sm:gap-3 items-center">
           {currentItem.trailerUrl && (
             <button
-              onClick={() => setIsMuted(!isMuted)}
+              onClick={() => {
+                if (!isPlayingVideo) {
+                  setIsPlayingVideo(true);
+                  setIsMuted(false);
+                } else {
+                  setIsMuted(!isMuted);
+                }
+              }}
               className="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass-morphism flex items-center justify-center text-white hover:text-white hover:bg-white/10 transition-all border border-white/10 shadow-xl mr-2"
-              title={isMuted ? "Unmute Trailer" : "Mute Trailer"}
+              title={!isPlayingVideo ? "Play Trailer" : (isMuted ? "Unmute Trailer" : "Mute Trailer")}
             >
-              {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+              {!isPlayingVideo ? <Play size={18} fill="white" /> : (isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />)}
             </button>
           )}
           <button 

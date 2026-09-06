@@ -26,6 +26,9 @@ export default function BillingTab({ billing }: { billing: any }) {
           const nextBilling = expiryTimestamp ? new Date(expiryTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
           const amount = user.plan_price ? `INR ${user.plan_price}` : (activeSub?.paid_amount ? `INR ${activeSub.paid_amount}` : "Free");
 
+          const cardNum = user.card_number || "";
+          const last4Str = cardNum ? (cardNum.length >= 4 ? cardNum.slice(-4) : cardNum) : "****";
+
           setCurrentBilling({
             planName,
             planDescription: user.plan || (user.is_subscribed ? "Active Subscription Plan" : "Manage your subscription plan"),
@@ -33,10 +36,10 @@ export default function BillingTab({ billing }: { billing: any }) {
             amount,
             is_subscribed: user.is_subscribed,
             paymentMethod: {
-              type: activeSub?.payment_method || "Online Payment",
-              last4: "****",
-              nameOnCard: user.user_name || "N/A",
-              expiry: "N/A",
+              type: activeSub?.payment_method || (user.upi ? "UPI" : "Online Payment"),
+              last4: last4Str,
+              nameOnCard: user.card_name || user.user_name || "N/A",
+              expiry: user.card_expiry || "N/A",
             }
           });
         } catch (e) {
@@ -55,6 +58,9 @@ export default function BillingTab({ billing }: { billing: any }) {
             const nextBilling = expiryTimestamp ? new Date(expiryTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
             const amount = user.plan_price ? `INR ${user.plan_price}` : (activeSub?.paid_amount ? `INR ${activeSub.paid_amount}` : "Free");
 
+            const cardNum = user.card_number || "";
+            const last4Str = cardNum ? (cardNum.length >= 4 ? cardNum.slice(-4) : cardNum) : "****";
+
             setCurrentBilling({
               planName,
               planDescription: user.plan || (user.is_subscribed ? "Active Subscription Plan" : "Manage your subscription plan"),
@@ -62,10 +68,10 @@ export default function BillingTab({ billing }: { billing: any }) {
               amount,
               is_subscribed: user.is_subscribed,
               paymentMethod: {
-                type: activeSub?.payment_method || "Online Payment",
-                last4: "****",
-                nameOnCard: user.user_name || "N/A",
-                expiry: "N/A",
+                type: activeSub?.payment_method || (user.upi ? "UPI" : "Online Payment"),
+                last4: last4Str,
+                nameOnCard: user.card_name || user.user_name || "N/A",
+                expiry: user.card_expiry || "N/A",
               }
             });
             localStorage.setItem('user', JSON.stringify(user));
