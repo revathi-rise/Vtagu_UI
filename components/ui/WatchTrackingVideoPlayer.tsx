@@ -5,6 +5,7 @@ import UniversalVideoPlayer, { UniversalVideoPlayerHandle } from './UniversalVid
 import { useWatchProgress } from '@/hooks/useWatchProgress';
 import { getUserId } from '@/lib/api-client';
 import { useConcurrentSessions } from '@/hooks/useConcurrentSessions';
+import { useSvodRevenueTracker } from '@/hooks/useSvodRevenueTracker';
 
 // For backward compatibility
 export type VideoPlayerHandle = UniversalVideoPlayerHandle;
@@ -57,6 +58,14 @@ const WatchTrackingVideoPlayer = React.forwardRef<
     const [localUserId, setLocalUserId] = useState<string | undefined>(userId);
     const videoPlayerRef = useRef<UniversalVideoPlayerHandle>(null);
     const hasResumedRef = useRef(false);
+    const [isPlayingState, setIsPlayingState] = useState(false);
+
+    // SVOD Pro-Rata Watch Time Tracker Hook
+    const { syncWatchTime } = useSvodRevenueTracker({
+      userId: localUserId,
+      filmId: contentId,
+      isPlaying: isPlayingState,
+    });
 
     const { updateProgress, resumeFromSavedProgress, markAsFinished } = useWatchProgress({
       userId: localUserId,
@@ -112,6 +121,9 @@ const WatchTrackingVideoPlayer = React.forwardRef<
     }, [autoResume, localUserId, contentId, resumeFromSavedProgress]);
 
     const handleTimeUpdate = (currentTime: number, duration: number) => {
+      if (!isPlayingState) {
+        setIsPlayingState(true);
+      }
       // Update progress (debounced by the hook)
       updateProgress(currentTime, duration);
 
@@ -124,6 +136,10 @@ const WatchTrackingVideoPlayer = React.forwardRef<
     };
 
     const handleEnded = () => {
+      setIsPlayingState(false);
+      // Flush SVOD watch time on video end
+      syncWatchTime();
+
       // Mark video as finished (100% progress)
       if (videoPlayerRef.current?.videoElement) {
         const videoElement = videoPlayerRef.current.videoElement;
