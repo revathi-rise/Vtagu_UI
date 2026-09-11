@@ -41,7 +41,8 @@ export async function getAccountDetails() {
         const activeSub = user.active_subscription || sub;
         const devices = deviceData?.data || [];
 
-        const planName = activeSub?.planName || activeSub?.plan?.name || user.plan || (user.is_subscribed ? "Active Member" : "Free Member");
+        let planName = activeSub?.planName || activeSub?.plan?.name || user.plan || (user.is_subscribed ? "Active Member" : "Free Member");
+        if (planName === '4') planName = 'Premium';
         const expiryTimestamp = activeSub?.timestamp_to;
         const nextBilling = expiryTimestamp ? new Date(expiryTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
         const amount = activeSub?.paid_amount !== undefined ? `INR ${activeSub.paid_amount}` : (user.plan_price ? `INR ${user.plan_price}` : "Free");

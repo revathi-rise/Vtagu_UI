@@ -1012,68 +1012,70 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                     )}
 
                     {/* Subtitle / CC Menu */}
-                    {subtitles && subtitles.length > 0 && (
-                      <div className="relative">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            playClickSound();
-                            setActiveMenu(
-                              activeMenu === 'subtitles' ? 'none' : 'subtitles'
-                            );
-                          }}
-                          className={`transition-all p-2 rounded-xl flex items-center justify-center ${
-                            subtitlesEnabled
-                              ? 'text-cyan-400 bg-cyan-400/10 border border-cyan-500/30'
-                              : 'text-white/80 hover:text-cyan-400 bg-white/5 hover:bg-white/10 border border-white/10'
-                          }`}
-                          title="Subtitles / Captions"
-                        >
-                          <Subtitles size={18} />
-                        </button>
+                    <div className="relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!subtitles || subtitles.length === 0) return;
+                          playClickSound();
+                          setActiveMenu(
+                            activeMenu === 'subtitles' ? 'none' : 'subtitles'
+                          );
+                        }}
+                        className={`transition-all p-2 rounded-xl flex items-center justify-center ${
+                          !subtitles || subtitles.length === 0
+                            ? 'text-white/30 bg-white/5 border border-white/5 cursor-not-allowed'
+                            : subtitlesEnabled
+                            ? 'text-cyan-400 bg-cyan-400/10 border border-cyan-500/30'
+                            : 'text-white/80 hover:text-cyan-400 bg-white/5 hover:bg-white/10 border border-white/10'
+                        }`}
+                        title={(!subtitles || subtitles.length === 0) ? "No subtitles available" : "Subtitles / Captions"}
+                        disabled={!subtitles || subtitles.length === 0}
+                      >
+                        <Subtitles size={18} />
+                      </button>
 
-                        {/* Subtitles Popup Menu */}
-                        {activeMenu === 'subtitles' && (
-                          <div className="absolute bottom-full right-0 mb-4 bg-black/95 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden min-w-[170px] z-50 shadow-2xl animate-scale-up-fade-in origin-bottom-right">
-                            <div className="px-4 py-2.5 border-b border-white/10 text-[10px] font-black uppercase tracking-widest text-cyan-400">
-                              Subtitles
-                            </div>
-                            <div className="flex flex-col py-1">
+                      {/* Subtitles Popup Menu */}
+                      {subtitles && subtitles.length > 0 && activeMenu === 'subtitles' && (
+                        <div className="absolute bottom-full right-0 mb-4 bg-black/95 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden min-w-[170px] z-50 shadow-2xl animate-scale-up-fade-in origin-bottom-right">
+                          <div className="px-4 py-2.5 border-b border-white/10 text-[10px] font-black uppercase tracking-widest text-cyan-400">
+                            Subtitles
+                          </div>
+                          <div className="flex flex-col py-1">
+                            <button
+                              onClick={(e) => toggleSubtitle(e)}
+                              className={`text-left px-4 py-2.5 text-xs font-bold transition-colors hover:bg-white/10 flex items-center justify-between ${
+                                !subtitlesEnabled
+                                  ? 'text-cyan-400 bg-cyan-400/5'
+                                  : 'text-white/80'
+                              }`}
+                            >
+                              <span>Off</span>
+                              {!subtitlesEnabled && <Check size={14} />}
+                            </button>
+                            {subtitles.map((sub) => (
                               <button
-                                onClick={(e) => toggleSubtitle(e)}
+                                key={sub.language}
+                                onClick={(e) =>
+                                  toggleSubtitle(e, sub.language)
+                                }
                                 className={`text-left px-4 py-2.5 text-xs font-bold transition-colors hover:bg-white/10 flex items-center justify-between ${
-                                  !subtitlesEnabled
+                                  subtitlesEnabled &&
+                                  activeSubtitleLanguage === sub.language
                                     ? 'text-cyan-400 bg-cyan-400/5'
                                     : 'text-white/80'
                                 }`}
                               >
-                                <span>Off</span>
-                                {!subtitlesEnabled && <Check size={14} />}
+                                <span>{sub.label}</span>
+                                {subtitlesEnabled &&
+                                  activeSubtitleLanguage ===
+                                    sub.language && <Check size={14} />}
                               </button>
-                              {subtitles.map((sub) => (
-                                <button
-                                  key={sub.language}
-                                  onClick={(e) =>
-                                    toggleSubtitle(e, sub.language)
-                                  }
-                                  className={`text-left px-4 py-2.5 text-xs font-bold transition-colors hover:bg-white/10 flex items-center justify-between ${
-                                    subtitlesEnabled &&
-                                    activeSubtitleLanguage === sub.language
-                                      ? 'text-cyan-400 bg-cyan-400/5'
-                                      : 'text-white/80'
-                                  }`}
-                                >
-                                  <span>{sub.label}</span>
-                                  {subtitlesEnabled &&
-                                    activeSubtitleLanguage ===
-                                      sub.language && <Check size={14} />}
-                                </button>
-                              ))}
-                            </div>
+                            ))}
                           </div>
-                        )}
-                      </div>
-                    )}
+                        </div>
+                      )}
+                    </div>
 
                     {/* Quality Menu (Adaptive Levels from Manifest) */}
                     <div className="relative">

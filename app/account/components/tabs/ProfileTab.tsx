@@ -62,7 +62,7 @@ export default function ProfileTab({ profile }: { profile: any }) {
             name: user.user_name || user.name || "User",
             email: user.email,
             avatarUrl: user.profile_picture || user.avatarUrl || "https://images.unsplash.com/photo-1542204165-65bf26472b9b?q=80&w=300&auto=format&fit=crop",
-            badges: [user.plan || "Free Member"],
+            badges: [user.active_subscription?.planName || user.planName || (user.plan === '4' ? 'Premium' : user.plan) || "Free Member"],
             age: user.age,
             gender: user.gender,
             mobile: user.mobile,

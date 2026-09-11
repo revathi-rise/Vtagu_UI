@@ -20,7 +20,7 @@ export default function BillingTab({ billing }: { billing: any }) {
         try {
           const user = JSON.parse(storedUser);
           const activeSub = user.active_subscription;
-          const planName = activeSub?.planName || user.plan || (user.is_subscribed ? "Active Subscription" : "No Active Plan");
+          const planName = activeSub?.planName || (user.plan === '4' ? 'Premium' : user.plan) || (user.is_subscribed ? "Active Subscription" : "No Active Plan");
           const expiryTimestamp = activeSub?.timestamp_to;
           const nextBilling = expiryTimestamp ? new Date(expiryTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
           const amount = user.plan_price ? `INR ${user.plan_price}` : (activeSub?.paid_amount ? `INR ${activeSub.paid_amount}` : "Free");
@@ -34,7 +34,7 @@ export default function BillingTab({ billing }: { billing: any }) {
 
           setCurrentBilling({
             planName,
-            planDescription: user.plan || (user.is_subscribed ? "Active Subscription Plan" : "Manage your subscription plan"),
+            planDescription: (user.plan === '4' ? 'Premium Plan' : user.planName) || (user.is_subscribed ? "Active Subscription Plan" : "Manage your subscription plan"),
             nextBillingDate: nextBilling,
             amount,
             screens,
@@ -59,7 +59,7 @@ export default function BillingTab({ billing }: { billing: any }) {
           if (res.status && res.data) {
             const user = res.data;
             const activeSub = user.active_subscription;
-            const planName = activeSub?.planName || user.plan || (user.is_subscribed ? "Active Subscription" : "No Active Plan");
+            const planName = activeSub?.planName || (user.plan === '4' ? 'Premium' : user.plan) || (user.is_subscribed ? "Active Subscription" : "No Active Plan");
             const expiryTimestamp = activeSub?.timestamp_to;
             const nextBilling = expiryTimestamp ? new Date(expiryTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
             const amount = user.plan_price ? `INR ${user.plan_price}` : (activeSub?.paid_amount ? `INR ${activeSub.paid_amount}` : "Free");
@@ -73,7 +73,7 @@ export default function BillingTab({ billing }: { billing: any }) {
 
             setCurrentBilling({
               planName,
-              planDescription: user.plan || (user.is_subscribed ? "Active Subscription Plan" : "Manage your subscription plan"),
+              planDescription: (user.plan === '4' ? 'Premium Plan' : user.planName) || (user.is_subscribed ? "Active Subscription Plan" : "Manage your subscription plan"),
               nextBillingDate: nextBilling,
               amount,
               screens,
