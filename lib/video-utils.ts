@@ -176,11 +176,12 @@ export function getVideoType(url: string | null | undefined): VideoType {
     return 'iframe';
   }
   
-  const videoExtensions = ['.mp4', '.webm', '.ogg', '.m3u8', '.mov', '.mkv'];
+  const videoExtensions = ['.mp4', '.webm', '.ogg', '.m3u8', '.mov', '.mkv', 'playlist'];
   const lowerUrl = url.toLowerCase();
   
   if (videoExtensions.some(ext => lowerUrl.includes(ext)) ||
       url.includes('stream.mux.com') ||
+      url.includes('b-cdn.net') ||
       url.includes('commondatastorage.googleapis.com')) {
     return 'native';
   }
@@ -206,16 +207,17 @@ export function isValidVideoUrl(url: string | null | undefined): boolean {
     }
 
     // Check if it's a valid iframe/embed source
-    if (url.includes('iframe.mediadelivery.net') || url.includes('iframe') || url.includes('/embed/')) {
+    if (url.includes('iframe.mediadelivery.net') || url.includes('/embed/')) {
       return true;
     }
     
     // Check if it's a valid native video URL
     new URL(url);
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.m3u8', '.mov'];
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.m3u8', '.mov', 'playlist'];
     const lowerUrl = url.toLowerCase();
     return videoExtensions.some(ext => lowerUrl.includes(ext)) || 
            url.includes('stream.mux.com') ||
+           url.includes('b-cdn.net') ||
            url.includes('commondatastorage.googleapis.com');
   } catch {
     return false;

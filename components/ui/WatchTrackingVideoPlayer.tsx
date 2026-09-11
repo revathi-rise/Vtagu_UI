@@ -38,6 +38,7 @@ interface WatchTrackingVideoPlayerProps {
       label: string;
       url: string;
   }[];
+  maxQualityHeight?: number;
 }
 
 const WatchTrackingVideoPlayer = React.forwardRef<
@@ -53,9 +54,11 @@ const WatchTrackingVideoPlayer = React.forwardRef<
     src,
     onTimeUpdate,
     onEnded,
+    maxQualityHeight: externalMaxQualityHeight,
     ...videoPlayerProps
   }, ref) => {
     const [localUserId, setLocalUserId] = useState<string | undefined>(userId);
+    const [maxQualityHeight, setMaxQualityHeight] = useState<number | undefined>(externalMaxQualityHeight);
     const videoPlayerRef = useRef<UniversalVideoPlayerHandle>(null);
     const hasResumedRef = useRef(false);
     const [isPlayingState, setIsPlayingState] = useState(false);
@@ -101,6 +104,29 @@ const WatchTrackingVideoPlayer = React.forwardRef<
         setLocalUserId(userId);
       }
     }, [userId]);
+
+    // Determine maxQualityHeight from localStorage if not provided explicitly
+    useEffect(() => {
+      if (externalMaxQualityHeight !== undefined) {
+        setMaxQualityHeight(externalMaxQualityHeight);
+        return;
+      }
+      if (localUserId) {
+        try {
+          const userJson = localStorage.getItem('user');
+          if (userJson) {
+            const user = JSON.parse(userJson);
+            if (user.userId?.toString() === localUserId || user.id?.toString() === localUserId) {
+              if (user.max_quality_height) {
+                setMaxQualityHeight(user.max_quality_height);
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to parse user for quality limit:', e);
+        }
+      }
+    }, [localUserId, externalMaxQualityHeight]);
 
     // Auto-resume from saved progress
     useEffect(() => {
@@ -171,6 +197,7 @@ const WatchTrackingVideoPlayer = React.forwardRef<
           contentId={contentId}
           contentType={contentType}
           userId={localUserId}
+          maxQualityHeight={maxQualityHeight}
           {...videoPlayerProps}
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleEnded}

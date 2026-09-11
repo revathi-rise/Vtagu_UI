@@ -20,6 +20,7 @@ interface UniversalVideoPlayerProps extends Omit<VideoPlayerProps, 'src'> {
   contentType?: 'movie' | 'episode';
   userId?: string;
   onProgressUpdate?: (progress: number, currentTime: number) => void;
+  maxQualityHeight?: number;
 }
 
 const UniversalVideoPlayer = forwardRef<UniversalVideoPlayerHandle, UniversalVideoPlayerProps>(
@@ -138,6 +139,7 @@ const UniversalVideoPlayer = forwardRef<UniversalVideoPlayerHandle, UniversalVid
         src={src}
         onTimeUpdate={handleTimeUpdate}
         onEnded={onEnded}
+        maxQualityHeight={rest.maxQualityHeight}
         {...rest}
       />
     );
