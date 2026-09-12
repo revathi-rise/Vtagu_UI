@@ -59,7 +59,7 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
         <VideoPlayerModal
           isOpen={playerOpen}
           onClose={() => setPlayerOpen(false)}
-          videoUrl={iframeSrc}
+          videoUrl={displayIframeSrc}
           title={episode.title}
           contentId={(episode.id || episode.episodeId || "").toString()}
           contentType="episode"
