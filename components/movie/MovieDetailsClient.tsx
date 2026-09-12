@@ -129,7 +129,7 @@ export default function MovieDetailsClient({ movie: initialMovie }: MovieDetails
               className="flex flex-wrap items-center gap-5"
             >
               <WatchNowButton
-                url={movie.videoUrl}
+                url={(!movie.isFree && !getUserId()) ? null : movie.videoUrl}
                 title={movie.title}
                 contentId={movie.id?.toString() || ""}
                 contentType="movie"

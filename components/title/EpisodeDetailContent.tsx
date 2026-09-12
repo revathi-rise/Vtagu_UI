@@ -50,10 +50,12 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
   }, [initialIframeSrc, episode.isFree, episode.slug, episode.id, episode.episodeId]);
 
   const epImage = episode.media?.poster_image?.url || episode.image;
+  const isLocked = !episode.isFree && !getUserId();
+  const displayIframeSrc = isLocked ? null : iframeSrc;
  
   return (
     <>
-      {iframeSrc && (
+      {displayIframeSrc && (
         <VideoPlayerModal
           isOpen={playerOpen}
           onClose={() => setPlayerOpen(false)}
@@ -67,13 +69,13 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
       <section className="py-20 tv-container px-6 md:px-12 lg:px-20">
         <div className="skeuo-surface-high p-8 lg:p-16 relative overflow-visible space-y-12">
 
-          {/* ── Inline Preview Player (if iframeSrc available) ── */}
-          {iframeSrc && (
+          {/* ── Inline Preview Player (if displayIframeSrc available) ── */}
+          {displayIframeSrc && (
             <div id="episode-player" className="relative w-full rounded-[2rem] overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/10">
               {/* 16:9 aspect ratio container */}
               <div style={{ position: 'relative', paddingTop: '56.25%' }}>
                 <iframe
-                  src={iframeSrc}
+                  src={displayIframeSrc}
                   loading="lazy"
                   style={{
                     border: 'none',
@@ -164,7 +166,7 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
 
               {/* CTA Buttons */}
               <div className="flex flex-wrap items-center gap-4 pt-2">
-                {iframeSrc ? (
+                {displayIframeSrc ? (
                   <button
                     onClick={() => setPlayerOpen(true)}
                     className="bg-primary text-black px-8 py-[12px] rounded-2xl text-[18px] font-black font-inter uppercase tracking-tight flex items-center gap-3 hover:bg-primary/90 hover:shadow-[0_0_25px_rgba(50,153,255,0.4)] transition-all duration-300 group relative overflow-hidden active:scale-95 shadow-xl"
@@ -174,7 +176,7 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
                   </button>
                 ) : (
                   <WatchNowButton
-                    url={iframeSrc}
+                    url={displayIframeSrc}
                     title={episode.title}
                     contentId={(episode.id || episode.episodeId || "").toString()}
                     contentType="episode"
