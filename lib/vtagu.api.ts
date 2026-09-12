@@ -312,6 +312,7 @@ export function normalizeEpisode(episode: any): Episode {
     is_coming_soon: parseBool(episode.isComingSoon ?? episode.is_coming_soon),
     isFree: parseBool(episode.isFree ?? episode.free ?? episode.is_free),
     isFeatured: parseBool(episode.isFeatured ?? episode.featured ?? episode.is_featured),
+    movieType: episode.movieType || episode.movie_type,
     // Provide backwards compatible fields just in case
     episodeId: episode.id || episode.episodeId,
     seasonId: episode.season_id || episode.seasonId,
@@ -426,6 +427,23 @@ export function cleanHtmlString(htmlStr: string): string {
   return cleaned.trim();
 }
 
+export function getBadgeText(media: any): string | null {
+  if (!media) return null;
+  if (media.isFree) return 'FREE';
+  
+  const mType = media.movieType || media.movie_type;
+  if (mType !== undefined && mType !== null) {
+    if (String(mType) === '2' || String(mType).toLowerCase() === 'premium') {
+      return 'PREMIUM';
+    }
+    if (String(mType) === '1' || String(mType).toLowerCase() === 'normal') {
+      return 'PAID';
+    }
+  }
+  
+  return null;
+}
+
 export function normalizeMovie(movie: any): Movie {
   if (!movie) return movie;
   return {
@@ -437,6 +455,8 @@ export function normalizeMovie(movie: any): Movie {
     is_coming_soon: parseBool(movie.isComingSoon ?? movie.is_coming_soon),
     isFree: parseBool(movie.isFree ?? movie.free ?? movie.is_free),
     isFeatured: parseBool(movie.isFeatured ?? movie.featured ?? movie.is_featured),
+    movieType: movie.movieType || movie.movie_type,
+    contentType: movie.contentType || movie.type,
     posterImage: movie.media?.card_image?.url || movie.media?.image?.url || movie.posterImage || "",
     videoUrl: (movie.media && movie.media.video && typeof movie.media.video.url === 'string') 
       ? movie.media.video.url 

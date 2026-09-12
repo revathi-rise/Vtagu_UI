@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Star, Clock, Calendar, Globe, User, Plus, Share2, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Movie, getMovieBySlug, incrementMovieView } from '@/lib/vtagu.api';
+import { Movie, getMovieBySlug, incrementMovieView, getBadgeText } from '@/lib/vtagu.api';
 import { getUserId } from '@/lib/api-client';
 
 // Components
@@ -85,9 +85,11 @@ export default function MovieDetailsClient({ movie: initialMovie }: MovieDetails
             transition={{ duration: 0.6 }}
             className="flex flex-wrap items-center gap-3 mb-8"
           >
-            <div className="bg-blue-500 text-black text-[10px] font-black uppercase px-6 py-2 rounded-full tracking-[0.2em] shadow-[0_0_25px_rgba(59,130,246,0.4)]">
-              {movie.isFree ? 'FREE' : 'PREMIUM'}
-            </div>
+            {getBadgeText(movie) && (
+              <div className={`text-black text-[10px] font-black uppercase px-6 py-2 rounded-full tracking-[0.2em] shadow-[0_0_25px_rgba(59,130,246,0.4)] ${movie.isFree ? 'bg-green-500' : 'bg-blue-500'}`}>
+                {getBadgeText(movie)}
+              </div>
+            )}
             <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md px-5 py-2 rounded-full border border-white/10 text-[12px] font-black text-yellow-500">
               <Star size={14} className="fill-yellow-500" />
               {movie.rating} / 10

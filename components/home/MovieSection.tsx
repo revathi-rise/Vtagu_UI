@@ -3,7 +3,7 @@
 import React from 'react';
 import { Film } from 'lucide-react';
 import SectionTitle from './SectionTitle';
-import { Movie } from '@/lib/vtagu.api';
+import { Movie, getBadgeText } from '@/lib/vtagu.api';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, FreeMode } from 'swiper/modules';
 import Link from 'next/link';
@@ -70,7 +70,7 @@ export default function MovieSection({ movies }: MovieSectionProps) {
                     duration={movie.duration}
                     year={movie.releaseYear}
                     description={movie.shortDescription}
-                    badge={movie.isFree ? 'FREE' : 'PREMIUM'}
+                    badge={getBadgeText(movie) || undefined}
                     badgeColor={movie.isFree ? 'green' : 'orange'}
                     infoLabel="MOVIE" // Explicitly setting MOVIE label
                   />

@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ChevronRight, Home, Video } from 'lucide-react';
-import { getMoviesByLanguage, getPosters } from '@/lib/vtagu.api';
+import { getMoviesByLanguage, getPosters, getBadgeText } from '@/lib/vtagu.api';
 import ListingHero from '@/components/shared/ListingHero';
 import ResponsiveGrid from '@/components/shared/ResponsiveGrid';
 import { MediaCard } from '@/components/shared/MediaCard';
@@ -151,7 +151,7 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
                         year={movie.releaseYear}
                         duration={movie.duration}
                         description={movie.shortDescription}
-                        badge={movie.isFree ? 'FREE' : 'PREMIUM'}
+                        badge={getBadgeText(movie) || undefined}
                         badgeColor={movie.isFree ? 'green' : 'orange'}
                         trailerUrl={movie.trailerUrl}
                         isComingSoon={movie.isComingSoon || movie.is_coming_soon}
@@ -225,7 +225,7 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
                         rating={episode.rating || "8.0"}
                         duration={episode.duration}
                         description={episode.shortDescription}
-                        badge={episode.isFree ? 'FREE' : 'PREMIUM'}
+                        badge={getBadgeText(episode) || undefined}
                         badgeColor={episode.isFree ? 'green' : 'orange'}
                         trailerUrl={episode.media?.trailer?.url || episode.url}
                         isComingSoon={episode.isComingSoon || episode.is_coming_soon}

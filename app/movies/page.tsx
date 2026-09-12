@@ -1,5 +1,5 @@
 import React from 'react';
-import { getMovies, getPosters } from '@/lib/vtagu.api';
+import { getMovies, getPosters, getBadgeText } from '@/lib/vtagu.api';
 import { MediaCard } from '@/components/shared/MediaCard';
 import Link from 'next/link';
 
@@ -83,7 +83,7 @@ console.log(movies, "movies");
                         year={movie.releaseYear}
                         duration={movie.duration}
                         description={movie.shortDescription}
-                        badge={index < 10 ? `#${index + 1} Today` : (movie.isFree ? 'FREE' : 'PREMIUM')}
+                        badge={index < 10 ? `#${index + 1} Today` : (getBadgeText(movie) || undefined)}
                         badgeColor={index < 10 ? 'purple' : (movie.isFree ? 'green' : 'orange')}
                         trailerUrl={movie.trailerUrl}
                         isComingSoon={movie.isComingSoon || movie.is_coming_soon}
