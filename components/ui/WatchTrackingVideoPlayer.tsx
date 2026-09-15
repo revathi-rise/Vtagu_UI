@@ -13,7 +13,7 @@ export type VideoPlayerHandle = UniversalVideoPlayerHandle;
 interface WatchTrackingVideoPlayerProps {
   src: string;
   contentId: string;
-  contentType?: 'movie' | 'episode' | 'interactive_movie';
+  contentType?: 'movie' | 'episode' | 'interactive_movie' | 'short';
   userId?: string;
   autoResume?: boolean;
   poster?: string;
@@ -66,7 +66,7 @@ const WatchTrackingVideoPlayer = React.forwardRef<
     // SVOD Pro-Rata Watch Time Tracker Hook
     const { syncWatchTime } = useSvodRevenueTracker({
       userId: localUserId,
-      filmId: contentType === 'episode' ? `ep_${contentId}` : contentType === 'interactive_movie' ? `im_${contentId}` : contentId,
+      filmId: contentType === 'episode' ? `ep_${contentId}` : contentType === 'interactive_movie' ? `im_${contentId}` : contentType === 'short' ? `sh_${contentId}` : contentId,
       isPlaying: isPlayingState,
     });
 

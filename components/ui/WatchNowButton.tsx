@@ -12,7 +12,7 @@ interface WatchNowButtonProps {
   url?: string | null;
   title?: string;
   contentId?: string;
-  contentType?: 'movie' | 'episode' | 'interactive_movie';
+  contentType?: 'movie' | 'episode' | 'interactive_movie' | 'short';
   internal?: boolean; // If true, use internal player; if false, open external URL
   onLockedClick?: () => void;
 }

@@ -16,7 +16,7 @@ import { getUserId } from '@/lib/api-client';
 interface UseWatchProgressOptions {
   userId?: number | string;
   contentId?: number | string;
-  contentType?: 'movie' | 'episode' | 'interactive_movie';
+  contentType?: 'movie' | 'episode' | 'interactive_movie' | 'short';
   autoUpdate?: boolean;
   debounceTime?: number;
 }

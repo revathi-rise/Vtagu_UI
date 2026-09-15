@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Short, getActiveShorts, incrementShortView } from '@/lib/vtagu.api';
-import UniversalVideoPlayer, { UniversalVideoPlayerHandle } from '@/components/ui/UniversalVideoPlayer';
+import WatchTrackingVideoPlayer, { VideoPlayerHandle } from '@/components/ui/WatchTrackingVideoPlayer';
 import { getShortThumbnailUrl } from '@/lib/video-utils';
 import { getUserId } from '@/lib/api-client';
 
@@ -74,7 +74,7 @@ interface ShortCardProps {
 }
 
 function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: ShortCardProps) {
-  const videoRef = useRef<UniversalVideoPlayerHandle>(null);
+  const videoRef = useRef<VideoPlayerHandle>(null);
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
   const viewedRef = useRef(false);
@@ -173,9 +173,11 @@ function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: Sh
             display: 'block',
           }}
         >
-          <UniversalVideoPlayer
+          <WatchTrackingVideoPlayer
             ref={videoRef}
             src={short.video_url}
+            contentId={short.id.toString()}
+            contentType="short"
             poster={getShortThumbnailUrl(short)}
             muted={isMuted}
             autoPlay={isActive}

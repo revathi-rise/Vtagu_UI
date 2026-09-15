@@ -17,7 +17,7 @@ export interface UniversalVideoPlayerHandle {
 interface UniversalVideoPlayerProps extends Omit<VideoPlayerProps, 'src'> {
   src: string;
   contentId?: string;
-  contentType?: 'movie' | 'episode' | 'interactive_movie';
+  contentType?: 'movie' | 'episode' | 'interactive_movie' | 'short';
   userId?: string;
   onProgressUpdate?: (progress: number, currentTime: number) => void;
   maxQualityHeight?: number;
