@@ -13,6 +13,7 @@ interface SceneManagerProps {
     onRestart: () => void;
     onPrevious?: () => void;
     hasPrevious?: boolean;
+    movieId?: number;
 }
 
 export interface SceneManagerHandle {
@@ -76,7 +77,7 @@ const parseTimeToSeconds = (timeVal: string | number | undefined | null): number
 };
 
 const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
-    ({ currentScene, choices, onChoiceSelect, onRestart, onPrevious, hasPrevious }, ref) => {
+    ({ currentScene, choices, onChoiceSelect, onRestart, onPrevious, hasPrevious, movieId }, ref) => {
     const playerRef = useRef<VideoPlayerHandle>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     console.log(currentScene, "currentScene");
@@ -175,8 +176,8 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                         <WatchTrackingVideoPlayer
                             ref={playerRef}
                             src={videoUrl}
-                            contentId={currentScene.scene_id?.toString() || currentScene.title || 'scene'}
-                            contentType="episode"
+                            contentId={movieId ? movieId.toString() : (currentScene.scene_id?.toString() || currentScene.title || 'scene')}
+                            contentType="interactive_movie"
                             autoPlay={true}
                             loop={false}
                             showControls={!showChoices}

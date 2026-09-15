@@ -11,7 +11,7 @@ interface VideoPlayerModalProps {
   videoUrl: string;
   title: string;
   contentId: string;
-  contentType?: 'movie' | 'episode';
+  contentType?: 'movie' | 'episode' | 'interactive_movie';
   userId?: string;
 }
 

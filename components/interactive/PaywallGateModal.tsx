@@ -11,7 +11,7 @@ interface PaywallProps {
   currency: string;
   movieId: number;
   movieTitle: string;
-  contentType?: 'movie' | 'episode';
+  contentType?: 'movie' | 'episode' | 'interactive_movie';
 }
 
 export const PaywallGateModal = ({ isOpen, price, currency, movieId, movieTitle, contentType = 'movie' }: PaywallProps) => {

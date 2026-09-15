@@ -216,6 +216,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                                     onRestart={handleRestart}
                                     onPrevious={handlePrevious}
                                     hasPrevious={sceneHistory.length > 0}
+                                    movieId={movie.interactive_movie_id}
                                 />
                             ) : (
                                 <div className="p-12 rounded-[2.5rem] bg-white/5 border border-white/10 flex flex-col items-center justify-center text-center gap-6 backdrop-blur-xl">

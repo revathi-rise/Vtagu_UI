@@ -6,7 +6,7 @@ import { getUserId } from '@/lib/api-client';
 
 interface UseConcurrentSessionsOptions {
   contentId: string | number;
-  contentType: 'movie' | 'episode' | 'interactive';
+  contentType: 'movie' | 'episode' | 'interactive' | 'interactive_movie';
   enabled?: boolean;
 }
 

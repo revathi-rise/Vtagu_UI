@@ -4,7 +4,7 @@ export interface WatchProgress {
   id?: number | string;
   userId: number | string;
   contentId: number | string;
-  contentType: 'movie' | 'episode';
+  contentType: 'movie' | 'episode' | 'interactive_movie';
   watchedDuration: number; // Current time in seconds
   totalDuration: number; // Total duration in seconds
   progressPercentage: number; // Progress in percentage (0-100)
