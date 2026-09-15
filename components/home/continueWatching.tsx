@@ -41,7 +41,7 @@ export default function ContinueWatching() {
                 if (response.status && Array.isArray(response.data) && response.data.length > 0) {
                     const mappedMovies = response.data.map((item) => {
                         const isMovie = item.contentType === 'movie';
-                        const slug = item.content?.slug || item.content?.id;
+                        const slug = item.content?.slug || item.content?.movie_id || item.content?.episode_id || item.contentId;
                         
                         return {
                             id: item.contentId,
