@@ -6,45 +6,61 @@ import SectionTitle from './SectionTitle';
 import { MediaCard } from '../shared/MediaCard';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay, FreeMode } from 'swiper/modules';
-import { useWatchProgress } from '@/hooks/useWatchProgress';
 import Shimmer from '@/components/shared/Shimmer';
 import { getUserId } from '@/lib/api-client';
+import { watchProgressApi } from '@/lib/api/watch-progress.api';
 
+import { useRouter } from 'next/navigation';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/free-mode';
 
 export default function ContinueWatching() {
+    const router = useRouter();
     const [userId, setUserId] = useState<string | null>(null);
-    const { watchList, isLoading, fetchUserWatchList } = useWatchProgress({ userId: userId || undefined });
+    const [movies, setMovies] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         // Get user ID reliably
         const id = getUserId();
         if (id) {
             setUserId(id);
+        } else {
+            setIsLoading(false);
         }
     }, []);
 
     useEffect(() => {
+        let isMounted = true;
         if (userId) {
-            fetchUserWatchList();
+            setIsLoading(true);
+            watchProgressApi.getProgressList(userId).then(response => {
+                if (!isMounted) return;
+                
+                if (response.status && Array.isArray(response.data) && response.data.length > 0) {
+                    const mappedMovies = response.data.map((item) => {
+                        const isMovie = item.contentType === 'movie';
+                        const slug = item.content?.slug || item.content?.id;
+                        
+                        return {
+                            id: item.contentId,
+                            url: isMovie ? `/movie/${slug}?play=true&t=${item.watchedDuration || 0}` : `/episodes/${slug}?play=true&t=${item.watchedDuration || 0}`,
+                            title: item.content?.title || `Content ${item.contentId}`,
+                            genre: isMovie ? 'Movie' : 'Episode',
+                            progress: item.progressPercentage || 0,
+                            duration: item.watchedDuration ? `${Math.floor(item.watchedDuration / 60)}m watched` : "Not started",
+                            image: item.content?.movie_image || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=800&auto=format&fit=crop"
+                        };
+                    });
+                    setMovies(mappedMovies);
+                }
+                setIsLoading(false);
+            }).catch(() => {
+                if (isMounted) setIsLoading(false);
+            });
         }
-    }, [userId, fetchUserWatchList]);
-
-    // Use watch list from API if available and not empty
-    const movies = watchList && watchList.length > 0 
-        ? watchList.map((item, index) => ({
-            id: item.contentId,
-            title: item.content?.title || `Content ${item.contentId}`,
-            genre: item.contentType === 'movie' ? 'Movie' : 'Episode',
-            progress: item.progressPercentage || 0,
-            duration: item.watchedDuration ? `${Math.floor(item.watchedDuration / 60)}m watched` : "Not started",
-            rating: "9.0",
-            description: item.content?.title || `Continue watching ${item.contentType}`,
-            image: item.content?.movie_image || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=800&auto=format&fit=crop"
-        }))
-        : [];
+    }, [userId]);
 
     // Hide section if no movies are found and not loading
     if (!isLoading && movies.length === 0) {
@@ -61,7 +77,7 @@ export default function ContinueWatching() {
                         subtitle="CONTINUE"
                         Icon={History}
                         gradientText="Watching"
-                        viewAllHref="/watch-history"
+                        viewAllHref="/my-list"
                     />
                 </div>
 
@@ -101,11 +117,9 @@ export default function ContinueWatching() {
                                         image={movie.image}
                                         subtitle={movie.genre}
                                         duration={movie.duration}
-                                        rating={movie.rating}
                                         progress={movie.progress}
-                                        description={movie.description}
-                                        badge={`${Math.round(movie.progress)}%`}
-                                        badgeColor="blue"
+                                        onClick={() => router.push(movie.url)}
+                                        className="cursor-pointer"
                                     />
                                 </SwiperSlide>
                             ))}
