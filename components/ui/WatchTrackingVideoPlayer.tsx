@@ -66,7 +66,7 @@ const WatchTrackingVideoPlayer = React.forwardRef<
     // SVOD Pro-Rata Watch Time Tracker Hook
     const { syncWatchTime } = useSvodRevenueTracker({
       userId: localUserId,
-      filmId: contentId,
+      filmId: contentType === 'episode' ? `ep_${contentId}` : contentId,
       isPlaying: isPlayingState,
     });
 
