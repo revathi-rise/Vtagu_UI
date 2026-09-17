@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { getPlans, Plan, getInteractiveMovies, purchaseMovie } from '@/lib/vtagu.api';
 import { transactionsApi } from '@/lib/api/transactions.api';
 import { subscriptionsApi } from '@/lib/api/subscriptions.api';
+import { authApi } from '@/lib/api/auth.api';
 import { Loader2, ShieldCheck, Crown, ArrowRight, Play } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -40,6 +41,23 @@ function CheckoutContent() {
   const [showRefInput, setShowRefInput] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  const refreshUserData = async (uid?: number | string) => {
+    const targetId = uid || user?.userId || user?.id;
+    if (!targetId) return;
+    try {
+      const res = await authApi.getProfile(targetId);
+      if (res.status && res.data) {
+        const existingUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const updatedUser = { ...existingUser, ...res.data };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        window.dispatchEvent(new Event('storage'));
+      }
+    } catch (err) {
+      console.error('Failed to refresh user profile:', err);
+    }
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -153,6 +171,7 @@ function CheckoutContent() {
             'INR'
           );
           if (purchaseRes.status === 'success' || (purchaseRes as any).status === true) {
+            await refreshUserData(userId);
             setSuccess(true);
           } else {
             setError('Failed to activate free movie access.');
@@ -168,6 +187,7 @@ function CheckoutContent() {
             timestamp_to,
           });
           if (subRes.status) {
+            await refreshUserData(userId);
             setSuccess(true);
           } else {
             setError('Failed to activate free subscription.');
@@ -240,6 +260,7 @@ function CheckoutContent() {
                   order.currency
                 );
                 if (purchaseRes.status === 'success') {
+                  await refreshUserData(userId);
                   setSuccess(true);
                 } else {
                   setError('Payment verified but failed to activate movie access. Please contact support.');
@@ -262,6 +283,7 @@ function CheckoutContent() {
                 });
                 
                 if (subRes.status) {
+                  await refreshUserData(userId);
                   setSuccess(true);
                 } else {
                   setError('Payment verified but failed to activate subscription. Please contact support.');
@@ -312,6 +334,7 @@ function CheckoutContent() {
       const refToUse = typeof overrideRef === 'string' ? overrideRef : upiRefInput;
       const res = await transactionsApi.checkPendingUserTransactions(userId, refToUse);
       if (res.status) {
+        await refreshUserData(userId);
         setSuccess(true);
       } else {
         setVerifyMessage(res.message || 'No confirmed payment found yet.');
