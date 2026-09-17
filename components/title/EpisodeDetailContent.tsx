@@ -50,7 +50,8 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
   }, [initialIframeSrc, episode.isFree, episode.slug, episode.id, episode.episodeId]);
 
   const epImage = episode.media?.poster_image?.url || episode.image;
-  const isLocked = !episode.isFree && !getUserId();
+  const hasAccess = episode.isFree || (iframeSrc && iframeSrc.trim() !== '');
+  const isLocked = !hasAccess;
   const displayIframeSrc = isLocked ? null : iframeSrc;
  
   return (
