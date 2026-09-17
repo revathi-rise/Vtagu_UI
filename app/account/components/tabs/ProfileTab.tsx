@@ -7,7 +7,7 @@ import { userApi } from '@/lib/api/user.api';
 import { useRouter } from 'next/navigation';
 import { useAlert } from '@/components/shared/CustomAlertModal';
 
-export default function ProfileTab({ profile }: { profile: any }) {
+export default function ProfileTab({ profile, activeTab }: { profile: any; activeTab?: string }) {
   const router = useRouter();
   const { showAlert } = useAlert();
   const [isEditing, setIsEditing] = useState(false);
@@ -51,8 +51,10 @@ export default function ProfileTab({ profile }: { profile: any }) {
     }
   };
 
+  // Re-fetch fresh profile data every time the Profile tab becomes active
   useEffect(() => {
-    const checkLocalUser = () => {
+    const refreshProfile = async () => {
+      // First, read from localStorage for instant display
       const userJson = localStorage.getItem('user');
       if (userJson) {
         try {
@@ -83,10 +85,44 @@ export default function ProfileTab({ profile }: { profile: any }) {
       } else {
         setCurrentProfile(profile);
       }
+
+      // Then, fetch fresh data from the API and update localStorage + state
+      const storedUserId = localStorage.getItem('userId');
+      if (storedUserId) {
+        try {
+          const res = await authApi.getProfile(storedUserId);
+          if (res.status && res.data) {
+            const user = res.data;
+            localStorage.setItem('user', JSON.stringify(user));
+            const freshProfile = {
+              id: user.userId || user.id,
+              name: user.user_name || user.name || "User",
+              email: user.email,
+              avatarUrl: user.profile_picture || user.avatarUrl || "https://images.unsplash.com/photo-1542204165-65bf26472b9b?q=80&w=300&auto=format&fit=crop",
+              badges: [user.active_subscription?.planName || user.planName || (user.plan === '4' ? 'Premium' : user.plan) || "Free Member"],
+              age: user.age,
+              gender: user.gender,
+              mobile: user.mobile,
+              isGuest: false
+            };
+            setCurrentProfile(freshProfile);
+            setFormData({
+              user_name: freshProfile.name,
+              email: freshProfile.email,
+              age: freshProfile.age || '',
+              gender: freshProfile.gender || '',
+              mobile: freshProfile.mobile || '',
+              profile_picture: freshProfile.avatarUrl || '',
+            });
+          }
+        } catch (e) {
+          console.error("Error fetching fresh profile in ProfileTab:", e);
+        }
+      }
     };
 
-    checkLocalUser();
-  }, [profile]);
+    refreshProfile();
+  }, [profile, activeTab]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

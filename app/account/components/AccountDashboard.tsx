@@ -12,7 +12,7 @@ export default function AccountDashboard({ initialData }: { initialData: any }) 
 
   const renderTab = () => {
     switch (activeTab) {
-      case "profile": return <ProfileTab profile={initialData.profile} />;
+      case "profile": return <ProfileTab profile={initialData.profile} activeTab={activeTab} />;
       case "billing": return <BillingTab billing={initialData.billing} />;
       case "devices": return <DevicesTab devices={initialData.devices} />;
       case "privacy": return <PrivacyTab />;
