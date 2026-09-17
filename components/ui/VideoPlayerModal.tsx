@@ -40,6 +40,18 @@ export default function VideoPlayerModal({
     }
   }, [isOpen, videoUrl]);
 
+  // Lock body scroll when modal is open and not minimized
+  useEffect(() => {
+    if (isOpen && !isMinimized && mounted) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, isMinimized, mounted]);
+
   if (!isOpen || !mounted) return null;
 
   const handleMinimize = () => {
@@ -103,7 +115,7 @@ export default function VideoPlayerModal({
 
   // ── Full Modal Player (Standard View) ──────────────────────────────────
   return createPortal(
-    <div className="fixed inset-0 z-[99999] bg-black flex flex-col animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[99999] h-[100dvh] w-screen bg-black flex flex-col animate-in fade-in duration-200">
       {/* Top Header Bar */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-black/90 backdrop-blur-md border-b border-white/10 flex-shrink-0">
         <div className="flex items-center gap-3">

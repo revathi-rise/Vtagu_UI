@@ -130,7 +130,11 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
     }));
 
     const handleFullscreenRequest = () => {
-        if (containerRef.current) {
+        const doc = document as any;
+        if (doc.fullscreenElement || doc.webkitFullscreenElement) {
+            if (doc.exitFullscreen) doc.exitFullscreen();
+            else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
+        } else if (containerRef.current) {
             if (containerRef.current.requestFullscreen) {
                 containerRef.current.requestFullscreen();
             } else if ((containerRef.current as any).webkitRequestFullscreen) {

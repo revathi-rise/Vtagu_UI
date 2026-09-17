@@ -541,16 +541,23 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       }
     };
 
-    // Fullscreen Toggle
     const handleFullscreen = (e: React.MouseEvent) => {
       e.stopPropagation();
       playClickSound();
       if (onFullscreenRequest) {
         onFullscreenRequest();
-      } else if (containerRef.current?.requestFullscreen) {
-        containerRef.current.requestFullscreen();
-      } else if ((containerRef.current as any).webkitRequestFullscreen) {
-        (containerRef.current as any).webkitRequestFullscreen();
+      } else {
+        const doc = document as any;
+        if (doc.fullscreenElement || doc.webkitFullscreenElement) {
+          if (doc.exitFullscreen) doc.exitFullscreen();
+          else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
+        } else if (containerRef.current?.requestFullscreen) {
+          containerRef.current.requestFullscreen();
+        } else if ((containerRef.current as any).webkitRequestFullscreen) {
+          (containerRef.current as any).webkitRequestFullscreen();
+        } else if ((videoRef.current as any)?.webkitEnterFullscreen) {
+          (videoRef.current as any).webkitEnterFullscreen();
+        }
       }
     };
 
@@ -1227,7 +1234,12 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                         onClick={(e) => {
                           e.stopPropagation();
                           playClickSound();
-                          onMinimize?.();
+                          const doc = document as any;
+                          if (doc.fullscreenElement || doc.webkitFullscreenElement) {
+                            if (doc.exitFullscreen) doc.exitFullscreen();
+                            else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
+                          }
+                          if (onMinimize) onMinimize();
                         }}
                         className="text-white/80 hover:text-cyan-400 transition-all p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10"
                         title="Minimize Player"
