@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Wifi, CheckCircle2, Loader2, Sparkles, ArrowRight, ShieldCheck, Laptop } from 'lucide-react';
+import { Star, Wifi, CheckCircle2, Loader2, Sparkles, ArrowRight, ShieldCheck, Laptop, Film, Clapperboard, Clock, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api/auth.api';
 import { getPlans, Plan } from '@/lib/vtagu.api';
@@ -25,9 +25,11 @@ export default function BillingTab({ billing }: { billing: any }) {
           const nextBilling = expiryTimestamp ? new Date(expiryTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
           const amount = user.plan_price ? `INR ${user.plan_price}` : (activeSub?.paid_amount ? `INR ${activeSub.paid_amount}` : "Free");
 
-          const screens = activeSub?.screens || (user.plan?.toLowerCase().includes('premium') ? 4 : 2);
-          const quality = activeSub?.quality || (user.plan?.toLowerCase().includes('premium') ? '4K Ultra HD + HDR' : 'HD 1080p');
-          const isInteractiveIncluded = activeSub?.isInteractiveIncluded !== undefined ? activeSub.isInteractiveIncluded : true;
+          const screens = activeSub?.screens || 1;
+          const quality = activeSub?.quality || 'HD';
+          const isInteractiveIncluded = activeSub?.isInteractiveIncluded !== undefined ? Number(activeSub.isInteractiveIncluded) : 0;
+          const isStandardIncluded = activeSub?.isStandardIncluded !== undefined ? Number(activeSub.isStandardIncluded) : (activeSub?.isShortsIncluded !== undefined ? Number(activeSub.isShortsIncluded) : 0);
+          const validity = activeSub?.validity || '';
 
           const cardNum = user.card_number || "";
           const last4Str = cardNum ? (cardNum.length >= 4 ? cardNum.slice(-4) : cardNum) : "****";
@@ -40,6 +42,8 @@ export default function BillingTab({ billing }: { billing: any }) {
             screens,
             quality,
             isInteractiveIncluded,
+            isStandardIncluded,
+            validity,
             is_subscribed: user.is_subscribed,
             paymentMethod: {
               type: activeSub?.payment_method || (user.upi ? "UPI" : "Online Payment"),
@@ -64,9 +68,11 @@ export default function BillingTab({ billing }: { billing: any }) {
             const nextBilling = expiryTimestamp ? new Date(expiryTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
             const amount = user.plan_price ? `INR ${user.plan_price}` : (activeSub?.paid_amount ? `INR ${activeSub.paid_amount}` : "Free");
 
-            const screens = activeSub?.screens || (user.plan?.toLowerCase().includes('premium') ? 4 : 2);
-            const quality = activeSub?.quality || (user.plan?.toLowerCase().includes('premium') ? '4K Ultra HD + HDR' : 'HD 1080p');
-            const isInteractiveIncluded = activeSub?.isInteractiveIncluded !== undefined ? activeSub.isInteractiveIncluded : true;
+            const screens = activeSub?.screens || 1;
+            const quality = activeSub?.quality || 'HD';
+            const isInteractiveIncluded = activeSub?.isInteractiveIncluded !== undefined ? Number(activeSub.isInteractiveIncluded) : 0;
+            const isStandardIncluded = activeSub?.isStandardIncluded !== undefined ? Number(activeSub.isStandardIncluded) : (activeSub?.isShortsIncluded !== undefined ? Number(activeSub.isShortsIncluded) : 0);
+            const validity = activeSub?.validity || '';
 
             const cardNum = user.card_number || "";
             const last4Str = cardNum ? (cardNum.length >= 4 ? cardNum.slice(-4) : cardNum) : "****";
@@ -79,6 +85,8 @@ export default function BillingTab({ billing }: { billing: any }) {
               screens,
               quality,
               isInteractiveIncluded,
+              isStandardIncluded,
+              validity,
               is_subscribed: user.is_subscribed,
               paymentMethod: {
                 type: activeSub?.payment_method || (user.upi ? "UPI" : "Online Payment"),
@@ -177,17 +185,27 @@ export default function BillingTab({ billing }: { billing: any }) {
 
                     <ul className="text-xs text-gray-300 space-y-3 mb-6 border-t border-white/10 pt-4">
                       <li className="flex items-center gap-2">
-                        <CheckCircle2 size={14} className="text-[#9248FF]" />
-                        <span>Quality: <strong className="text-white">{plan.quality || 'HD / 4K'}</strong></span>
+                        {Number(plan.isInteractiveIncluded || plan.is_interactive_included) === 1
+                          ? <CheckCircle2 size={14} className="text-emerald-400" />
+                          : <XCircle size={14} className="text-red-400/60" />}
+                        <span>Interactive Content: <strong className={Number(plan.isInteractiveIncluded || plan.is_interactive_included) === 1 ? 'text-emerald-400' : 'text-red-400'}>{Number(plan.isInteractiveIncluded || plan.is_interactive_included) === 1 ? 'Included' : 'Not Included'}</strong></span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        {Number(plan.isStandardIncluded || plan.is_standard_included || plan.unlimited) === 1
+                          ? <CheckCircle2 size={14} className="text-emerald-400" />
+                          : <XCircle size={14} className="text-red-400/60" />}
+                        <span>Standard Content: <strong className={Number(plan.isStandardIncluded || plan.is_standard_included || plan.unlimited) === 1 ? 'text-emerald-400' : 'text-red-400'}>{Number(plan.isStandardIncluded || plan.is_standard_included || plan.unlimited) === 1 ? 'Included' : 'Not Included'}</strong></span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle2 size={14} className="text-[#9248FF]" />
-                        <span>Screens: <strong className="text-white">{plan.screens || 'Unlimited'}</strong></span>
+                        <span>Screens: <strong className="text-white">{plan.screens || '1'}</strong></span>
                       </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 size={14} className="text-[#9248FF]" />
-                        <span>Interactive Content: <strong className="text-white">{plan.isInteractiveIncluded ? 'Included' : 'Standard'}</strong></span>
-                      </li>
+                      {plan.quality && plan.quality.toLowerCase() !== 'none' && (
+                        <li className="flex items-center gap-2">
+                          <CheckCircle2 size={14} className="text-[#9248FF]" />
+                          <span>Quality: <strong className="text-white">{plan.quality}</strong></span>
+                        </li>
+                      )}
                     </ul>
                   </div>
 
@@ -243,22 +261,42 @@ export default function BillingTab({ billing }: { billing: any }) {
           <div className="bg-[#25183d]/60 border border-[#9248FF]/20 rounded-xl p-4 mb-6 space-y-3">
             <div className="flex items-center justify-between text-xs sm:text-sm">
               <span className="text-gray-300 flex items-center gap-2 font-medium">
-                <Laptop size={16} className="text-[#b28cff]" /> Device / Screen Limit
+                <Clapperboard size={16} className="text-[#b28cff]" /> Interactive Content
               </span>
-              <span className="text-white font-extrabold">{currentBilling.screens} Device{currentBilling.screens > 1 ? 's' : ''} Allowed</span>
+              <span className={`font-extrabold ${Number(currentBilling.isInteractiveIncluded) === 1 ? 'text-emerald-400' : 'text-red-400'}`}>
+                {Number(currentBilling.isInteractiveIncluded) === 1 ? '✓ Included' : '✗ Not Included'}
+              </span>
             </div>
             <div className="flex items-center justify-between text-xs sm:text-sm">
               <span className="text-gray-300 flex items-center gap-2 font-medium">
-                <CheckCircle2 size={16} className="text-[#b28cff]" /> Video Quality
+                <Film size={16} className="text-[#b28cff]" /> Standard Content (Movies / Series)
               </span>
-              <span className="text-white font-extrabold">{currentBilling.quality}</span>
+              <span className={`font-extrabold ${Number(currentBilling.isStandardIncluded) === 1 ? 'text-emerald-400' : 'text-red-400'}`}>
+                {Number(currentBilling.isStandardIncluded) === 1 ? '✓ Included' : '✗ Not Included'}
+              </span>
             </div>
             <div className="flex items-center justify-between text-xs sm:text-sm">
               <span className="text-gray-300 flex items-center gap-2 font-medium">
-                <Sparkles size={16} className="text-[#b28cff]" /> Interactive Originals
+                <Laptop size={16} className="text-[#b28cff]" /> Screens
               </span>
-              <span className="text-white font-extrabold">{currentBilling.isInteractiveIncluded ? 'Included' : 'Standard'}</span>
+              <span className="text-white font-extrabold">{currentBilling.screens} Device{Number(currentBilling.screens) > 1 ? 's' : ''}</span>
             </div>
+            {currentBilling.quality && currentBilling.quality !== 'none' && (
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-gray-300 flex items-center gap-2 font-medium">
+                  <CheckCircle2 size={16} className="text-[#b28cff]" /> Video Quality
+                </span>
+                <span className="text-white font-extrabold">{currentBilling.quality}</span>
+              </div>
+            )}
+            {currentBilling.validity && (
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-gray-300 flex items-center gap-2 font-medium">
+                  <Clock size={16} className="text-[#b28cff]" /> Validity
+                </span>
+                <span className="text-white font-extrabold">{currentBilling.validity}</span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between text-sm mb-3">
