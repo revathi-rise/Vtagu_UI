@@ -27,5 +27,15 @@ export const transactionsApi = {
       body: JSON.stringify(data),
     });
     return res.json();
+  },
+
+  checkPendingUserTransactions: async (userId: number): Promise<ApiResponse> => {
+    const url = `${API_BASE}/transactions/check-pending-user/${userId}`;
+    logger.debug(`Calling check pending transactions API: ${url}`);
+    
+    const res = await fetchWithAuth(url, {
+      method: 'POST',
+    });
+    return res.json();
   }
 };

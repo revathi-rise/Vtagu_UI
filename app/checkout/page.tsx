@@ -34,6 +34,8 @@ function CheckoutContent() {
   const [movie, setMovie] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyMessage, setVerifyMessage] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
@@ -207,6 +209,12 @@ function CheckoutContent() {
           email: (user.email || '').trim(),
           contact: (user.mobile || '').replace(/\s+/g, '').replace(/[^\d+]/g, '')
         },
+        modal: {
+          ondismiss: function () {
+            console.log('[DEBUG] Razorpay modal closed by user');
+            setIsProcessing(false);
+          }
+        },
         handler: async function (response: any) {
           try {
             setIsProcessing(true);
@@ -238,6 +246,11 @@ function CheckoutContent() {
                   userId: userId,
                   payment_method: 'RAZORPAY',
                   payment_details: response.razorpay_payment_id,
+                  paid_amount: amount,
+                  price_amount: amount,
+                  payment_status: 2,
+                  txnId: response.razorpay_order_id,
+                  txn_id: response.razorpay_order_id,
                   timestamp_from,
                   timestamp_to,
                 });
@@ -279,6 +292,27 @@ function CheckoutContent() {
     } catch (err: any) {
       setError('An unexpected error occurred while initiating payment.');
       setIsProcessing(false);
+    }
+  };
+
+  const handleVerifyPaymentStatus = async () => {
+    if (!user) return;
+    setIsVerifying(true);
+    setVerifyMessage('');
+    setError('');
+
+    try {
+      const userId = user.userId || user.id;
+      const res = await transactionsApi.checkPendingUserTransactions(userId);
+      if (res.status) {
+        setSuccess(true);
+      } else {
+        setVerifyMessage(res.message || 'No confirmed payment found yet.');
+      }
+    } catch (err) {
+      setVerifyMessage('Failed to check payment status. Please try again.');
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -441,6 +475,20 @@ function CheckoutContent() {
                 </>
               )}
             </button>
+            
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={handleVerifyPaymentStatus}
+                disabled={isVerifying || isProcessing}
+                className="text-xs text-purple-300/80 hover:text-purple-200 underline font-medium transition-colors disabled:opacity-50"
+              >
+                {isVerifying ? 'Checking payment status...' : 'Already paid? Verify payment status'}
+              </button>
+              {verifyMessage && (
+                <p className="mt-2 text-xs text-amber-300 font-medium">{verifyMessage}</p>
+              )}
+            </div>
             
             <div className="mt-8 flex items-center justify-center gap-4 opacity-50 grayscale">
               <span className="text-xs font-bold uppercase tracking-widest text-white">VISA</span>
