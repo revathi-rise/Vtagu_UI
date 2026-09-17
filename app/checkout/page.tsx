@@ -29,7 +29,7 @@ function CheckoutContent() {
   const planIdParam = searchParams.get('plan');
   const checkoutType = searchParams.get('type') || 'plan'; // 'plan' or 'movie'
   const movieIdParam = searchParams.get('id');
-  
+
   const [user, setUser] = useState<any>(null);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [movie, setMovie] = useState<any>(null);
@@ -64,13 +64,13 @@ function CheckoutContent() {
       try {
         const storedUser = localStorage.getItem('user');
         if (!storedUser) {
-          const redirectUrl = checkoutType === 'movie' 
-            ? `/login?type=movie&id=${movieIdParam}` 
+          const redirectUrl = checkoutType === 'movie'
+            ? `/login?type=movie&id=${movieIdParam}`
             : `/login${planIdParam ? `?plan=${planIdParam}` : ''}`;
           router.push(redirectUrl);
           return;
         }
-        
+
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
 
@@ -82,7 +82,7 @@ function CheckoutContent() {
           }
           const allMovies = await getInteractiveMovies();
           const selectedMovie = allMovies.find(m => m.interactive_movie_id.toString() === movieIdParam);
-          
+
           if (!selectedMovie) {
             setError('Selected movie not found.');
           } else {
@@ -96,7 +96,7 @@ function CheckoutContent() {
           }
           const allPlans = await getPlans();
           const selectedPlan = allPlans.find(p => p.planId.toString() === planIdParam);
-          
+
           if (!selectedPlan) {
             setError('Selected plan not found.');
           } else {
@@ -116,7 +116,7 @@ function CheckoutContent() {
   const calculateValidityTimestamps = (validityStr: string) => {
     const now = Math.floor(Date.now() / 1000);
     let days = 30; // Default 1 month
-    
+
     if (!validityStr) return { timestamp_from: now, timestamp_to: now + (30 * 86400) };
 
     const dateMatch = validityStr.match(/\d{4}-\d{2}-\d{2}/);
@@ -144,14 +144,14 @@ function CheckoutContent() {
       const weeks = match ? parseInt(match[1]) : 1;
       days = weeks * 7;
     }
-    
+
     const timestamp_to = now + (days * 86400);
     return { timestamp_from: now, timestamp_to };
   };
 
   const handlePayment = async () => {
     if (!user || (checkoutType === 'plan' && !plan) || (checkoutType === 'movie' && !movie)) return;
-    
+
     setIsProcessing(true);
     setError('');
 
@@ -205,16 +205,16 @@ function CheckoutContent() {
       }
 
       // Re-use pre-calculated userId and amount values
-      
+
       console.log('[DEBUG] Initiating payment:', { userId, amount, type: checkoutType });
-      
+
       const orderData = await transactionsApi.createOrder({
         userId,
         amount,
         planId: checkoutType === 'plan' ? plan?.planId : undefined,
       });
       console.log('[DEBUG] Received order data:', orderData);
-      
+
       if (!orderData.status || !orderData.data) {
         setError(orderData.message || 'Could not create order.');
         setIsProcessing(false);
@@ -224,7 +224,7 @@ function CheckoutContent() {
       const order = orderData.data;
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_45mZ4X3bfF1Mt7', 
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_45mZ4X3bfF1Mt7',
         amount: Math.round(order.amount), // Ensure it's an integer in paisa
         currency: order.currency,
         name: 'PrimeTime',
@@ -267,7 +267,7 @@ function CheckoutContent() {
                 }
               } else {
                 const { timestamp_from, timestamp_to } = calculateValidityTimestamps(plan!.validity);
-                
+
                 const subRes = await subscriptionsApi.create({
                   planId: plan!.planId,
                   userId: userId,
@@ -281,7 +281,7 @@ function CheckoutContent() {
                   timestamp_from,
                   timestamp_to,
                 });
-                
+
                 if (subRes.status) {
                   await refreshUserData(userId);
                   setSuccess(true);
@@ -303,11 +303,11 @@ function CheckoutContent() {
         }
       };
 
-      console.log('[DEBUG] Razorpay options:', { 
-        key: options.key, 
-        order_id: options.order_id, 
-        amount: options.amount, 
-        currency: options.currency 
+      console.log('[DEBUG] Razorpay options:', {
+        key: options.key,
+        order_id: options.order_id,
+        amount: options.amount,
+        currency: options.currency
       });
 
       const paymentObject = new (window as any).Razorpay(options);
@@ -315,7 +315,7 @@ function CheckoutContent() {
         setError(response.error.description || 'Payment failed. Please try again.');
         setIsProcessing(false);
       });
-      
+
       paymentObject.open();
     } catch (err: any) {
       setError('An unexpected error occurred while initiating payment.');
@@ -366,12 +366,12 @@ function CheckoutContent() {
             {checkoutType === 'movie' ? 'Experience Unlocked' : 'Welcome to Premium'}
           </h1>
           <p className="text-gray-400 mb-8 leading-relaxed">
-            {checkoutType === 'movie' 
-              ? `Your payment was successful and access to ${movie?.title} is now unlocked.` 
+            {checkoutType === 'movie'
+              ? `Your payment was successful and access to ${movie?.title} is now unlocked.`
               : `Your payment was successful and your ${plan?.name} subscription is now active. Get ready to experience cinema like never before.`}
           </p>
-          <Link 
-            href={checkoutType === 'movie' ? `/interactive/${movie?.interactive_movie_id}` : '/'} 
+          <Link
+            href={checkoutType === 'movie' ? `/interactive/${movie?.interactive_movie_id}` : '/'}
             className="inline-flex items-center gap-2 bg-white text-black font-bold px-8 py-4 rounded-full hover:scale-105 transition-transform duration-300"
           >
             <Play size={18} fill="currentColor" />
@@ -389,20 +389,20 @@ function CheckoutContent() {
           <Image src="/vtagu_logo.png" alt="PrimeTime Logo" width={140} height={60} className="h-10 w-auto object-contain" />
         </Link>
       </header>
-      
+
       <main className="flex-1 flex items-center justify-center p-6 pb-20">
         <div className="w-full max-w-4xl grid md:grid-cols-2 gap-10 md:gap-0 items-stretch bg-[#161224]/50 border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl backdrop-blur-sm">
-          
+
           {/* Left Side: Summary */}
           <div className="p-8 md:p-12 bg-gradient-to-br from-white/5 to-transparent flex flex-col justify-between relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#b28cff]/10 blur-[100px] rounded-full pointer-events-none" />
-            
+
             <div className="relative z-10">
               <div className="inline-flex items-center gap-2 bg-[#b28cff]/10 text-[#b28cff] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-8 border border-[#b28cff]/20">
                 <Crown size={14} />
                 Order Summary
               </div>
-              
+
               {checkoutType === 'movie' && movie ? (
                 <>
                   <h2 className="text-4xl font-black text-white mb-2 uppercase italic tracking-tighter">
@@ -411,7 +411,7 @@ function CheckoutContent() {
                   <p className="text-gray-400 text-sm mb-10 font-medium">
                     Lifetime Interactive Experience
                   </p>
-                  
+
                   <div className="space-y-6 mb-10 border-t border-white/10 pt-8">
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-400 font-bold">Experience Price</span>
@@ -422,7 +422,7 @@ function CheckoutContent() {
                       <span className="text-white font-bold">Included</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-between items-end border-t border-white/10 pt-8">
                     <span className="text-gray-400 text-sm font-bold uppercase tracking-widest">Total</span>
                     <div className="flex items-baseline gap-1">
@@ -439,7 +439,7 @@ function CheckoutContent() {
                   <p className="text-gray-400 text-sm mb-10 font-medium">
                     {plan.validity} of unlimited streaming
                   </p>
-                  
+
                   <div className="space-y-6 mb-10 border-t border-white/10 pt-8">
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-400 font-bold">Plan Price</span>
@@ -456,7 +456,7 @@ function CheckoutContent() {
                       <span className="text-white font-bold">Included</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-between items-end border-t border-white/10 pt-8">
                     <span className="text-gray-400 text-sm font-bold uppercase tracking-widest">Total</span>
                     <div className="flex items-baseline gap-1">
@@ -469,25 +469,25 @@ function CheckoutContent() {
                 <div className="text-red-400">{error || 'Selection not found'}</div>
               )}
             </div>
-            
+
             <div className="mt-12 text-gray-500 text-[10px] font-bold uppercase tracking-widest relative z-10">
               Secure Encrypted Checkout
             </div>
           </div>
-          
+
           {/* Right Side: Payment Action */}
           <div className="p-8 md:p-12 flex flex-col justify-center relative">
             <h3 className="text-2xl font-bold text-white mb-6">Complete your payment</h3>
             <p className="text-gray-400 text-sm leading-relaxed mb-8">
               You will be securely redirected to Razorpay to complete your payment. All major credit cards, UPI, and net banking options are supported.
             </p>
-            
+
             {error && (
               <div className="mb-8 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
                 {error}
               </div>
             )}
-            
+
             <button
               onClick={handlePayment}
               disabled={isProcessing || (checkoutType === 'plan' ? !plan : !movie)}
@@ -506,7 +506,7 @@ function CheckoutContent() {
                 </>
               )}
             </button>
-            
+
             <div className="mt-4 text-center">
               <button
                 type="button"
@@ -519,7 +519,7 @@ function CheckoutContent() {
               {verifyMessage && (
                 <p className="mt-2 text-xs text-amber-300 font-medium">{verifyMessage}</p>
               )}
-              
+
               {showRefInput && (
                 <div className="mt-3 bg-white/5 p-3 rounded-xl border border-white/10 flex flex-col gap-2 text-left">
                   <span className="text-[11px] text-gray-300 font-medium">Enter 12-digit UPI Ref / RRN from your Bank SMS (e.g. 626099119884):</span>
@@ -543,7 +543,7 @@ function CheckoutContent() {
                 </div>
               )}
             </div>
-            
+
             <div className="mt-8 flex items-center justify-center gap-4 opacity-50 grayscale">
               <span className="text-xs font-bold uppercase tracking-widest text-white">VISA</span>
               <span className="text-xs font-bold uppercase tracking-widest text-white">Mastercard</span>
