@@ -7,7 +7,7 @@ export interface ApiResponse {
 }
 
 export const transactionsApi = {
-  createOrder: async (data: { userId: number; amount: number }): Promise<ApiResponse> => {
+  createOrder: async (data: { userId: number; amount: number; planId?: number }): Promise<ApiResponse> => {
     const url = `${API_BASE}/transactions/create-order`;
     logger.debug(`Calling create order API: ${url}`);
     
@@ -29,12 +29,13 @@ export const transactionsApi = {
     return res.json();
   },
 
-  checkPendingUserTransactions: async (userId: number): Promise<ApiResponse> => {
+  checkPendingUserTransactions: async (userId: number, txnRef?: string): Promise<ApiResponse> => {
     const url = `${API_BASE}/transactions/check-pending-user/${userId}`;
     logger.debug(`Calling check pending transactions API: ${url}`);
     
     const res = await fetchWithAuth(url, {
       method: 'POST',
+      body: JSON.stringify({ txnRef: txnRef || '' }),
     });
     return res.json();
   }

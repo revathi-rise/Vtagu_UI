@@ -36,6 +36,8 @@ function CheckoutContent() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifyMessage, setVerifyMessage] = useState('');
+  const [upiRefInput, setUpiRefInput] = useState('');
+  const [showRefInput, setShowRefInput] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
@@ -186,7 +188,11 @@ function CheckoutContent() {
       
       console.log('[DEBUG] Initiating payment:', { userId, amount, type: checkoutType });
       
-      const orderData = await transactionsApi.createOrder({ userId, amount });
+      const orderData = await transactionsApi.createOrder({
+        userId,
+        amount,
+        planId: checkoutType === 'plan' ? plan?.planId : undefined,
+      });
       console.log('[DEBUG] Received order data:', orderData);
       
       if (!orderData.status || !orderData.data) {
@@ -295,7 +301,7 @@ function CheckoutContent() {
     }
   };
 
-  const handleVerifyPaymentStatus = async () => {
+  const handleVerifyPaymentStatus = async (overrideRef?: string) => {
     if (!user) return;
     setIsVerifying(true);
     setVerifyMessage('');
@@ -303,11 +309,13 @@ function CheckoutContent() {
 
     try {
       const userId = user.userId || user.id;
-      const res = await transactionsApi.checkPendingUserTransactions(userId);
+      const refToUse = typeof overrideRef === 'string' ? overrideRef : upiRefInput;
+      const res = await transactionsApi.checkPendingUserTransactions(userId, refToUse);
       if (res.status) {
         setSuccess(true);
       } else {
         setVerifyMessage(res.message || 'No confirmed payment found yet.');
+        setShowRefInput(true);
       }
     } catch (err) {
       setVerifyMessage('Failed to check payment status. Please try again.');
@@ -479,7 +487,7 @@ function CheckoutContent() {
             <div className="mt-4 text-center">
               <button
                 type="button"
-                onClick={handleVerifyPaymentStatus}
+                onClick={() => handleVerifyPaymentStatus()}
                 disabled={isVerifying || isProcessing}
                 className="text-xs text-purple-300/80 hover:text-purple-200 underline font-medium transition-colors disabled:opacity-50"
               >
@@ -487,6 +495,29 @@ function CheckoutContent() {
               </button>
               {verifyMessage && (
                 <p className="mt-2 text-xs text-amber-300 font-medium">{verifyMessage}</p>
+              )}
+              
+              {showRefInput && (
+                <div className="mt-3 bg-white/5 p-3 rounded-xl border border-white/10 flex flex-col gap-2 text-left">
+                  <span className="text-[11px] text-gray-300 font-medium">Enter 12-digit UPI Ref / RRN from your Bank SMS (e.g. 626099119884):</span>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={upiRefInput}
+                      onChange={(e) => setUpiRefInput(e.target.value)}
+                      placeholder="e.g. 626099119884"
+                      className="flex-1 bg-black/40 border border-white/20 rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleVerifyPaymentStatus(upiRefInput)}
+                      disabled={isVerifying || !upiRefInput.trim()}
+                      className="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-4 py-1.5 rounded-lg disabled:opacity-50 transition-colors"
+                    >
+                      {isVerifying ? 'Verifying...' : 'Verify'}
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
             
