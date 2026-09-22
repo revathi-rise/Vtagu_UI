@@ -71,17 +71,41 @@ export default function ProfileSelector() {
     loadData();
   }, []);
 
-  const handleProfileClick = (e: React.MouseEvent, profile: any) => {
-    // If not logged in and not a public profile, redirect to login
+  // Parental PIN restriction commented out for now per client requirement
+  // const [showPinModal, setShowPinModal] = useState(false);
+  // const [pinInput, setPinInput] = useState('');
+  // const [pinError, setPinError] = useState('');
+  // const [pendingTargetProfile, setPendingTargetProfile] = useState<any>(null);
+
+  const handleProfileClick = async (e: React.MouseEvent, profile: any) => {
+    e.preventDefault();
+
     const userJson = localStorage.getItem('user');
     if (!userJson && !profile.isKids) {
-      e.preventDefault();
       router.push('/login');
       return;
     }
 
-    // Save selected profile for the session
+    // Switching into Kids Mode
+    if (profile.isKids) {
+      try {
+        await authApi.kidsLogin();
+      } catch (err) {
+        console.warn("Kids mode activation API call optional", err);
+      }
+      localStorage.setItem('currentProfile', JSON.stringify(profile));
+      router.push('/');
+      return;
+    }
+
+    // Switching into Standard Profile
+    try {
+      await authApi.exitKidsMode('');
+    } catch (err) {
+      console.warn("Exit kids mode API call optional", err);
+    }
     localStorage.setItem('currentProfile', JSON.stringify(profile));
+    router.push('/');
   };
 
   return (
@@ -99,11 +123,10 @@ export default function ProfileSelector() {
         
         <div className="flex flex-wrap justify-center gap-6 sm:gap-10">
            {profiles.map(profile => (
-             <Link 
-               href="/" 
+             <button 
                key={profile.id} 
                onClick={(e) => handleProfileClick(e, profile)}
-               className="group flex flex-col items-center gap-4"
+               className="group flex flex-col items-center gap-4 text-left"
              >
                <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(146,72,255,0.4)] border-4 border-transparent group-hover:border-white">
                   <div className={`absolute inset-0 bg-gradient-to-tr ${profile.color} opacity-20`} />
@@ -122,7 +145,7 @@ export default function ProfileSelector() {
                <span className="text-gray-400 font-medium group-hover:text-white transition-colors tracking-wide text-lg sm:text-xl">
                  {profile.name}
                </span>
-             </Link>
+             </button>
            ))}
 
            {/* Add Profile Button */}
@@ -143,6 +166,7 @@ export default function ProfileSelector() {
           {isManaging ? "Done" : "Manage Profiles"}
         </button>
       </div>
+
     </div>
   );
 }

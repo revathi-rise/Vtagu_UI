@@ -148,5 +148,40 @@ export const authApi = {
       body: JSON.stringify(data),
     });
     return res.json();
+  },
+
+  // Set / Update Parental PIN
+  setParentalPin: async (pin: string): Promise<AuthResponse> => {
+    const url = `${API_BASE}/users/parental-pin`;
+    logger.debug(`Calling setParentalPin API: ${url}`);
+    
+    const res = await fetchWithAuth(url, {
+      method: 'POST',
+      body: JSON.stringify({ pin }),
+    });
+    return res.json();
+  },
+
+  // Switch to Kids Mode (Kids Login)
+  kidsLogin: async (): Promise<AuthResponse> => {
+    const url = `${API_BASE}/users/kids-login`;
+    logger.debug(`Calling kidsLogin API: ${url}`);
+    
+    const res = await fetchWithAuth(url, {
+      method: 'POST',
+    });
+    return res.json();
+  },
+
+  // Exit Kids Mode with Parental PIN validation
+  exitKidsMode: async (pin: string): Promise<AuthResponse> => {
+    const url = `${API_BASE}/users/exit-kids`;
+    logger.debug(`Calling exitKidsMode API: ${url}`);
+    
+    const res = await fetchWithAuth(url, {
+      method: 'POST',
+      body: JSON.stringify({ pin }),
+    });
+    return res.json();
   }
 };
