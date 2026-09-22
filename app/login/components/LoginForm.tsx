@@ -70,6 +70,7 @@ export default function LoginForm() {
       const userData = res.data || res.user || (res as any).userData;
 
       if (userData) {
+        localStorage.removeItem('currentProfile');
         localStorage.setItem('user', JSON.stringify(userData));
         const userId = userData.userId || userData.id;
         if (userId) {
@@ -88,7 +89,7 @@ export default function LoginForm() {
       } else if (userData && userData.is_subscribed === false) {
         router.push('/pricing');
       } else {
-        router.push('/');
+        router.push('/browse');
       }
     } else {
       if (res.message === 'Please verify OTP first' && email) {
@@ -124,6 +125,7 @@ export default function LoginForm() {
           setToken(res.token);
           const userData = res.data || res.user || (res as any).userData;
           if (userData) {
+            localStorage.removeItem('currentProfile');
             localStorage.setItem('user', JSON.stringify(userData));
             const userId = userData.userId || userData.id;
             if (userId) {
@@ -137,7 +139,7 @@ export default function LoginForm() {
           } else if (userData && userData.is_subscribed === false) {
             router.push('/pricing');
           } else {
-            router.push('/');
+            router.push('/browse');
           }
         } else {
           setApiError(res.message || 'Google Login failed. Please try again.');

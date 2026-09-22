@@ -94,7 +94,11 @@ export default function ProfileSelector() {
         console.warn("Kids mode activation API call optional", err);
       }
       localStorage.setItem('currentProfile', JSON.stringify(profile));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('profileChanged'));
+      }
       router.push('/');
+      router.refresh();
       return;
     }
 
@@ -105,7 +109,11 @@ export default function ProfileSelector() {
       console.warn("Exit kids mode API call optional", err);
     }
     localStorage.setItem('currentProfile', JSON.stringify(profile));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('profileChanged'));
+    }
     router.push('/');
+    router.refresh();
   };
 
   return (

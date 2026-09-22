@@ -188,6 +188,14 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
           {userName ? (
             <div className="flex items-center gap-2">
               <Link
+                href="/browse"
+                className={`flex items-center gap-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-white/80 hover:text-white ${scrolled ? 'px-2.5 py-1 text-[9px]' : 'px-3 py-1.5 text-[10px]'} font-bold uppercase tracking-wider`}
+                title="Switch Profile"
+              >
+                <User size={14} className="text-[#b28cff]" />
+                <span className="hidden md:inline">Profiles</span>
+              </Link>
+              <Link
                 href="/account"
                 className={`flex items-center gap-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all group shadow-[inset_0_1px_2px_rgba(255,255,255,0.05),0_2px_5px_rgba(0,0,0,0.2)] ${scrolled ? 'pl-1.5 pr-3 py-1' : 'pl-3 pr-5 py-2'}`}
               >
@@ -203,6 +211,7 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
                   removeToken();
                   localStorage.removeItem('user');
                   localStorage.removeItem('userId');
+                  localStorage.removeItem('currentProfile');
                   document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                   document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                   dispatch(setUser(null));

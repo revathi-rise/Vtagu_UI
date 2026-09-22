@@ -116,6 +116,7 @@ export default function RegisterForm() {
           setToken(res.token);
           const userData = res.data || res.user || (res as any).userData;
           if (userData) {
+            localStorage.removeItem('currentProfile');
             localStorage.setItem('user', JSON.stringify(userData));
             const userId = userData.userId || userData.id;
             if (userId) {
@@ -128,7 +129,7 @@ export default function RegisterForm() {
             if (planId) {
               router.push(`/checkout?plan=${planId}`);
             } else {
-              router.push('/');
+              router.push('/browse');
             }
           }, 1500);
         } else {

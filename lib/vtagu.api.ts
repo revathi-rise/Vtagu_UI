@@ -1,11 +1,61 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
+async function getAuthHeader(): Promise<Record<string, string>> {
+  let token: string | null = null;
+  if (typeof window !== 'undefined') {
+    token = localStorage.getItem('token');
+    if (!token) {
+      const match = document.cookie.match(/(?:^|; )token=([^;]*)/);
+      if (match) token = match[1];
+    }
+  } else {
+    try {
+      const { cookies } = await import('next/headers');
+      const cookieStore = await cookies();
+      token = cookieStore.get('token')?.value || null;
+    } catch (e) {
+      // ignore server context errors if not available
+    }
+  }
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+export function isKidsProfileActive(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const currentProfileStr = localStorage.getItem('currentProfile');
+    if (currentProfileStr) {
+      const profile = JSON.parse(currentProfileStr);
+      return !!profile.isKids;
+    }
+  } catch (e) {
+    // ignore
+  }
+  return false;
+}
+
+export function filterForProfile<T>(items: T[]): T[] {
+  if (!items || !Array.isArray(items)) return [];
+  if (!isKidsProfileActive()) return items;
+  return items.filter((item: any) => {
+    if (item.kidsRestriction === true || item.kids_restriction === true || item.kids_restriction === 1 || item.kids_restriction === '1') {
+      return false;
+    }
+    if (item.ageRestriction === '18+' || item.age_restriction === '18+') {
+      return false;
+    }
+    return true;
+  });
+}
+
 async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 2): Promise<Response> {
+  const authHeader = await getAuthHeader();
   try {
     const res = await fetch(url, {
       ...options,
       headers: {
         "Content-Type": "application/json",
+        ...authHeader,
         ...options.headers,
       },
     });

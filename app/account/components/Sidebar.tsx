@@ -18,6 +18,7 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     removeToken();
     localStorage.removeItem('user');
     localStorage.removeItem('userId');
+    localStorage.removeItem('currentProfile');
     // Clear cookies
     document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
