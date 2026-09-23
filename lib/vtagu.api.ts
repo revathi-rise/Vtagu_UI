@@ -36,16 +36,17 @@ export function isKidsProfileActive(): boolean {
 
 export function filterForProfile<T>(items: T[]): T[] {
   if (!items || !Array.isArray(items)) return [];
-  if (!isKidsProfileActive()) return items;
-  return items.filter((item: any) => {
-    if (item.kidsRestriction === true || item.kids_restriction === true || item.kids_restriction === 1 || item.kids_restriction === '1') {
-      return false;
-    }
-    if (item.ageRestriction === '18+' || item.age_restriction === '18+') {
-      return false;
-    }
-    return true;
-  });
+  return items;
+}
+
+function appendUserId(url: string, userId?: string | null): string {
+  let uid = userId;
+  if (!uid && typeof window !== 'undefined') {
+    uid = localStorage.getItem('userId');
+  }
+  if (!uid) return url;
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}userId=${encodeURIComponent(uid)}`;
 }
 
 async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 2): Promise<Response> {
@@ -162,8 +163,8 @@ export interface Series {
   isComingSoon?: boolean;
 }
 
-export async function getSeries(): Promise<Series[]> {
-  const url = `${API_BASE}/series`;
+export async function getSeries(userId?: string | null): Promise<Series[]> {
+  const url = appendUserId(`${API_BASE}/series`, userId);
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
@@ -371,8 +372,8 @@ export function normalizeEpisode(episode: any): Episode {
   };
 }
 
-export async function getEpisodes(): Promise<Episode[]> {
-  const url = `${API_BASE}/episodes`;
+export async function getEpisodes(userId?: string | null): Promise<Episode[]> {
+  const url = appendUserId(`${API_BASE}/episodes`, userId);
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
@@ -517,8 +518,8 @@ export function normalizeMovie(movie: any): Movie {
   };
 }
 
-export async function getMovies(): Promise<Movie[]> {
-  const url = `${API_BASE}/movies`;
+export async function getMovies(userId?: string | null): Promise<Movie[]> {
+  const url = appendUserId(`${API_BASE}/movies`, userId);
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
@@ -533,7 +534,7 @@ export async function getMovies(): Promise<Movie[]> {
 }
 
 export async function getMovieBySlug(slug: string, userId?: string | null): Promise<Movie | null> {
-  const url = `${API_BASE}/movies/${encodeURIComponent(slug)}${userId ? `?userId=${userId}` : ''}`;
+  const url = appendUserId(`${API_BASE}/movies/${encodeURIComponent(slug)}`, userId);
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
@@ -551,8 +552,8 @@ export async function getMovieBySlug(slug: string, userId?: string | null): Prom
 // New Endpoints: Trending, Admin CRUD for Movies
 // ----------------------------------------------------
 
-export async function getTrendingMovies(limit: number = 10): Promise<Movie[]> {
-  const url = `${API_BASE}/movies/trending?limit=${limit}`;
+export async function getTrendingMovies(limit: number = 10, userId?: string | null): Promise<Movie[]> {
+  const url = appendUserId(`${API_BASE}/movies/trending?limit=${limit}`, userId);
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
