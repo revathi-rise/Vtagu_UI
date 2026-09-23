@@ -178,7 +178,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                             {movie.description}
                         </p>
 
-                        <div className="flex flex-wrap gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                        <div className="flex flex-wrap items-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000">
                             {isAuthorized ? (
                                 <button
                                     onClick={handleRestart}
@@ -188,6 +188,28 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                                     <span className="font-inter font-black text-[18px]">Begin Narrative</span>
                                     <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
                                 </button>
+                            ) : scenes.some(s => Number(s.is_free) === 1 || Boolean(s.is_free) === true || s.is_locked === false || (!!s.scene_url && s.scene_url.length > 0)) ? (
+                                <>
+                                    <button
+                                        onClick={() => {
+                                            const playerEl = document.getElementById('interactive-player-section');
+                                            if (playerEl) playerEl.scrollIntoView({ behavior: 'smooth' });
+                                            else handleRestart();
+                                        }}
+                                        className="flex items-center gap-3 bg-emerald-400 hover:bg-emerald-300 text-black px-8 py-[12px] rounded-2xl font-black text-[18px] font-inter uppercase tracking-tight transition-all shadow-2xl shadow-emerald-400/20 active:scale-95 group"
+                                    >
+                                        <Play size={22} fill="black" />
+                                        <span className="font-inter font-black text-[18px]">Watch Free Preview 🔓</span>
+                                        <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                    </button>
+                                    <button
+                                        onClick={() => setShowPaywallModal(true)}
+                                        className="flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-7 py-[12px] rounded-2xl font-black text-[16px] font-inter tracking-tight uppercase transition-all shadow-lg active:scale-95"
+                                    >
+                                        <Lock size={18} />
+                                        <span>Unlock Full Movie</span>
+                                    </button>
+                                </>
                             ) : (
                                 <button
                                     onClick={() => setShowPaywallModal(true)}
@@ -205,9 +227,9 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                 <div className="max-w-[90%] mx-auto md:py-24 py-12">
                     <div className="max-w-6xl mx-auto space-y-20">
 
-                        {/* Scene Manager / Locked Banner */}
-                        <div className="animate-in fade-in zoom-in duration-1000">
-                            {isAuthorized ? (
+                        {/* Scene Manager / Free Preview Banner */}
+                        <div id="interactive-player-section" className="animate-in fade-in zoom-in duration-1000">
+                            { (isAuthorized || (scenes.some(s => Number(s.is_free) === 1 || Boolean(s.is_free) === true || s.is_locked === false || (!!s.scene_url && s.scene_url.length > 0)))) ? (
                                 <SceneManager
                                     ref={managerRef}
                                     currentScene={currentScene}
@@ -217,6 +239,10 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                                     onPrevious={handlePrevious}
                                     hasPrevious={sceneHistory.length > 0}
                                     movieId={movie.interactive_movie_id}
+                                    movieTitle={movie.title}
+                                    isAuthorized={isAuthorized || Number(movie.is_free) === 1}
+                                    scenes={scenes}
+                                    onShowPaywall={() => setShowPaywallModal(true)}
                                 />
                             ) : (
                                 <div className="p-12 rounded-[2.5rem] bg-white/5 border border-white/10 flex flex-col items-center justify-center text-center gap-6 backdrop-blur-xl">

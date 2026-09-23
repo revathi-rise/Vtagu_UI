@@ -252,6 +252,8 @@ export interface Scene {
       label: string;
       url: string;
   }[];
+  is_free?: boolean | number;
+  is_locked?: boolean;
 }
 
 export interface Choice {
@@ -283,8 +285,8 @@ export async function getInteractiveMovies(): Promise<InteractiveMovie[]> {
 }
 
 
-export async function getScenes(movieId: number): Promise<Scene[]> {
-  const url = `${API_BASE}/scenes?id=${movieId}`;
+export async function getScenes(movieId: number, userId?: string | number | null): Promise<Scene[]> {
+  const url = appendUserId(`${API_BASE}/scenes?id=${movieId}`, userId ? String(userId) : null);
   try {
     const res = await fetchWithRetry(url);
     if (!res.ok) {
