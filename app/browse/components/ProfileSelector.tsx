@@ -5,13 +5,15 @@ import { useRouter } from 'next/navigation';
 import { Plus, Edit2 } from 'lucide-react';
 import { authApi } from '@/lib/api/auth.api';
 import { getUserId } from '@/lib/api-client';
+import KidsIcon from '@/components/icons/KidsIcon';
 
 export default function ProfileSelector() {
   const router = useRouter();
   const [isManaging, setIsManaging] = useState(false);
+
   const [profiles, setProfiles] = useState([
-    { id: 1, name: "Loading...", avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop", color: "from-blue-500 to-purple-600" },
-    { id: 2, name: "Kids", avatar: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=200&auto=format&fit=crop", color: "from-yellow-400 to-orange-500", isKids: true }
+    { id: 1, name: "Loading...", avatar: "", color: "from-purple-600 to-indigo-600" },
+    { id: 2, name: "Kids", avatar: "", color: "from-amber-400 to-orange-500", isKids: true }
   ]);
 
   useEffect(() => {
@@ -48,22 +50,22 @@ export default function ProfileSelector() {
           { 
             id: userData.userId || userData.id || 1, 
             name: userData.user_name || userData.name || "User", 
-            avatar: userData.profile_picture || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop", 
-            color: "from-blue-500 to-purple-600" 
+            avatar: userData.profile_picture || "", 
+            color: "from-purple-600 to-indigo-600" 
           },
           { 
             id: 2, 
             name: "Kids", 
-            avatar: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=200&auto=format&fit=crop", 
-            color: "from-yellow-400 to-orange-500",
+            avatar: "", 
+            color: "from-amber-400 to-orange-500",
             isKids: true
           }
         ]);
       } else {
         // Guest mode
         setProfiles([
-          { id: 1, name: "Guest", avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop", color: "from-blue-500 to-purple-600" },
-          { id: 2, name: "Kids", avatar: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=200&auto=format&fit=crop", color: "from-yellow-400 to-orange-500", isKids: true }
+          { id: 1, name: "Guest", avatar: "", color: "from-purple-600 to-indigo-600" },
+          { id: 2, name: "Kids", avatar: "", color: "from-amber-400 to-orange-500", isKids: true }
         ]);
       }
     };
@@ -120,29 +122,45 @@ export default function ProfileSelector() {
     <div className="fixed inset-0 z-[200] w-full min-h-screen bg-[#0f0a19] flex flex-col items-center justify-center overflow-y-auto">
       {/* Brand Logo Header */}
       <Link href="/" className="absolute top-8 left-8 sm:left-12 flex items-center gap-2 hover:opacity-80 transition-opacity">
-         <div className="w-10 h-10 bg-white flex items-center justify-center rounded-lg shadow-lg">
-            <span className="text-[#1a1329] font-black text-2xl">P</span>
-         </div>
-         <span className="font-extrabold text-2xl tracking-tighter text-white">PrimeTime</span>
+         <img
+            src="/vtagu_logo.png"
+            alt="PrimeTime Logo"
+            className="h-10 sm:h-12 w-auto object-contain drop-shadow-md"
+         />
       </Link>
 
       <div className="flex flex-col items-center mt-16 sm:mt-0 animate-in fade-in zoom-in duration-500">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-10 tracking-tight drop-shadow-lg text-center">Who's watching?</h1>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-12 tracking-tight drop-shadow-xl text-center">
+          Who's watching?
+        </h1>
         
-        <div className="flex flex-wrap justify-center gap-6 sm:gap-10">
+        <div className="flex flex-wrap justify-center gap-8 sm:gap-12">
            {profiles.map(profile => (
              <button 
                key={profile.id} 
                onClick={(e) => handleProfileClick(e, profile)}
-               className="group flex flex-col items-center gap-4 text-left"
+               className="group flex flex-col items-center gap-4 text-left transition-all duration-300"
              >
-               <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(146,72,255,0.4)] border-4 border-transparent group-hover:border-white">
-                  <div className={`absolute inset-0 bg-gradient-to-tr ${profile.color} opacity-20`} />
-                  {profile.avatar && (
-                    <img src={profile.avatar} className="w-full h-full object-cover" alt={profile.name} />
+               <div className={`relative w-32 h-32 sm:w-40 sm:h-40 rounded-3xl overflow-hidden transition-all duration-300 group-hover:scale-110 border-4 border-transparent ${
+                 profile.isKids 
+                   ? 'group-hover:border-amber-400 group-hover:shadow-[0_0_40px_rgba(251,191,36,0.6)] bg-gradient-to-tr from-amber-400 to-orange-500' 
+                   : 'group-hover:border-[#b28cff] group-hover:shadow-[0_0_40px_rgba(178,140,255,0.6)] bg-gradient-to-tr from-purple-600 to-indigo-700'
+               }`}>
+                  {profile.isKids ? (
+                    <KidsIcon className="w-full h-full p-2 group-hover:scale-105 transition-transform duration-300" />
+                  ) : profile.avatar ? (
+                    <img 
+                      src={profile.avatar} 
+                      className="w-full h-full object-cover group-hover:brightness-110 transition-all duration-300" 
+                      alt={profile.name} 
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center font-black text-white text-5xl uppercase tracking-tighter drop-shadow-md">
+                      {profile.name.substring(0, 1)}
+                    </div>
                   )}
                </div>
-               <span className="text-gray-400 font-medium group-hover:text-white transition-colors tracking-wide text-lg sm:text-xl text-center">
+               <span className="text-gray-400 font-bold group-hover:text-white transition-colors tracking-wide text-lg sm:text-xl text-center uppercase">
                  {profile.name}
                </span>
              </button>

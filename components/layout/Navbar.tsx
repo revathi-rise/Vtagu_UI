@@ -4,27 +4,34 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Search, Menu, X, ChevronRight, LogOut, User, Globe } from "lucide-react";
+import { Search, Menu, X, ChevronRight, LogOut, User, Users, ChevronDown, Settings, Shield, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Genre, InteractiveMovie, getInteractiveMovies, Language, getLanguages, getGenres } from "@/lib/vtagu.api";
 import { removeToken } from "@/lib/api-client";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
 import { setUser } from "@/store/slices/authSlice";
+import KidsIcon from "@/components/icons/KidsIcon";
 
 export default function Navbar({ genres = [], languages = [] }: { genres?: Genre[]; languages?: Language[] }) {
+  const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [interactiveMovies, setInteractiveMovies] = useState<InteractiveMovie[]>([]);
   const [genresList, setGenresList] = useState<Genre[]>(genres);
-  console.log(genresList);
 
   const [languagesList, setLanguagesList] = useState<Language[]>(languages);
+  const [currentProfile, setCurrentProfile] = useState<any>(null);
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
   const pathname = usePathname();
 
   const userName = user?.user_name || user?.name || null;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (genres && genres.length > 0) {
@@ -85,13 +92,29 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
       }
     };
 
+    const loadProfile = () => {
+      try {
+        const profileStr = localStorage.getItem('currentProfile');
+        if (profileStr) {
+          setCurrentProfile(JSON.parse(profileStr));
+        } else {
+          setCurrentProfile(null);
+        }
+      } catch (e) {
+        setCurrentProfile(null);
+      }
+    };
+
     window.addEventListener("scroll", handleScroll);
+    window.addEventListener("profileChanged", loadProfile);
     fetchInteractive();
     fetchDropdownData();
     loadUser();
+    loadProfile();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("profileChanged", loadProfile);
     };
   }, [dispatch, languagesList.length, genresList.length]);
 
@@ -180,48 +203,106 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
         {/* Right Actions */}
         <div className="flex items-center gap-1.5 sm:gap-3">
           {/* Search */}
-          <button className={`flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/80 hover:text-white transition-all border border-white/10 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.3)] group active:scale-95 active:shadow-inner ${scrolled ? 'w-8 h-8 sm:w-9 sm:h-9' : 'w-10 h-10 sm:w-11 sm:h-11'}`}>
+          <button suppressHydrationWarning className={`flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/80 hover:text-white transition-all border border-white/10 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.3)] group active:scale-95 active:shadow-inner ${scrolled ? 'w-8 h-8 sm:w-9 sm:h-9' : 'w-10 h-10 sm:w-11 sm:h-11'}`}>
             <Search className={`group-hover:scale-110 transition-transform ${scrolled ? 'w-3.5 h-3.5 sm:w-4 sm:h-4' : 'w-4.5 h-4.5 sm:w-5 sm:h-5'}`} />
           </button>
 
           {/* Profile / Login */}
-          {userName ? (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/browse"
-                className={`flex items-center gap-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-white/80 hover:text-white ${scrolled ? 'px-2.5 py-1 text-[9px]' : 'px-3 py-1.5 text-[10px]'} font-bold uppercase tracking-wider`}
-                title="Switch Profile"
-              >
-                <User size={14} className="text-[#b28cff]" />
-                <span className="hidden md:inline">Profiles</span>
-              </Link>
-              <Link
-                href="/account"
-                className={`flex items-center gap-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all group shadow-[inset_0_1px_2px_rgba(255,255,255,0.05),0_2px_5px_rgba(0,0,0,0.2)] ${scrolled ? 'pl-1.5 pr-3 py-1' : 'pl-3 pr-5 py-2'}`}
-              >
-                <div className={`rounded-full bg-brand-gradient border border-white/30 shadow-[0_2px_10px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.3)] flex items-center justify-center font-bold text-white overflow-hidden uppercase transition-all ${scrolled ? 'w-6 h-6 text-[8px]' : 'w-9 h-9 text-xs'}`}>
-                  {userName.substring(0, 2)}
+          {mounted && userName ? (
+            <div 
+              className="relative flex items-center gap-2"
+              onMouseEnter={() => setIsProfileDropdownOpen(true)}
+              onMouseLeave={() => setIsProfileDropdownOpen(false)}
+            >
+              {/* Profile Pill Trigger */}
+              <div suppressHydrationWarning className="flex items-center gap-2 bg-[#161026]/90 hover:bg-[#211738] border border-white/15 hover:border-white/30 rounded-full p-1 sm:pr-4 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer group">
+                {/* Avatar Badge */}
+                <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full ${currentProfile?.isKids ? 'bg-gradient-to-r from-amber-400 to-orange-500 shadow-[0_0_12px_rgba(251,191,36,0.5)]' : 'bg-brand-gradient shadow-[0_0_12px_rgba(178,140,255,0.4)]'} border border-white/30 flex items-center justify-center font-black text-white text-xs uppercase shrink-0 transition-transform group-hover:scale-105 overflow-hidden p-0.5`}>
+                  {currentProfile?.isKids ? <KidsIcon className="w-full h-full" /> : userName.substring(0, 2)}
                 </div>
-                <span className={`hidden sm:block font-black tracking-widest text-white/90 group-hover:text-white transition-colors uppercase ${scrolled ? 'text-[9px] xl:text-[10px]' : 'text-[10px] xl:text-xs'}`}>
-                  {userName}
-                </span>
-              </Link>
-              <button
-                onClick={() => {
-                  removeToken();
-                  localStorage.removeItem('user');
-                  localStorage.removeItem('userId');
-                  localStorage.removeItem('currentProfile');
-                  document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                  document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                  dispatch(setUser(null));
-                  window.location.href = '/login';
-                }}
-                className={`flex items-center justify-center rounded-full bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white transition-all border border-red-500/20 active:scale-95 ${scrolled ? 'w-8 h-8 sm:w-9 sm:h-9' : 'w-10 h-10 sm:w-11 sm:h-11'}`}
-                title="Logout"
-              >
-                <svg className={scrolled ? "w-3.5 h-3.5" : "w-4.5 h-4.5"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
-              </button>
+
+                {/* Profile Name & Status */}
+                <div className="hidden sm:flex flex-col text-left">
+                  <span className="text-[11px] font-extrabold text-white tracking-wider uppercase leading-none group-hover:text-[#b28cff] transition-colors">
+                    {currentProfile?.isKids ? 'KIDS' : (currentProfile?.name || userName)}
+                  </span>
+                  <span className="text-[8px] font-bold text-gray-400 tracking-widest uppercase mt-0.5">
+                    {currentProfile?.isKids ? 'KIDS MODE' : 'PROFILE'}
+                  </span>
+                </div>
+
+                <ChevronDown size={14} className={`text-gray-400 group-hover:text-white transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180 text-white' : ''}`} />
+              </div>
+
+              {/* Rich Glassmorphic Profile Dropdown */}
+              <AnimatePresence>
+                {isProfileDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 top-full mt-2 w-64 bg-[#140e24]/95 border border-white/15 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl p-4 z-50 overflow-hidden"
+                  >
+                    {/* Header Info */}
+                    <div className="flex items-center gap-3 pb-3 mb-3 border-b border-white/10">
+                      <div className={`w-11 h-11 rounded-xl ${currentProfile?.isKids ? 'bg-gradient-to-r from-amber-400 to-orange-500 shadow-[0_0_15px_rgba(251,191,36,0.5)]' : 'bg-brand-gradient'} flex items-center justify-center font-black text-white text-sm uppercase shadow-md border border-white/20 overflow-hidden p-0.5`}>
+                        {currentProfile?.isKids ? <KidsIcon className="w-full h-full" /> : userName.substring(0, 2)}
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-extrabold text-white text-sm truncate uppercase tracking-tight">
+                          {currentProfile?.isKids ? 'Kids Mode' : (currentProfile?.name || userName)}
+                        </span>
+                        <span className="text-[10px] text-gray-400 truncate">
+                          {user?.email || 'PrimeTime Member'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Navigation Items */}
+                    <div className="space-y-1">
+                      <Link
+                        href="/browse"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 transition-colors group"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                      >
+                        <Users size={16} className="text-[#b28cff] group-hover:scale-110 transition-transform" />
+                        <span>Switch Profile</span>
+                      </Link>
+
+                      <Link
+                        href="/account"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 transition-colors group"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                      >
+                        <Settings size={16} className="text-[#b28cff] group-hover:scale-110 transition-transform" />
+                        <span>Manage Account</span>
+                      </Link>
+                    </div>
+
+                    {/* Divider & Logout */}
+                    <div className="pt-3 mt-3 border-t border-white/10">
+                      <button
+                        suppressHydrationWarning
+                        onClick={() => {
+                          removeToken();
+                          localStorage.removeItem('user');
+                          localStorage.removeItem('userId');
+                          localStorage.removeItem('currentProfile');
+                          document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                          dispatch(setUser(null));
+                          window.location.href = '/login';
+                        }}
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-red-400 hover:text-white hover:bg-red-500/20 transition-all border border-red-500/20 active:scale-95"
+                      >
+                        <LogOut size={16} />
+                        <span>Sign Out of PrimeTime</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           ) : (
             <Link
@@ -253,6 +334,7 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
 
           {/* Mobile Menu Button */}
           <button
+            suppressHydrationWarning
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="lg:hidden relative z-[70] w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 shadow-lg active:scale-90 transition-all hover:bg-white/20"
           >

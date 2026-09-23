@@ -84,11 +84,12 @@ export default function Footer() {
               </Link>
               <div className="relative group">
                 <input
+                  suppressHydrationWarning
                   type="email"
                   placeholder="Newsletter"
                   className="w-full bg-white/[0.03] border border-white/5 rounded-xl sm:rounded-2xl py-3 px-4 pr-10 text-[11px] sm:text-xs font-bold focus:outline-none focus:border-primary/40 transition-all placeholder:text-white/20"
                 />
-                <button className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-primary transition-colors">
+                <button suppressHydrationWarning className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-primary transition-colors">
                   <Mail size={14} />
                 </button>
               </div>
@@ -103,14 +104,14 @@ export default function Footer() {
             <p>© 2026 VTAGU PRIMETIME · ALL RIGHTS RESERVED</p>
             <div className="hidden sm:block w-px h-3.5 bg-white/10" />
             <div className="flex items-center gap-4 sm:gap-6">
-              <button className="hover:text-white transition-colors">Terms</button>
-              <button className="hover:text-white transition-colors">Privacy</button>
-              <button className="hover:text-white transition-colors">Cookies</button>
+              <button suppressHydrationWarning className="hover:text-white transition-colors">Terms</button>
+              <button suppressHydrationWarning className="hover:text-white transition-colors">Privacy</button>
+              <button suppressHydrationWarning className="hover:text-white transition-colors">Cookies</button>
             </div>
           </div>
 
           <div className="flex items-center gap-6">
-            <button className="flex items-center gap-2 hover:text-white transition-all group">
+            <button suppressHydrationWarning className="flex items-center gap-2 hover:text-white transition-all group">
               <Globe size={14} className="text-primary group-hover:rotate-12 transition-transform duration-500" />
               <span>International (EN)</span>
             </button>
