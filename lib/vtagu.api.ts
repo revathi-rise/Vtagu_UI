@@ -60,11 +60,11 @@ async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 
         ...options.headers,
       },
     });
-    
+
     if (!res.ok && retries > 0) {
-        return fetchWithRetry(url, options, retries - 1);
+      return fetchWithRetry(url, options, retries - 1);
     }
-    
+
     return res;
   } catch (err: any) {
     if (retries > 0) {
@@ -84,7 +84,7 @@ export interface Genre {
 
 export async function getGenres(): Promise<Genre[]> {
   const url = `${API_BASE}/genres`;
-  
+
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
 
@@ -137,7 +137,7 @@ export async function getPosters(pageType?: string, language?: string, limit?: n
   try {
     const res = await fetchWithRetry(fullUrl, { next: { revalidate: 0 } });
     if (!res.ok) {
-        throw new Error(`Failed to fetch posters. Status: ${res.status}`);
+      throw new Error(`Failed to fetch posters. Status: ${res.status}`);
     }
     const result = await res.json();
     return result.data || [];
@@ -248,9 +248,9 @@ export interface Scene {
   end_text?: string;
   choices?: Choice[];
   subtitles?: {
-      language: string;
-      label: string;
-      url: string;
+    language: string;
+    label: string;
+    url: string;
   }[];
   is_free?: boolean | number;
   is_locked?: boolean;
@@ -271,7 +271,7 @@ export interface Choice {
 export async function getInteractiveMovies(): Promise<InteractiveMovie[]> {
   const url = `${API_BASE}/interactive-movies`;
   try {
-    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });    
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
       throw new Error(`Failed to fetch interactive movies. Status: ${res.status}`);
     }
@@ -483,7 +483,7 @@ export function cleanHtmlString(htmlStr: string): string {
 export function getBadgeText(media: any): string | null {
   if (!media) return null;
   if (media.isFree) return 'FREE';
-  
+
   const mType = media.movieType || media.movie_type;
   if (mType !== undefined && mType !== null) {
     if (String(mType) === '2' || String(mType).toLowerCase() === 'premium') {
@@ -493,7 +493,7 @@ export function getBadgeText(media: any): string | null {
       return 'PAID';
     }
   }
-  
+
   return null;
 }
 
@@ -511,8 +511,8 @@ export function normalizeMovie(movie: any): Movie {
     movieType: movie.movieType || movie.movie_type,
     contentType: movie.contentType || movie.type,
     posterImage: movie.media?.card_image?.url || movie.media?.image?.url || movie.posterImage || "",
-    videoUrl: (movie.media && movie.media.video && typeof movie.media.video.url === 'string') 
-      ? movie.media.video.url 
+    videoUrl: (movie.media && movie.media.video && typeof movie.media.video.url === 'string')
+      ? movie.media.video.url
       : (movie.videoUrl || ""),
     trailerUrl: movie.media?.trailer?.url || movie.trailerUrl || "",
     posterAlt: movie.media?.card_image?.alt || movie.media?.image?.alt || movie.posterAlt || "",
@@ -540,7 +540,7 @@ export async function getMovieBySlug(slug: string, userId?: string | null): Prom
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
-        if (res.status === 404) return null;
+      if (res.status === 404) return null;
       throw new Error(`Failed to fetch movie detail. Status: ${res.status}`);
     }
     const result = await res.json();
@@ -747,17 +747,16 @@ export async function getLanguages(): Promise<Language[]> {
 
 export async function getMoviesByLanguage(slug: string): Promise<LanguageMoviesResponse> {
   const url = `${API_BASE}/languages/${slug}/movies`;
-  console.log(url,"url");
-  
+
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
       if (res.status === 404) {
-        return { 
-          language: slug.charAt(0).toUpperCase() + slug.slice(1), 
-          movies: [], 
-          Interactive: [], 
-          episodes: [] 
+        return {
+          language: slug.charAt(0).toUpperCase() + slug.slice(1),
+          movies: [],
+          Interactive: [],
+          episodes: []
         };
       }
       throw new Error(`Failed to fetch movies by language slug "${slug}". Status: ${res.status}`);

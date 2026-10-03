@@ -41,7 +41,7 @@ export default function MovieDetailsClient({ movie: initialMovie }: MovieDetails
           if (freshMovie && freshMovie.videoUrl) {
             setMovie(freshMovie);
           }
-        }).catch(() => {});
+        }).catch(() => { });
       }
     }
   }, [movie.isFree, movie.videoUrl, movie.slug]);
@@ -60,17 +60,17 @@ export default function MovieDetailsClient({ movie: initialMovie }: MovieDetails
       {/* Hero Section with High-Performance Video Background */}
       <div className="relative w-full h-[90vh] lg:h-[100vh] overflow-hidden">
         <DynamicBackgroundVideo
-          videoUrl={movie.trailerUrl}
+          videoUrl={movie.trailerUrl || movie.videoUrl || ""}
           posterImage={movie.posterImage || "https://picsum.photos/seed/movie/1920/1080"}
           posterAlt={movie.posterAlt || movie.title}
         />
 
         {/* Content Container */}
-        <div className="relative z-20 h-full max-w-[90%] mx-auto flex flex-col justify-end pb-24 lg:pb-32">
+        <div className="relative z-20 h-full max-w-[90%] mx-auto flex flex-col justify-end pb-24 lg:pb-32 pointer-events-none">
           {/* Back Button with Premium Glassmorphism */}
           <Link
             href="/"
-            className="w-fit mb-6 flex items-center gap-3 text-white/60 hover:text-white transition-all group"
+            className="w-fit mb-6 flex items-center gap-3 text-white/60 hover:text-white transition-all group pointer-events-auto"
           >
             <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center bg-white/5 backdrop-blur-md group-hover:bg-white/10 group-hover:border-white/20">
               <ChevronLeft size={22} />
@@ -103,7 +103,7 @@ export default function MovieDetailsClient({ movie: initialMovie }: MovieDetails
           </motion.div>
 
           {/* Title & Description with Luxury Typography */}
-          <div className="max-w-4xl">
+          <div className="max-w-4xl pointer-events-auto">
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}

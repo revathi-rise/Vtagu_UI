@@ -50,24 +50,33 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
 
     const checkAccess = async () => {
         setCheckingAccess(true);
-        
-        // Immediate client check: If movie is explicitly marked free, play directly without modal
+
+        // Check if user is logged in with an active paid account/subscription
+        let isUserPaidAccount = false;
+        try {
+            const userJson = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+            if (userJson) {
+                const userObj = JSON.parse(userJson);
+                if (userObj.is_subscribed || userObj.isSubscribed || (userObj.plan && String(userObj.plan).toLowerCase() !== 'free')) {
+                    isUserPaidAccount = true;
+                }
+            }
+        } catch (e) {}
+
         const isMovieFree = Number(movie.is_free) === 1 || Number((movie as any).isFree) === 1 || Boolean(movie.is_free) === true || String(movie.is_free) === '1';
-        if (isMovieFree) {
-            setAccessData({ hasAccess: true, reason: 'free', price: 0, currency: movie.currency || 'INR' });
-            setIsAuthorized(true);
-            setCheckingAccess(false);
-            return;
-        }
 
         try {
             const userId = getUserId();
             const result = await checkMovieAccess(movie.interactive_movie_id, userId);
             setAccessData(result);
-            setIsAuthorized(result.hasAccess);
+            if (isUserPaidAccount || result.hasAccess || isMovieFree) {
+                setIsAuthorized(true);
+            } else {
+                setIsAuthorized(false);
+            }
         } catch (error) {
             console.error('Error checking movie access:', error);
-            setIsAuthorized(false);
+            setIsAuthorized(isUserPaidAccount || isMovieFree);
         } finally {
             setCheckingAccess(false);
         }

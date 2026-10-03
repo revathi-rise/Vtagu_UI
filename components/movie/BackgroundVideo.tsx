@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { Volume2, VolumeX } from 'lucide-react';
 import { isRumbleUrl, getRumbleEmbedUrl } from '@/lib/video-utils';
 
 interface BackgroundVideoProps {
@@ -13,9 +14,10 @@ interface BackgroundVideoProps {
 
 export default function BackgroundVideo({ videoUrl, posterImage, posterAlt }: BackgroundVideoProps) {
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const { scrollY } = useScroll();
   const playerRef = useRef<any>(null);
-  const fadeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const html5VideoRef = useRef<HTMLVideoElement | null>(null);
 
   const isRumble = isRumbleUrl(videoUrl);
   const rumbleEmbedUrl = isRumble ? getRumbleEmbedUrl(videoUrl) : null;
@@ -25,25 +27,92 @@ export default function BackgroundVideo({ videoUrl, posterImage, posterAlt }: Ba
     ? posterImage
     : "https://picsum.photos/seed/movie/1920/1080";
 
+  // Extract YouTube Video ID
+  const getYTId = (url: string) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url?.match(regExp);
+    if (match && match[2].length === 11) return match[2];
+    if (url.length === 11 && !url.includes('/') && !url.includes('.')) return url;
+    return null;
+  };
+
+  const videoId = getYTId(videoUrl);
+  const isDirectVideo = !videoId && !isRumble && videoUrl && videoUrl.trim() !== '';
+
+  // Toggle audio mute / unmute for background trailer
+  const toggleMute = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+
+    // 1. YouTube API Instance
+    if (playerRef.current) {
+      try {
+        if (nextMuted) {
+          playerRef.current.mute?.();
+        } else {
+          playerRef.current.unMute?.();
+          playerRef.current.setVolume?.(100);
+          playerRef.current.playVideo?.();
+        }
+      } catch (err) {
+        console.warn('YouTube API mute toggle error:', err);
+      }
+    }
+
+    // 2. Direct postMessage fallback
+    if (videoId) {
+      try {
+        const iframe = document.querySelector(`#bg-youtube-player-${videoId} iframe`) as HTMLIFrameElement;
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage(
+            JSON.stringify({
+              event: 'command',
+              func: nextMuted ? 'mute' : 'unMute',
+              args: [],
+            }),
+            '*'
+          );
+          if (!nextMuted) {
+            iframe.contentWindow.postMessage(
+              JSON.stringify({
+                event: 'command',
+                func: 'setVolume',
+                args: [100],
+              }),
+              '*'
+            );
+          }
+        }
+      } catch (err) {
+        console.warn('postMessage error:', err);
+      }
+    }
+
+    // 3. HTML5 Video Element
+    if (html5VideoRef.current) {
+      html5VideoRef.current.muted = nextMuted;
+      html5VideoRef.current.volume = 1.0;
+      if (!nextMuted) {
+        html5VideoRef.current.play().catch(() => {});
+      }
+    }
+  };
+
   // Progressively dim the video as we scroll down (0 to 600px)
   const videoOpacity = useTransform(scrollY, [0, 600], [1, 0.2]);
   const videoBlur = useTransform(scrollY, [0, 600], ["blur(0px)", "blur(10px)"]);
 
-  // Extract YouTube Video ID
-  const getYTId = (url: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url?.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
-  };
-
-  const videoId = getYTId(videoUrl);
-
-  // Initialize YouTube API and player
+  // Initialize YouTube API player on div target
   useEffect(() => {
     if (typeof window === 'undefined' || !videoId) return;
 
     let player: any = null;
-    let checkYTInterval: NodeJS.Timeout | null = null;
+    let checkInterval: NodeJS.Timeout | null = null;
 
     const initPlayer = () => {
       const YT = (window as any).YT;
@@ -52,67 +121,55 @@ export default function BackgroundVideo({ videoUrl, posterImage, posterAlt }: Ba
       const container = document.getElementById(`bg-youtube-player-${videoId}`);
       if (!container) return;
 
-      player = new YT.Player(`bg-youtube-player-${videoId}`, {
-        videoId: videoId,
-        playerVars: {
-          autoplay: 1,
-          mute: 1,
-          controls: 0,
-          modestbranding: 1,
-          rel: 0,
-          showinfo: 0,
-          iv_load_policy: 3,
-          playsinline: 1,
-          disablekb: 1,
-        },
-        events: {
-          onReady: (event: any) => {
-            const p = event?.target || player || playerRef.current;
-            p?.mute?.();
-            p?.playVideo?.();
+      try {
+        player = new YT.Player(`bg-youtube-player-${videoId}`, {
+          videoId: videoId,
+          playerVars: {
+            autoplay: 1,
+            mute: 1,
+            controls: 0,
+            modestbranding: 1,
+            rel: 0,
+            showinfo: 0,
+            iv_load_policy: 3,
+            playsinline: 1,
+            disablekb: 1,
+            enablejsapi: 1,
+            origin: typeof window !== 'undefined' ? window.location.origin : '',
           },
-          onStateChange: (event: any) => {
-            const YT = (window as any).YT;
-            
-            // Clear any existing fade timer first
-            if (fadeTimerRef.current) {
-              clearTimeout(fadeTimerRef.current);
-              fadeTimerRef.current = null;
-            }
-
-            if (event.data === YT.PlayerState.PLAYING) {
-              // Delay fading in the video by 2.5 seconds so that YouTube's initial
-              // play/pause controls overlay has time to auto-hide.
-              fadeTimerRef.current = setTimeout(() => {
-                setVideoPlaying(true);
-              }, 2500);
-            } else if (event.data === YT.PlayerState.ENDED) {
-              // Loop the video programmatically without playlist parameters
-              const p = event?.target || player || playerRef.current;
+          events: {
+            onReady: (event: any) => {
+              const p = event.target || player;
+              playerRef.current = p;
+              p?.mute?.();
               p?.playVideo?.();
-            } else if (event.data === YT.PlayerState.BUFFERING) {
-              // Keep showing or fade out during buffering (optional)
-              // If it was already playing, we keep showing it to prevent flickers
-              // otherwise we keep it hidden.
-            } else {
+            },
+            onStateChange: (event: any) => {
+              const p = event.target || player;
+              if (p) playerRef.current = p;
+              const YTState = (window as any).YT?.PlayerState;
+              if (event.data === YTState?.PLAYING) {
+                setVideoPlaying(true);
+              } else if (event.data === YTState?.ENDED) {
+                p?.playVideo?.();
+              }
+            },
+            onError: () => {
               setVideoPlaying(false);
-            }
+            },
           },
-          onError: () => {
-            setVideoPlaying(false);
-          }
-        }
-      });
-      playerRef.current = player;
+        });
+        playerRef.current = player;
+      } catch (e) {
+        console.warn('YT Player init error:', e);
+      }
     };
 
     if ((window as any).YT && (window as any).YT.Player) {
       const timer = setTimeout(initPlayer, 100);
       return () => {
         clearTimeout(timer);
-        if (player && player.destroy) {
-          player.destroy();
-        }
+        if (player && player.destroy) player.destroy();
       };
     } else {
       if (!document.getElementById('youtube-iframe-api-script')) {
@@ -123,34 +180,33 @@ export default function BackgroundVideo({ videoUrl, posterImage, posterAlt }: Ba
         firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
       }
 
-      checkYTInterval = setInterval(() => {
+      checkInterval = setInterval(() => {
         if ((window as any).YT && (window as any).YT.Player) {
-          if (checkYTInterval) clearInterval(checkYTInterval);
+          if (checkInterval) clearInterval(checkInterval);
           initPlayer();
         }
-      }, 100);
+      }, 150);
 
       const previousCallback = (window as any).onYouTubeIframeAPIReady;
       (window as any).onYouTubeIframeAPIReady = () => {
         if (previousCallback) previousCallback();
-        if (checkYTInterval) clearInterval(checkYTInterval);
+        if (checkInterval) clearInterval(checkInterval);
         initPlayer();
       };
     }
 
     return () => {
-      if (checkYTInterval) clearInterval(checkYTInterval);
-      if (fadeTimerRef.current) {
-        clearTimeout(fadeTimerRef.current);
-      }
+      if (checkInterval) clearInterval(checkInterval);
       if (player && player.destroy) {
-        player.destroy();
+        try { player.destroy(); } catch (e) {}
       }
     };
   }, [videoId]);
 
+  const hasVideoSource = !!(videoId || isRumble || isDirectVideo);
+
   return (
-    <div className="absolute inset-0 z-0 bg-[#0B0A10]">
+    <div className="absolute inset-0 z-10 bg-[#0B0A10]">
       {/* Fallback/Initial Poster */}
       <Image
         src={safePosterImage}
@@ -169,7 +225,8 @@ export default function BackgroundVideo({ videoUrl, posterImage, posterAlt }: Ba
           className="absolute inset-0 overflow-hidden pointer-events-none z-[5]"
         >
           <iframe
-            src={`${rumbleEmbedUrl}?pub=4&autoplay=2&muted=1`}
+            key={isMuted ? 'rumble-muted' : 'rumble-unmuted'}
+            src={`${rumbleEmbedUrl}?pub=4&autoplay=2&muted=${isMuted ? 1 : 0}`}
             className="absolute top-1/2 left-1/2 w-[125%] h-[125%] -translate-x-1/2 -translate-y-1/2 scale-[1.3] pointer-events-none border-none"
             allow="autoplay; encrypted-media"
             onLoad={() => setVideoPlaying(true)}
@@ -177,7 +234,7 @@ export default function BackgroundVideo({ videoUrl, posterImage, posterAlt }: Ba
         </motion.div>
       )}
 
-      {/* YouTube Player */}
+      {/* YouTube Player Container (Managed by YouTube API) */}
       {videoId && (
         <motion.div
           style={{ opacity: videoOpacity, filter: videoBlur }}
@@ -186,7 +243,7 @@ export default function BackgroundVideo({ videoUrl, posterImage, posterAlt }: Ba
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: videoPlaying ? 1 : 0 }}
-            transition={{ duration: 2, ease: "easeInOut" }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
             className="absolute top-1/2 left-1/2 w-[115%] h-[115%] -translate-x-1/2 -translate-y-1/2 scale-[1.3] pointer-events-none"
           >
             <div
@@ -197,15 +254,47 @@ export default function BackgroundVideo({ videoUrl, posterImage, posterAlt }: Ba
         </motion.div>
       )}
 
+      {/* Direct HTML5 Video Player */}
+      {isDirectVideo && (
+        <motion.div
+          style={{ opacity: videoOpacity, filter: videoBlur }}
+          className="absolute inset-0 overflow-hidden pointer-events-none"
+        >
+          <video
+            ref={html5VideoRef}
+            src={videoUrl}
+            autoPlay
+            loop
+            muted={isMuted}
+            playsInline
+            onCanPlay={() => setVideoPlaying(true)}
+            onPlay={() => setVideoPlaying(true)}
+            className="absolute top-1/2 left-1/2 w-[115%] h-[115%] -translate-x-1/2 -translate-y-1/2 object-cover pointer-events-none"
+          />
+        </motion.div>
+      )}
+
+      {/* Volume Control Button */}
+      {hasVideoSource && (
+        <div className="absolute bottom-12 right-24 sm:right-28 z-[100] pointer-events-auto">
+          <button
+            onClick={toggleMute}
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-all hover:scale-110 active:scale-95 group cursor-pointer"
+            title={isMuted ? "Unmute Trailer Sound" : "Mute Trailer Sound"}
+          >
+            {isMuted ? (
+              <VolumeX size={20} className="text-white/70 group-hover:text-white transition-colors" />
+            ) : (
+              <Volume2 size={20} className="text-cyan-400 group-hover:text-cyan-300 transition-colors animate-pulse" />
+            )}
+          </button>
+        </div>
+      )}
+
       {/* Luxury Masking & Gradients */}
       <div className="absolute inset-0 z-10 pointer-events-none">
-        {/* Radial Edge Mask - Blends video into page background */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,#0B0A10_90%)]" />
-
-        {/* Bottom Fade - Safe zone for content */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B0A10] via-transparent to-transparent opacity-90" />
-
-        {/* Left/Right Fade - Netflix/Apple TV Style Vignette */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#0B0A10] via-transparent to-[#0B0A10] opacity-40" />
       </div>
     </div>
