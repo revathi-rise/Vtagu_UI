@@ -61,10 +61,10 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-1 lg:col-span-2 space-y-4 sm:space-y-5">
             <h4 className="font-black text-white text-[10px] uppercase tracking-[0.3em] opacity-40">Support</h4>
             <ul className="space-y-2.5 sm:space-y-3">
-              <FooterLink href="#">Help Center</FooterLink>
-              <FooterLink href="#">Account</FooterLink>
-              <FooterLink href="#">Privacy Policy</FooterLink>
-              <FooterLink href="#">Contact Us</FooterLink>
+              <FooterLink href="/faqs">Help Center</FooterLink>
+              <FooterLink href="/account">Account</FooterLink>
+              <FooterLink href="/privacy-policy">Privacy Policy</FooterLink>
+              <FooterLink href="mailto:vtagutech@gmail.com">Contact Us</FooterLink>
             </ul>
           </div>
 
@@ -104,9 +104,9 @@ export default function Footer() {
             <p>© 2026 VTAGU PRIMETIME · ALL RIGHTS RESERVED</p>
             <div className="hidden sm:block w-px h-3.5 bg-white/10" />
             <div className="flex items-center gap-4 sm:gap-6">
-              <button suppressHydrationWarning className="hover:text-white transition-colors">Terms</button>
-              <button suppressHydrationWarning className="hover:text-white transition-colors">Privacy</button>
-              <button suppressHydrationWarning className="hover:text-white transition-colors">Cookies</button>
+              <Link href="/privacy-policy" className="hover:text-white transition-colors">Terms</Link>
+              <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy</Link>
+              <Link href="/privacy-policy" className="hover:text-white transition-colors">Cookies</Link>
             </div>
           </div>
 
