@@ -11,7 +11,6 @@ import {
   Baby,
   RefreshCw,
   Mail,
-  Phone,
   MapPin,
   Printer,
   Copy,
@@ -735,16 +734,6 @@ export default function PrivacyPolicyClient() {
                     </div>
 
                     <div className="flex items-start gap-3">
-                      <Phone className="text-primary shrink-0 mt-1" size={18} />
-                      <div>
-                        <span className="text-xs text-white/50 block font-semibold">Contact Phone</span>
-                        <a href="tel:+914440008800" className="text-white font-bold hover:text-primary transition-colors">
-                          +91 (044) 4000-8800
-                        </a>
-                      </div>
-                    </div>
-
-                    <div className="sm:col-span-2 flex items-start gap-3 pt-2">
                       <MapPin className="text-primary shrink-0 mt-1" size={18} />
                       <div>
                         <span className="text-xs text-white/50 block font-semibold">Official Postal Address</span>
