@@ -21,22 +21,62 @@ async function getAuthHeader(): Promise<Record<string, string>> {
 }
 
 export function isKidsProfileActive(): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    const currentProfileStr = localStorage.getItem('currentProfile');
-    if (currentProfileStr) {
-      const profile = JSON.parse(currentProfileStr);
-      return !!profile.isKids;
+  if (typeof window !== 'undefined') {
+    try {
+      // 1. Check kids_mode cookie
+      const cookieMatch = document.cookie.match(/(?:^|; )kids_mode=([^;]*)/);
+      if (cookieMatch) {
+        const val = cookieMatch[1].trim();
+        if (val === 'true' || val === '1') return true;
+        if (val === 'false' || val === '0') return false;
+      }
+      // 2. Check currentProfile in localStorage
+      const currentProfileStr = localStorage.getItem('currentProfile');
+      if (currentProfileStr) {
+        const profile = JSON.parse(currentProfileStr);
+        return !!profile.isKids;
+      }
+    } catch (e) {
+      // ignore
     }
-  } catch (e) {
-    // ignore
   }
   return false;
 }
 
+export function isContentKidsApproved(item: any): boolean {
+  if (!item) return false;
+  const val = item.kids_restriction ?? item.kidsRestriction ?? item.is_kids_approved ?? item.isKidsApproved;
+  return val === true || val === 1 || val === '1' || val === 'true';
+}
+
 export function filterForProfile<T>(items: T[]): T[] {
   if (!items || !Array.isArray(items)) return [];
+  if (isKidsProfileActive()) {
+    return items.filter(item => isContentKidsApproved(item));
+  }
   return items;
+}
+
+async function getKidsHeader(): Promise<Record<string, string>> {
+  let isKids = false;
+  if (typeof window !== 'undefined') {
+    isKids = isKidsProfileActive();
+  } else {
+    try {
+      const { cookies } = await import('next/headers');
+      const cookieStore = await cookies();
+      const kidsCookie = cookieStore.get('kids_mode')?.value;
+      if (kidsCookie === 'true' || kidsCookie === '1') isKids = true;
+      const profileCookie = cookieStore.get('currentProfile')?.value;
+      if (profileCookie) {
+        const profile = JSON.parse(decodeURIComponent(profileCookie));
+        if (profile.isKids) isKids = true;
+      }
+    } catch (e) {
+      // ignore server context errors if not available
+    }
+  }
+  return isKids ? { 'x-kids-mode': 'true' } : {};
 }
 
 function appendUserId(url: string, userId?: string | null): string {
@@ -51,12 +91,22 @@ function appendUserId(url: string, userId?: string | null): string {
 
 async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 2): Promise<Response> {
   const authHeader = await getAuthHeader();
+  const kidsHeader = await getKidsHeader();
+  
+  // Also append kidsMode query param if kids header active and URL has no query yet
+  let targetUrl = url;
+  if (kidsHeader['x-kids-mode'] === 'true' && !targetUrl.includes('kidsMode=')) {
+    const sep = targetUrl.includes('?') ? '&' : '?';
+    targetUrl = `${targetUrl}${sep}kidsMode=true`;
+  }
+
   try {
-    const res = await fetch(url, {
+    const res = await fetch(targetUrl, {
       ...options,
       headers: {
         "Content-Type": "application/json",
         ...authHeader,
+        ...kidsHeader,
         ...options.headers,
       },
     });
@@ -171,7 +221,8 @@ export async function getSeries(userId?: string | null): Promise<Series[]> {
       throw new Error(`Failed to fetch series. Status: ${res.status}`);
     }
     const result = await res.json();
-    return Array.isArray(result) ? result : (result.data || []);
+    const arr = Array.isArray(result) ? result : (result.data || []);
+    return filterForProfile(arr);
   } catch (err: any) {
     return [];
   }
@@ -276,8 +327,8 @@ export async function getInteractiveMovies(): Promise<InteractiveMovie[]> {
       throw new Error(`Failed to fetch interactive movies. Status: ${res.status}`);
     }
     const result = await res.json();
-    if (Array.isArray(result.data)) return result.data;
-    if (Array.isArray(result)) return result;
+    if (Array.isArray(result.data)) return filterForProfile(result.data);
+    if (Array.isArray(result)) return filterForProfile(result);
     return [];
   } catch (err: any) {
     return [];
@@ -293,8 +344,8 @@ export async function getScenes(movieId: number, userId?: string | number | null
       throw new Error(`Failed to fetch scenes. Status: ${res.status}`);
     }
     const result = await res.json();
-    if (Array.isArray(result.data)) return result.data;
-    if (Array.isArray(result)) return result;
+    if (Array.isArray(result.data)) return filterForProfile(result.data);
+    if (Array.isArray(result)) return filterForProfile(result);
     return [];
   } catch (err: any) {
     return [];
@@ -309,8 +360,8 @@ export async function getChoices(sceneId: number): Promise<Choice[]> {
       throw new Error(`Failed to fetch choices. Status: ${res.status}`);
     }
     const result = await res.json();
-    if (Array.isArray(result.data)) return result.data;
-    if (Array.isArray(result)) return result;
+    if (Array.isArray(result.data)) return filterForProfile(result.data);
+    if (Array.isArray(result)) return filterForProfile(result);
     return [];
   } catch (err: any) {
     return [];
@@ -383,7 +434,7 @@ export async function getEpisodes(userId?: string | null): Promise<Episode[]> {
     }
     const result = await res.json();
     const data = Array.isArray(result) ? result : (result.data || []);
-    return data.map(normalizeEpisode);
+    return filterForProfile(data.map(normalizeEpisode));
   } catch (err: any) {
     return [];
   }
@@ -529,7 +580,7 @@ export async function getMovies(userId?: string | null): Promise<Movie[]> {
     }
     const result = await res.json();
     const data = result.data || [];
-    return data.map(normalizeMovie);
+    return filterForProfile(data.map(normalizeMovie));
   } catch (err: any) {
     return [];
   }
@@ -544,7 +595,11 @@ export async function getMovieBySlug(slug: string, userId?: string | null): Prom
       throw new Error(`Failed to fetch movie detail. Status: ${res.status}`);
     }
     const result = await res.json();
-    return normalizeMovie(result.data || result);
+    const movieObj = normalizeMovie(result.data || result);
+    if (movieObj && isKidsProfileActive() && !isContentKidsApproved(movieObj)) {
+      return null;
+    }
+    return movieObj;
   } catch (err: any) {
     return null;
   }
@@ -563,7 +618,7 @@ export async function getTrendingMovies(limit: number = 10, userId?: string | nu
     }
     const result = await res.json();
     const data = result.data || [];
-    return data.map(normalizeMovie);
+    return filterForProfile(data.map(normalizeMovie));
   } catch (err: any) {
     return [];
   }
@@ -738,7 +793,8 @@ export async function getLanguages(): Promise<Language[]> {
       throw new Error(`Failed to fetch active languages. Status: ${res.status}`);
     }
     const result = await res.json();
-    return Array.isArray(result) ? result : (result.data || []);
+    const arr = Array.isArray(result) ? result : (result.data || []);
+    return filterForProfile(arr);
   } catch (err: any) {
     console.error("Error fetching languages in API:", err);
     return [];
@@ -863,8 +919,8 @@ export async function getActiveShorts(limit?: number, userId?: string | null): P
     const res = await fetchWithRetry(url, { next: { revalidate: 0 } }); // No cache
     if (!res.ok) throw new Error(`Failed to fetch active shorts. Status: ${res.status}`);
     const result = await res.json();
-    if (Array.isArray(result.data)) return result.data;
-    if (Array.isArray(result)) return result;
+    if (Array.isArray(result.data)) return filterForProfile(result.data);
+    if (Array.isArray(result)) return filterForProfile(result);
     return [];
   } catch (err: any) {
     console.error('Error fetching active shorts:', err);

@@ -82,6 +82,16 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}, retr
     headers.set('Authorization', `Bearer ${token}`);
   }
 
+  // Check if kids mode is active
+  if (typeof window !== 'undefined') {
+    const isKidsCookie = document.cookie.includes('kids_mode=true') || document.cookie.includes('kids_mode=1');
+    const profileStr = localStorage.getItem('currentProfile');
+    const isKidsProfile = profileStr && JSON.parse(profileStr)?.isKids;
+    if ((isKidsCookie || isKidsProfile) && !headers.has('x-kids-mode')) {
+      headers.set('x-kids-mode', 'true');
+    }
+  }
+
   const enhancedOptions = {
     ...options,
     headers,

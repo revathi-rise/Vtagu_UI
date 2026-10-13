@@ -133,6 +133,24 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
     };
   }, [isMobileMenuOpen]);
 
+  const handleExitKidsMode = async () => {
+    try {
+      const { authApi } = await import('@/lib/api/auth.api');
+      await authApi.exitKidsMode('');
+    } catch (e) {
+      // ignore
+    }
+    const defaultProfile = { id: user?.userId || 1, name: user?.user_name || userName || "User", avatar: user?.profile_picture || "", color: "from-purple-600 to-indigo-600", isKids: false };
+    localStorage.setItem('currentProfile', JSON.stringify(defaultProfile));
+    document.cookie = "kids_mode=false; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+    setCurrentProfile(defaultProfile);
+    setIsProfileDropdownOpen(false);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('profileChanged'));
+    }
+    window.location.href = '/';
+  };
+
   return (
     <header className={`fixed top-0 left-0 w-full z-50 flex justify-center transition-all duration-500 ${scrolled ? 'px-4' : 'px-0'}`}>
       {/* Top Gradient Overlay for readability against bright images */}
@@ -261,6 +279,15 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
 
                     {/* Navigation Items */}
                     <div className="space-y-1">
+                      {currentProfile?.isKids && (
+                        <button
+                          onClick={handleExitKidsMode}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-amber-300 hover:text-white bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all group shadow-sm mb-1"
+                        >
+                          <KidsIcon className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
+                          <span>Exit Kids Mode</span>
+                        </button>
+                      )}
                       <Link
                         href="/browse"
                         className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 transition-colors group"
