@@ -82,13 +82,19 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}, retr
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  // Check if kids mode is active
+  // Append kidsMode query param if kids mode is active (avoids CORS preflight header issues)
+  let targetUrl = url;
   if (typeof window !== 'undefined') {
     const isKidsCookie = document.cookie.includes('kids_mode=true') || document.cookie.includes('kids_mode=1');
     const profileStr = localStorage.getItem('currentProfile');
-    const isKidsProfile = profileStr && JSON.parse(profileStr)?.isKids;
-    if ((isKidsCookie || isKidsProfile) && !headers.has('x-kids-mode')) {
-      headers.set('x-kids-mode', 'true');
+    let isKidsProfile = false;
+    try {
+      isKidsProfile = profileStr ? !!JSON.parse(profileStr)?.isKids : false;
+    } catch (e) {}
+
+    if ((isKidsCookie || isKidsProfile) && !targetUrl.includes('kidsMode=')) {
+      const sep = targetUrl.includes('?') ? '&' : '?';
+      targetUrl = `${targetUrl}${sep}kidsMode=true`;
     }
   }
 
@@ -98,26 +104,20 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}, retr
   };
 
   try {
-    const res = await fetch(url, enhancedOptions);
-
-    // Auto-logout on unauthorized if it's an API route that requires auth
-    // if (res.status === 401) {
-    //   removeToken();
-    //   window.location.href = '/login';
-    // }
+    const res = await fetch(targetUrl, enhancedOptions);
 
     if (!res.ok && retries > 0 && res.status >= 500) {
-      logger.debug(`Retrying fetch for ${url}. Status: ${res.status}. Retries left: ${retries}`);
+      logger.debug(`Retrying fetch for ${targetUrl}. Status: ${res.status}. Retries left: ${retries}`);
       return fetchWithAuth(url, options, retries - 1);
     }
 
     return res;
   } catch (err: any) {
     if (retries > 0) {
-      logger.debug(`Retrying fetch for ${url} due to network error: ${err.message}. Retries left: ${retries}`);
+      logger.debug(`Retrying fetch for ${targetUrl} due to network error: ${err.message}. Retries left: ${retries}`);
       return fetchWithAuth(url, options, retries - 1);
     }
-    logger.error(`Final fetch failure for ${url}:`, err);
+    logger.debug(`Network fetch failure for ${targetUrl}:`, err?.message || err);
     throw err;
   }
 }

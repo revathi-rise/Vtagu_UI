@@ -94,8 +94,11 @@ export async function filterForProfileAsync<T>(items: T[]): Promise<T[]> {
 }
 
 async function getKidsHeader(): Promise<Record<string, string>> {
-  const isKids = await isKidsProfileActiveAsync();
-  return isKids ? { 'x-kids-mode': 'true' } : {};
+  if (typeof window === 'undefined') {
+    const isKids = await isKidsProfileActiveAsync();
+    return isKids ? { 'x-kids-mode': 'true' } : {};
+  }
+  return {};
 }
 
 function appendUserId(url: string, userId?: string | null): string {
@@ -190,16 +193,24 @@ export interface Poster {
 }
 
 export async function getPosters(pageType?: string, language?: string, limit?: number): Promise<Poster[]> {
+  const isKids = await isKidsProfileActiveAsync();
   const url = `${API_BASE}/posters`;
+
+  // In kids mode, prioritize separate kids banner ('kids' page_type) if looking for home banners
+  const targetPageType = (isKids && pageType === 'home') ? 'kids' : pageType;
+
   const params = new URLSearchParams();
-  if (pageType) {
-    params.append('page_type', pageType);
+  if (targetPageType) {
+    params.append('page_type', targetPageType);
   }
   if (language) {
     params.append('language', language);
   }
   if (limit) {
     params.append('limit', limit.toString());
+  }
+  if (isKids) {
+    params.append('kidsMode', 'true');
   }
 
   const queryString = params.toString();
@@ -211,10 +222,28 @@ export async function getPosters(pageType?: string, language?: string, limit?: n
       throw new Error(`Failed to fetch posters. Status: ${res.status}`);
     }
     const result = await res.json();
-    const posters: Poster[] = result.data || [];
-    const isKids = await isKidsProfileActiveAsync();
+    let posters: Poster[] = result.data || [];
+
+    // Fallback: If 'kids' page_type had no posters, check 'home' with kidsMode=true
+    if (isKids && pageType === 'home' && posters.length === 0) {
+      const fallbackParams = new URLSearchParams();
+      fallbackParams.append('page_type', 'home');
+      fallbackParams.append('kidsMode', 'true');
+      if (language) fallbackParams.append('language', language);
+      if (limit) fallbackParams.append('limit', limit.toString());
+      try {
+        const fallbackRes = await fetchWithRetry(`${url}?${fallbackParams.toString()}`, { next: { revalidate: 0 } });
+        if (fallbackRes.ok) {
+          const fallbackResult = await fallbackRes.json();
+          posters = fallbackResult.data || [];
+        }
+      } catch (e) {
+        // ignore fallback error
+      }
+    }
+
     if (isKids) {
-      return posters.filter(p => isContentKidsApproved(p));
+      return posters.filter(p => p.page_type === 'kids' || isContentKidsApproved(p));
     }
     return posters;
   } catch (err: any) {

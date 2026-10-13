@@ -110,16 +110,28 @@ export const watchProgressApi = {
       }
 
       if (!res.ok) {
-        throw new Error(`Failed to fetch watch progress: ${res.status}`);
+        return {
+          status: false,
+          message: 'No watch progress records',
+          data: [],
+        };
       }
       
-      return await res.json();
+      const json = await res.json();
+      if (json && json.status === false) {
+        return {
+          status: false,
+          message: json.message || 'No watch progress records',
+          data: [],
+        };
+      }
+      return json;
     } catch (error: any) {
-      logger.error('getProgressList error:', error);
+      logger.debug('getProgressList unavailable:', error?.message || error);
       return {
         status: false,
-        message: 'Failed to fetch progress list',
-        error: error.message,
+        message: 'No progress records',
+        error: error?.message,
         data: [],
       };
     }
