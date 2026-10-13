@@ -188,6 +188,8 @@ export interface Poster {
   is_coming_soon?: boolean;
   isComingSoon?: boolean;
   kids_restriction?: boolean;
+  kids_only?: boolean;
+  kidsOnly?: boolean;
   kidsRestriction?: boolean;
   createdon?: string;
 }
@@ -243,9 +245,10 @@ export async function getPosters(pageType?: string, language?: string, limit?: n
     }
 
     if (isKids) {
-      return posters.filter(p => p.page_type === 'kids' || isContentKidsApproved(p));
+      return posters.filter(p => p.page_type === 'kids' || p.kids_only || (p as any).kidsOnly || isContentKidsApproved(p));
     }
-    return posters;
+    // Normal mode: exclude posters that are Kids Mode Only
+    return posters.filter(p => !p.kids_only && !(p as any).kidsOnly && p.page_type !== 'kids');
   } catch (err: any) {
     return [];
   }

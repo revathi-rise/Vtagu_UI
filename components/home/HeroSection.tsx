@@ -66,6 +66,7 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
   const filteredPosters = isKids
     ? posters.filter((poster) => {
         if (poster.page_type === "kids" || (poster as any).pageType === "kids") return true;
+        if ((poster as any).kids_only || (poster as any).kidsOnly) return true;
         if (isContentKidsApproved(poster)) return true;
         if (poster.reference_type === "movie" && poster.reference_id) {
           const m = movies.find((mov) => mov.id === poster.reference_id);
@@ -77,7 +78,12 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
         }
         return false;
       })
-    : posters;
+    : posters.filter((poster) => {
+        // Normal mode: hide posters that are Kids Mode Only
+        if (poster.page_type === "kids" || (poster as any).pageType === "kids") return false;
+        if ((poster as any).kids_only || (poster as any).kidsOnly) return false;
+        return true;
+      });
 
   // Map API posters to HeroItem format
   let items: HeroItem[] = filteredPosters.map((poster) => {
