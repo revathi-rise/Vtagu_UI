@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Film } from 'lucide-react';
 import SectionTitle from './SectionTitle';
-import { Movie, getBadgeText } from '@/lib/vtagu.api';
+import { Movie, getBadgeText, isKidsProfileActive, isContentKidsApproved } from '@/lib/vtagu.api';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, FreeMode } from 'swiper/modules';
 import Link from 'next/link';
@@ -17,12 +17,20 @@ interface MovieSectionProps {
 }
 
 export default function MovieSection({ movies }: MovieSectionProps) {
-  console.log(movies);
-  
-  if (!movies || movies.length === 0) {
+  const [isKids, setIsKids] = useState(false);
+
+  useEffect(() => {
+    setIsKids(isKidsProfileActive());
+    const onProfileChange = () => setIsKids(isKidsProfileActive());
+    window.addEventListener('profileChanged', onProfileChange);
+    return () => window.removeEventListener('profileChanged', onProfileChange);
+  }, []);
+
+  const visibleMovies = isKids ? (movies || []).filter(isContentKidsApproved) : (movies || []);
+
+  if (!visibleMovies || visibleMovies.length === 0) {
     return null;
   }
-  console.log(movies);
 
   return (
     <section className="w-full py-10 sm:py-16 overflow-hidden">
@@ -54,7 +62,7 @@ export default function MovieSection({ movies }: MovieSectionProps) {
             }}
             className="!px-4 !py-6 -my-6"
           >
-            {movies.map((movie, index) => (
+            {visibleMovies.map((movie) => (
               <SwiperSlide key={movie.id} className="!overflow-visible">
                 <Link
                   href={`/movies/${movie.slug}`}
@@ -72,7 +80,7 @@ export default function MovieSection({ movies }: MovieSectionProps) {
                     description={movie.shortDescription}
                     badge={getBadgeText(movie) || undefined}
                     badgeColor={movie.isFree ? 'green' : 'orange'}
-                    infoLabel="MOVIE" // Explicitly setting MOVIE label
+                    infoLabel="MOVIE"
                   />
                 </Link>
               </SwiperSlide>

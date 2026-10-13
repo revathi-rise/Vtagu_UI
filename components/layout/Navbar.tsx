@@ -143,6 +143,7 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
     const defaultProfile = { id: user?.userId || 1, name: user?.user_name || userName || "User", avatar: user?.profile_picture || "", color: "from-purple-600 to-indigo-600", isKids: false };
     localStorage.setItem('currentProfile', JSON.stringify(defaultProfile));
     document.cookie = "kids_mode=false; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+    document.cookie = `currentProfile=${encodeURIComponent(JSON.stringify(defaultProfile))}; path=/; max-age=31536000; SameSite=Lax`;
     setCurrentProfile(defaultProfile);
     setIsProfileDropdownOpen(false);
     if (typeof window !== 'undefined') {

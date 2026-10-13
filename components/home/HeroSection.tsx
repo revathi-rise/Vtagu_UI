@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Play, Plus, Check, Star, ChevronLeft, ChevronRight, Globe, Volume2, VolumeX } from "lucide-react";
+import { Play, Plus, Check, Star, ChevronLeft, ChevronRight, Globe } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Poster, Movie, Episode, toggleWatchlist, checkWatchlist } from "@/lib/vtagu.api";
+import { Poster, Movie, Episode, toggleWatchlist, checkWatchlist, isKidsProfileActive, isContentKidsApproved } from "@/lib/vtagu.api";
 import { useAlert } from '../shared/CustomAlertModal';
 import { getUserId } from "@/lib/api-client";
 import HeroThumbnailSlider from "./HeroThumbnailSlider";
@@ -33,15 +33,53 @@ interface HeroSectionProps {
 
 const IMAGE_BASE_URL = "https://www.vtagu.in/";
 
+function cleanHtml(str?: string): string {
+  if (!str) return "";
+  return str
+    .replace(/<!--[sS]*?-->/g, "")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export default function HeroSection({ posters = [], movies = [], episodes = [] }: HeroSectionProps) {
   const { showAlert } = useAlert();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(true);
   const [inWatchlist, setInWatchlist] = useState(false);
+  const [isKids, setIsKids] = useState(false);
   const userId = getUserId();
 
+  useEffect(() => {
+    setIsKids(isKidsProfileActive());
+    const onProfileChange = () => setIsKids(isKidsProfileActive());
+    window.addEventListener('profileChanged', onProfileChange);
+    return () => window.removeEventListener('profileChanged', onProfileChange);
+  }, []);
+
+  // Filter posters if kids mode is active
+  const filteredPosters = isKids
+    ? posters.filter((poster) => {
+        if (isContentKidsApproved(poster)) return true;
+        if (poster.reference_type === "movie" && poster.reference_id) {
+          const m = movies.find((mov) => mov.id === poster.reference_id);
+          return m ? isContentKidsApproved(m) : false;
+        }
+        if ((poster.reference_type === "series" || poster.reference_type === "episode") && poster.reference_id) {
+          const ep = episodes.find((e) => e.id === poster.reference_id || e.episodeId === poster.reference_id);
+          return ep ? isContentKidsApproved(ep) : false;
+        }
+        return false;
+      })
+    : posters;
+
   // Map API posters to HeroItem format
-  const items: HeroItem[] = posters.map((poster) => {
+  let items: HeroItem[] = filteredPosters.map((poster) => {
     let rating = "";
     let link = poster.link || "";
 
@@ -65,8 +103,8 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
 
     return {
       id: poster.poster_id,
-      title: poster.poster_title || "",
-      description: poster.description || "",
+      title: cleanHtml(poster.poster_title || ""),
+      description: cleanHtml(poster.description || ""),
       image: poster.path.startsWith('http') ? poster.path : `${IMAGE_BASE_URL}${poster.path}`,
       category: poster.genres_list || "",
       rating,
@@ -78,7 +116,27 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
     };
   });
 
-  const currentItem = items[activeIndex];
+  // Fallback to movies if posters is empty
+  const fallbackMovies = isKids ? movies.filter(isContentKidsApproved) : movies;
+  if (items.length === 0 && fallbackMovies && fallbackMovies.length > 0) {
+    items = fallbackMovies.slice(0, 5).map((movie) => ({
+      id: movie.id,
+      title: cleanHtml(movie.title || ""),
+      description: cleanHtml(movie.shortDescription || movie.longDescription || ""),
+      image: movie.posterImage || (movie.media?.image?.url ?? ""),
+      category: (movie as any).genre_name || "Featured",
+      rating: movie.rating ? movie.rating.toString() : "",
+      link: `/movies/${movie.slug}`,
+      languages: movie.languages || "",
+      trailerUrl: movie.trailerUrl || "",
+      referenceType: 'movie',
+      referenceId: movie.id,
+    }));
+  }
+
+  // Ensure activeIndex is within range
+  const safeActiveIndex = items.length > 0 ? activeIndex % items.length : 0;
+  const currentItem = items[safeActiveIndex];
 
   useEffect(() => {
     async function verifyWatchlist() {
@@ -94,7 +152,7 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
       setInWatchlist(isSaved);
     }
     verifyWatchlist();
-  }, [userId, activeIndex, currentItem]);
+  }, [userId, safeActiveIndex, currentItem]);
 
   const handleWatchlistToggle = async () => {
     if (!userId) {
@@ -113,70 +171,85 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
     }
   };
 
-  if (items.length === 0) return null;
-
-  const [videoError, setVideoError] = useState(false);
-  const [isPlayingVideo, setIsPlayingVideo] = useState(false);
-
   const nextSlide = React.useCallback(() => {
+    if (items.length <= 1) return;
     setActiveIndex((prev) => (prev + 1) % items.length);
-    setVideoError(false);
-    setIsPlayingVideo(false);
   }, [items.length]);
 
   const prevSlide = React.useCallback(() => {
+    if (items.length <= 1) return;
     setActiveIndex((prev) => (prev - 1 + items.length) % items.length);
-    setVideoError(false);
-    setIsPlayingVideo(false);
   }, [items.length]);
 
+  // Autoplay slides
   React.useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (!currentItem?.trailerUrl || videoError) {
-      timer = setInterval(nextSlide, 8000);
-    }
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [nextSlide, currentItem?.trailerUrl, videoError]);
+    if (items.length <= 1) return;
+    const timer = setInterval(nextSlide, 7000);
+    return () => clearInterval(timer);
+  }, [nextSlide, items.length]);
 
   const handleThumbClick = (index: number) => {
     setActiveIndex(index);
   };
 
+  if (items.length === 0 || !currentItem) {
+    return (
+      <section className="relative w-full py-16 sm:py-24 px-6 overflow-hidden bg-gradient-to-b from-[#1a102a] via-[#0f0a19] to-[#0f0a10] border-b border-white/5 flex flex-col items-center justify-center text-center">
+        <div className="max-w-xl mx-auto space-y-5">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center mx-auto shadow-[0_0_25px_rgba(251,191,36,0.3)]">
+            <span className="text-3xl">🌟</span>
+          </div>
+          <div className="space-y-2">
+            <span className="inline-block px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-400 text-[10px] font-black uppercase tracking-widest">
+              Kids Mode
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">
+              Welcome to Kids Fun Zone
+            </h2>
+            <p className="text-white/60 text-xs sm:text-sm max-w-md mx-auto">
+              Family-safe movies, series, and adventures curated for young explorers.
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              const defaultProfile = { id: 1, name: "User", avatar: "", color: "from-purple-600 to-indigo-600", isKids: false };
+              localStorage.setItem('currentProfile', JSON.stringify(defaultProfile));
+              document.cookie = "kids_mode=false; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+              document.cookie = `currentProfile=${encodeURIComponent(JSON.stringify(defaultProfile))}; path=/; max-age=31536000; SameSite=Lax`;
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('profileChanged'));
+              }
+              window.location.href = '/';
+            }}
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-black uppercase tracking-widest transition-all cursor-pointer active:scale-95"
+          >
+            Exit Kids Mode
+          </button>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="relative w-full h-[70vh] sm:h-[80vh] md:h-screen overflow-hidden bg-[#0f0a10]">
-      {/* 1. Background Image/Video with Transition */}
+      {/* 1. Background Image Slider with Smooth Motion Transition */}
       <AnimatePresence mode="wait">
         <motion.div
           key={currentItem.id}
-          initial={{ opacity: 0, scale: 1.1 }}
+          initial={{ opacity: 0, scale: 1.08 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
+          transition={{ duration: 1.0, ease: "easeOut" }}
           className="absolute inset-0"
         >
-          {isPlayingVideo && currentItem.trailerUrl ? (
-            <video
-              src={currentItem.trailerUrl}
-              autoPlay
-              muted={isMuted}
-              playsInline
-              onEnded={nextSlide}
-              onError={() => setVideoError(true)}
-              className="absolute inset-0 w-full h-full object-cover"
-              poster={currentItem.image}
-            />
-          ) : (
-            <Image
-              src={currentItem.image}
-              alt={currentItem.title}
-              fill
-              priority
-              className="object-cover"
-              sizes="100vw"
-            />
-          )}
+          <Image
+            src={currentItem.image}
+            alt={currentItem.title}
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
           {/* Multi-layered Gradients for readability */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#0f0a10] via-[#0f0a10]/60 to-transparent z-10" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0f0a10] via-transparent to-transparent z-10" />
@@ -189,7 +262,7 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.2}
-        onDragEnd={(e, { offset, velocity }) => {
+        onDragEnd={(_e, { offset }) => {
           const swipeThreshold = 50;
           if (offset.x > swipeThreshold) {
             prevSlide();
@@ -296,35 +369,19 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
       </motion.div>
 
       {/* 3. Navigation Controls & Thumbnails */}
-      {/* Mobile: bottom-center dots/arrows, Desktop: bottom-right with thumbnails */}
       <div className="absolute bottom-6 right-4 sm:bottom-8 sm:right-8 z-40 flex flex-col items-end gap-4 sm:gap-6">
-        {/* Navigation Arrows & Volume */}
         <div className="flex gap-2 sm:gap-3 items-center">
-          {currentItem.trailerUrl && (
-            <button
-              onClick={() => {
-                if (!isPlayingVideo) {
-                  setIsPlayingVideo(true);
-                  setIsMuted(false);
-                } else {
-                  setIsMuted(!isMuted);
-                }
-              }}
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass-morphism flex items-center justify-center text-white hover:text-white hover:bg-white/10 transition-all border border-white/10 shadow-xl mr-2"
-              title={!isPlayingVideo ? "Play Trailer" : (isMuted ? "Unmute Trailer" : "Mute Trailer")}
-            >
-              {!isPlayingVideo ? <Play size={18} fill="white" /> : (isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />)}
-            </button>
-          )}
           <button 
             onClick={prevSlide}
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass-morphism flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all border border-white/10 shadow-xl"
+            title="Previous"
           >
             <ChevronLeft size={20} />
           </button>
           <button 
             onClick={nextSlide}
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass-morphism flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all border border-white/10 shadow-xl"
+            title="Next"
           >
             <ChevronRight size={20} />
           </button>
@@ -332,7 +389,7 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
 
         <HeroThumbnailSlider 
           items={items} 
-          activeIndex={activeIndex} 
+          activeIndex={safeActiveIndex} 
           onThumbClick={handleThumbClick} 
         />
       </div>

@@ -4,7 +4,7 @@ import React from 'react';
 import { Film, ArrowLeft, ArrowRight } from 'lucide-react';
 import SectionTitle from './SectionTitle';
 import { MediaCard } from '../shared/MediaCard';
-import { Episode } from '@/lib/vtagu.api';
+import { Episode, isKidsProfileActive, isContentKidsApproved } from '@/lib/vtagu.api';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay, FreeMode } from 'swiper/modules';
 import Link from 'next/link';
@@ -27,7 +27,18 @@ const mockGifs = [
 ];
 
 export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
-  if (!episodes || episodes.length === 0) {
+  const [isKids, setIsKids] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsKids(isKidsProfileActive());
+    const onProfileChange = () => setIsKids(isKidsProfileActive());
+    window.addEventListener('profileChanged', onProfileChange);
+    return () => window.removeEventListener('profileChanged', onProfileChange);
+  }, []);
+
+  const visibleEpisodes = isKids ? (episodes || []).filter(isContentKidsApproved) : (episodes || []);
+
+  if (!visibleEpisodes || visibleEpisodes.length === 0) {
     return null;
   }
 
@@ -65,7 +76,7 @@ export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
             }}
             className="!px-4 !py-6 -my-6"
           >
-            {episodes.map((episode, index) => {
+            {visibleEpisodes.map((episode, index) => {
               const epId = episode.id || episode.episodeId || index;
               const epSlug = epId?.toString();
               const epSeason = episode.season_id || episode.seasonId;

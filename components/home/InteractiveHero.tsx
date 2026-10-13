@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { LayoutGrid, Zap, ChevronRight, ArrowLeft, ArrowRight } from 'lucide-react';
 import SectionTitle from './SectionTitle';
 import { MediaCard } from '../shared/MediaCard';
-import { InteractiveMovie } from '@/lib/vtagu.api';
+import { InteractiveMovie, isKidsProfileActive, isContentKidsApproved } from '@/lib/vtagu.api';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay, FreeMode } from 'swiper/modules';
 import { useRouter } from 'next/navigation';
@@ -20,10 +20,20 @@ interface InteractiveHeroProps {
 
 export default function InteractiveGridHero({ interactiveMovies }: InteractiveHeroProps) {
     const router = useRouter();
+    const [isKids, setIsKids] = React.useState(false);
 
-    if (!interactiveMovies || interactiveMovies.length === 0) return null;
+    React.useEffect(() => {
+        setIsKids(isKidsProfileActive());
+        const onProfileChange = () => setIsKids(isKidsProfileActive());
+        window.addEventListener('profileChanged', onProfileChange);
+        return () => window.removeEventListener('profileChanged', onProfileChange);
+    }, []);
 
-    const displayMovies = interactiveMovies;
+    const displayMovies = isKids 
+        ? (interactiveMovies || []).filter(isContentKidsApproved) 
+        : (interactiveMovies || []);
+
+    if (!displayMovies || displayMovies.length === 0) return null;
 
     return (
         <section className="w-full py-10 sm:py-16 overflow-hidden">

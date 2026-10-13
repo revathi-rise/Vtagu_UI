@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef, useState, useCallback, memo } from 'react';
+import { useRef, useState, useEffect, useCallback, memo } from 'react';
 import Link from 'next/link';
-import { Short } from '@/lib/vtagu.api';
+import { Short, isKidsProfileActive, isContentKidsApproved } from '@/lib/vtagu.api';
 import UniversalVideoPlayer, { UniversalVideoPlayerHandle } from '@/components/ui/UniversalVideoPlayer';
 import { getShortThumbnailUrl, FALLBACK_SHORT_POSTERS, getVideoUrl } from '@/lib/video-utils';
 
@@ -218,13 +218,22 @@ interface ShortsSectionProps {
 }
 
 export default function ShortsSection({ shorts }: ShortsSectionProps) {
-  console.log(shorts, "shorts");
-  
+  const [isKids, setIsKids] = useState(false);
+
+  useEffect(() => {
+    setIsKids(isKidsProfileActive());
+    const onProfileChange = () => setIsKids(isKidsProfileActive());
+    window.addEventListener('profileChanged', onProfileChange);
+    return () => window.removeEventListener('profileChanged', onProfileChange);
+  }, []);
+
+  const visibleShorts = isKids ? (shorts || []).filter(isContentKidsApproved) : (shorts || []);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  if (!shorts || shorts.length === 0) return null;
+  if (!visibleShorts || visibleShorts.length === 0) return null;
 
   const updateScrollState = () => {
     const el = scrollRef.current;
@@ -352,7 +361,7 @@ export default function ShortsSection({ shorts }: ShortsSectionProps) {
           }}
           className="no-scrollbar"
         >
-          {shorts.map((short, i) => (
+          {visibleShorts.map((short, i) => (
             <div key={short.id} style={{ scrollSnapAlign: 'start' }}>
               <ShortsTeaserCard short={short} index={i} />
             </div>

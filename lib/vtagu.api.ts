@@ -30,7 +30,13 @@ export function isKidsProfileActive(): boolean {
         if (val === 'true' || val === '1') return true;
         if (val === 'false' || val === '0') return false;
       }
-      // 2. Check currentProfile in localStorage
+      // 2. Check currentProfile cookie
+      const profileCookieMatch = document.cookie.match(/(?:^|; )currentProfile=([^;]*)/);
+      if (profileCookieMatch) {
+        const prof = JSON.parse(decodeURIComponent(profileCookieMatch[1]));
+        if (prof?.isKids) return true;
+      }
+      // 3. Check currentProfile in localStorage
       const currentProfileStr = localStorage.getItem('currentProfile');
       if (currentProfileStr) {
         const profile = JSON.parse(currentProfileStr);
@@ -39,6 +45,27 @@ export function isKidsProfileActive(): boolean {
     } catch (e) {
       // ignore
     }
+  }
+  return false;
+}
+
+export async function isKidsProfileActiveAsync(): Promise<boolean> {
+  if (typeof window !== 'undefined') {
+    return isKidsProfileActive();
+  }
+  try {
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    const kidsCookie = cookieStore.get('kids_mode')?.value;
+    if (kidsCookie === 'true' || kidsCookie === '1') return true;
+    if (kidsCookie === 'false' || kidsCookie === '0') return false;
+    const profileCookie = cookieStore.get('currentProfile')?.value;
+    if (profileCookie) {
+      const profile = JSON.parse(decodeURIComponent(profileCookie));
+      return !!profile.isKids;
+    }
+  } catch (e) {
+    // ignore server context errors if not available
   }
   return false;
 }
@@ -57,25 +84,17 @@ export function filterForProfile<T>(items: T[]): T[] {
   return items;
 }
 
-async function getKidsHeader(): Promise<Record<string, string>> {
-  let isKids = false;
-  if (typeof window !== 'undefined') {
-    isKids = isKidsProfileActive();
-  } else {
-    try {
-      const { cookies } = await import('next/headers');
-      const cookieStore = await cookies();
-      const kidsCookie = cookieStore.get('kids_mode')?.value;
-      if (kidsCookie === 'true' || kidsCookie === '1') isKids = true;
-      const profileCookie = cookieStore.get('currentProfile')?.value;
-      if (profileCookie) {
-        const profile = JSON.parse(decodeURIComponent(profileCookie));
-        if (profile.isKids) isKids = true;
-      }
-    } catch (e) {
-      // ignore server context errors if not available
-    }
+export async function filterForProfileAsync<T>(items: T[]): Promise<T[]> {
+  if (!items || !Array.isArray(items)) return [];
+  const isKids = await isKidsProfileActiveAsync();
+  if (isKids) {
+    return items.filter(item => isContentKidsApproved(item));
   }
+  return items;
+}
+
+async function getKidsHeader(): Promise<Record<string, string>> {
+  const isKids = await isKidsProfileActiveAsync();
   return isKids ? { 'x-kids-mode': 'true' } : {};
 }
 
@@ -165,6 +184,8 @@ export interface Poster {
   status: string;
   is_coming_soon?: boolean;
   isComingSoon?: boolean;
+  kids_restriction?: boolean;
+  kidsRestriction?: boolean;
   createdon?: string;
 }
 
@@ -190,7 +211,12 @@ export async function getPosters(pageType?: string, language?: string, limit?: n
       throw new Error(`Failed to fetch posters. Status: ${res.status}`);
     }
     const result = await res.json();
-    return result.data || [];
+    const posters: Poster[] = result.data || [];
+    const isKids = await isKidsProfileActiveAsync();
+    if (isKids) {
+      return posters.filter(p => isContentKidsApproved(p));
+    }
+    return posters;
   } catch (err: any) {
     return [];
   }
@@ -222,7 +248,7 @@ export async function getSeries(userId?: string | null): Promise<Series[]> {
     }
     const result = await res.json();
     const arr = Array.isArray(result) ? result : (result.data || []);
-    return filterForProfile(arr);
+    return await filterForProfileAsync(arr);
   } catch (err: any) {
     return [];
   }
@@ -327,9 +353,8 @@ export async function getInteractiveMovies(): Promise<InteractiveMovie[]> {
       throw new Error(`Failed to fetch interactive movies. Status: ${res.status}`);
     }
     const result = await res.json();
-    if (Array.isArray(result.data)) return filterForProfile(result.data);
-    if (Array.isArray(result)) return filterForProfile(result);
-    return [];
+    const arr = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
+    return await filterForProfileAsync(arr);
   } catch (err: any) {
     return [];
   }
@@ -344,9 +369,8 @@ export async function getScenes(movieId: number, userId?: string | number | null
       throw new Error(`Failed to fetch scenes. Status: ${res.status}`);
     }
     const result = await res.json();
-    if (Array.isArray(result.data)) return filterForProfile(result.data);
-    if (Array.isArray(result)) return filterForProfile(result);
-    return [];
+    const arr = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
+    return await filterForProfileAsync(arr);
   } catch (err: any) {
     return [];
   }
@@ -434,7 +458,7 @@ export async function getEpisodes(userId?: string | null): Promise<Episode[]> {
     }
     const result = await res.json();
     const data = Array.isArray(result) ? result : (result.data || []);
-    return filterForProfile(data.map(normalizeEpisode));
+    return await filterForProfileAsync(data.map(normalizeEpisode));
   } catch (err: any) {
     return [];
   }
@@ -451,7 +475,11 @@ export async function getEpisodeById(id: string | number, userId?: string | null
       throw new Error(`Failed to fetch episode. Status: ${res.status}`);
     }
     const result = await res.json();
-    return normalizeEpisode(result.data || result);
+    const epObj = normalizeEpisode(result.data || result);
+    if (epObj && (await isKidsProfileActiveAsync()) && !isContentKidsApproved(epObj)) {
+      return null;
+    }
+    return epObj;
   } catch (err: any) {
     return null;
   }
@@ -580,7 +608,7 @@ export async function getMovies(userId?: string | null): Promise<Movie[]> {
     }
     const result = await res.json();
     const data = result.data || [];
-    return filterForProfile(data.map(normalizeMovie));
+    return await filterForProfileAsync(data.map(normalizeMovie));
   } catch (err: any) {
     return [];
   }
@@ -596,7 +624,7 @@ export async function getMovieBySlug(slug: string, userId?: string | null): Prom
     }
     const result = await res.json();
     const movieObj = normalizeMovie(result.data || result);
-    if (movieObj && isKidsProfileActive() && !isContentKidsApproved(movieObj)) {
+    if (movieObj && (await isKidsProfileActiveAsync()) && !isContentKidsApproved(movieObj)) {
       return null;
     }
     return movieObj;
@@ -618,7 +646,7 @@ export async function getTrendingMovies(limit: number = 10, userId?: string | nu
     }
     const result = await res.json();
     const data = result.data || [];
-    return filterForProfile(data.map(normalizeMovie));
+    return await filterForProfileAsync(data.map(normalizeMovie));
   } catch (err: any) {
     return [];
   }

@@ -9,6 +9,7 @@ import { Navigation, Autoplay, FreeMode } from 'swiper/modules';
 import Shimmer from '@/components/shared/Shimmer';
 import { getUserId } from '@/lib/api-client';
 import { watchProgressApi } from '@/lib/api/watch-progress.api';
+import { isKidsProfileActive, isContentKidsApproved } from '@/lib/vtagu.api';
 
 import { useRouter } from 'next/navigation';
 import 'swiper/css';
@@ -39,7 +40,11 @@ export default function ContinueWatching() {
                 if (!isMounted) return;
                 
                 if (response.status && Array.isArray(response.data) && response.data.length > 0) {
-                    const mappedMovies = response.data.map((item) => {
+                    const isKids = isKidsProfileActive();
+                    const validItems = isKids 
+                        ? response.data.filter((item: any) => isContentKidsApproved(item.content)) 
+                        : response.data;
+                    const mappedMovies = validItems.map((item: any) => {
                         const isMovie = item.contentType === 'movie';
                         const slug = item.content?.slug || item.content?.movie_id || item.content?.episode_id || item.contentId;
                         

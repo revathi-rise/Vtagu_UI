@@ -96,9 +96,10 @@ export default function ProfileSelector() {
         console.warn("Kids mode activation API call optional", err);
       }
       localStorage.setItem('currentProfile', JSON.stringify(profile));
-    document.cookie = "kids_mode=false; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new Event('profileChanged'));
+      document.cookie = "kids_mode=true; path=/; max-age=31536000; SameSite=Lax";
+      document.cookie = `currentProfile=${encodeURIComponent(JSON.stringify(profile))}; path=/; max-age=31536000; SameSite=Lax`;
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('profileChanged'));
       }
       router.push('/');
       router.refresh();
@@ -112,6 +113,8 @@ export default function ProfileSelector() {
       console.warn("Exit kids mode API call optional", err);
     }
     localStorage.setItem('currentProfile', JSON.stringify(profile));
+    document.cookie = "kids_mode=false; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+    document.cookie = `currentProfile=${encodeURIComponent(JSON.stringify(profile))}; path=/; max-age=31536000; SameSite=Lax`;
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('profileChanged'));
     }
