@@ -15,6 +15,17 @@ interface WatchNowButtonProps {
   contentType?: 'movie' | 'episode' | 'interactive_movie' | 'short';
   internal?: boolean; // If true, use internal player; if false, open external URL
   onLockedClick?: () => void;
+  subtitles?: {
+    language: string;
+    label: string;
+    url: string;
+  }[];
+  audioTracks?: {
+    language: string;
+    label: string;
+    url?: string;
+    isDefault?: boolean;
+  }[];
 }
 
 export default function WatchNowButton({
@@ -24,6 +35,8 @@ export default function WatchNowButton({
   contentType = 'movie',
   internal = true,
   onLockedClick,
+  subtitles,
+  audioTracks,
 }: WatchNowButtonProps) {
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   const [userId, setUserId] = useState<string | undefined>();
@@ -112,6 +125,8 @@ export default function WatchNowButton({
         contentId={contentId}
         contentType={contentType}
         userId={userId}
+        subtitles={subtitles}
+        audioTracks={audioTracks}
       />
     </>
   );

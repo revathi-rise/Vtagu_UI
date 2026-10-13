@@ -22,8 +22,10 @@ interface WatchTrackingVideoPlayerProps {
   muted?: boolean;
   showControls?: boolean;
   className?: string;
-  crossOrigin?: string;
+  crossOrigin?: 'anonymous' | 'use-credentials' | '';
   showSkip?: boolean;
+  showNext?: boolean;
+  onNext?: () => void;
   showPrevious?: boolean;
   onPrevious?: () => void;
   onProgressUpdate?: (progress: number, currentTime: number) => void;
@@ -33,10 +35,20 @@ interface WatchTrackingVideoPlayerProps {
   onFullscreenRequest?: () => void;
   showMinimize?: boolean;
   onMinimize?: () => void;
+  title?: string;
+  metadata?: string;
+  isMinimized?: boolean;
+  onClose?: () => void;
   subtitles?: {
       language: string;
       label: string;
       url: string;
+  }[];
+  audioTracks?: {
+      language: string;
+      label: string;
+      url?: string;
+      isDefault?: boolean;
   }[];
   maxQualityHeight?: number;
 }

@@ -64,6 +64,8 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
           title={episode.title}
           contentId={(episode.id || episode.episodeId || "").toString()}
           contentType="episode"
+          subtitles={(episode as any).subtitles || (episode as any).media?.video?.subtitles}
+          audioTracks={(episode as any).audioTracks || (episode as any).audio_tracks}
         />
       )}
 
@@ -182,6 +184,8 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
                     contentId={(episode.id || episode.episodeId || "").toString()}
                     contentType="episode"
                     internal={true}
+                    subtitles={(episode as any).subtitles || (episode as any).media?.video?.subtitles}
+                    audioTracks={(episode as any).audioTracks || (episode as any).audio_tracks}
                   />
                 )}
                 {episode.media?.trailer?.url && (

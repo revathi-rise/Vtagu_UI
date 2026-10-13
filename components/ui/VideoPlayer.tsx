@@ -4,6 +4,7 @@ import React, {
   useRef,
   useState,
   useEffect,
+  useMemo,
   useImperativeHandle,
   forwardRef,
   useCallback,
@@ -23,12 +24,17 @@ import {
   ChevronRight,
   ChevronLeft,
   Subtitles,
+  Headphones,
   Settings,
   Check,
   RefreshCw,
   Gauge,
   Sliders,
   PictureInPicture2,
+  MoreVertical,
+  X,
+  SkipBack,
+  SkipForward,
 } from 'lucide-react';
 import Hls from 'hls.js';
 import { getFallbackVideoUrl } from '@/lib/video-utils';
@@ -37,6 +43,7 @@ import {
   exitDocumentFullscreen,
   isElementFullscreen,
   addFullscreenChangeListener,
+  getFullscreenElement,
 } from '@/lib/fullscreen-utils';
 
 export interface HlsQualityLevel {
@@ -47,9 +54,181 @@ export interface HlsQualityLevel {
   isLocked?: boolean;
 }
 
+export interface SubtitleTrackOption {
+  id: string;
+  language: string;
+  label: string;
+  isHls?: boolean;
+  hlsIndex?: number;
+  isNative?: boolean;
+  nativeIndex?: number;
+  isExternal?: boolean;
+  url?: string;
+}
+
+export interface AudioTrackOption {
+  id: string;
+  language: string;
+  label: string;
+  isHls?: boolean;
+  hlsIndex?: number;
+  isNative?: boolean;
+  nativeIndex?: number;
+  isExternal?: boolean;
+  url?: string;
+  isDefault?: boolean;
+}
+
+// Custom SVG Icons matching exact streaming reference mockup
+function Rewind10Icon({ size = 20, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+      <path d="M3 3v5h5" />
+      <text
+        x="12"
+        y="15.5"
+        fontSize="7.5"
+        fontWeight="bold"
+        fill="currentColor"
+        stroke="none"
+        textAnchor="middle"
+        fontFamily="sans-serif"
+      >
+        10
+      </text>
+    </svg>
+  );
+}
+
+function Forward10Icon({ size = 20, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+      <path d="M21 3v5h-5" />
+      <text
+        x="12"
+        y="15.5"
+        fontSize="7.5"
+        fontWeight="bold"
+        fill="currentColor"
+        stroke="none"
+        textAnchor="middle"
+        fontFamily="sans-serif"
+      >
+        10
+      </text>
+    </svg>
+  );
+}
+
+function FullscreenCornersIcon({ size = 20, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M4 9V5a1 1 0 0 1 1-1h4" />
+      <path d="M20 9V5a1 1 0 0 0-1-1h-4" />
+      <path d="M4 15v4a1 1 0 0 0 1 1h4" />
+      <path d="M20 15v4a1 1 0 0 1-1 1h-4" />
+    </svg>
+  );
+}
+
+function ExitFullscreenCornersIcon({ size = 20, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M9 4v4a1 1 0 0 1-1 1H4" />
+      <path d="M15 4v4a1 1 0 0 0 1 1h4" />
+      <path d="M9 20v-4a1 1 0 0 0-1-1H4" />
+      <path d="M15 20v-4a1 1 0 0 1 1-1h4" />
+    </svg>
+  );
+}
+
+function SubtitlesBadgeIcon({ size = 20, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <rect x="2" y="5" width="20" height="14" rx="3" />
+      <path d="M10 10.5a2 2 0 0 0-2-1.5c-1.3 0-2 1-2 3s.7 3 2 3a2 2 0 0 0 2-1.5" />
+      <path d="M18 10.5a2 2 0 0 0-2-1.5c-1.3 0-2 1-2 3s.7 3 2 3a2 2 0 0 0 2-1.5" />
+    </svg>
+  );
+}
+
+function PipRectanglesIcon({ size = 20, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <rect x="3" y="4" width="18" height="16" rx="3" />
+      <rect x="11" y="11" width="8" height="7" rx="1.5" fill="currentColor" fillOpacity="0.25" stroke="currentColor" />
+    </svg>
+  );
+}
+
 export interface VideoPlayerProps {
   src: string;
   poster?: string;
+  title?: string;
+  metadata?: string;
+  contentType?: 'movie' | 'episode' | 'interactive_movie' | 'short';
   autoPlay?: boolean;
   loop?: boolean;
   muted?: boolean;
@@ -57,14 +236,18 @@ export interface VideoPlayerProps {
   className?: string;
   onEnded?: () => void;
   onTimeUpdate?: (currentTime: number, duration: number) => void;
-  crossOrigin?: string;
+  crossOrigin?: 'anonymous' | 'use-credentials' | '';
   showSkip?: boolean;
   onSkip?: () => void;
+  showNext?: boolean;
+  onNext?: () => void;
   showPrevious?: boolean;
   onPrevious?: () => void;
   onFullscreenRequest?: () => void;
   showMinimize?: boolean;
   onMinimize?: () => void;
+  onClose?: () => void;
+  isMinimized?: boolean;
   subtitles?: {
     language: string;
     label: string;
@@ -73,7 +256,7 @@ export interface VideoPlayerProps {
   audioTracks?: {
     language: string;
     label: string;
-    url: string;
+    url?: string;
     isDefault?: boolean;
   }[];
   maxQualityHeight?: number;
@@ -94,6 +277,9 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     {
       src,
       poster,
+      title,
+      metadata,
+      contentType = 'movie',
       autoPlay = false,
       loop = false,
       muted = false,
@@ -104,11 +290,15 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       crossOrigin,
       showSkip = false,
       onSkip,
+      showNext = false,
+      onNext,
       showPrevious = false,
       onPrevious,
       onFullscreenRequest,
       showMinimize = true,
       onMinimize,
+      onClose,
+      isMinimized = false,
       subtitles,
       audioTracks,
       maxQualityHeight,
@@ -156,7 +346,34 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     // Adaptive Quality & Speed State
     const [qualityLevels, setQualityLevels] = useState<HlsQualityLevel[]>([]);
     const [currentQuality, setCurrentQuality] = useState<number>(-1); // -1 = Auto
+    const [autoCurrentLabel, setAutoCurrentLabel] = useState<string>('');
     const [selectedSpeed, setSelectedSpeed] = useState<number>(1.0);
+
+    const currentQualityLabel = useMemo(() => {
+      if (currentQuality === -1) {
+        return autoCurrentLabel ? `${autoCurrentLabel}` : 'Auto';
+      }
+      const found = qualityLevels.find((q) => q.id === currentQuality);
+      return found?.label || 'HD';
+    }, [currentQuality, autoCurrentLabel, qualityLevels]);
+
+    // Timeline Hover & Scrubbing State
+    const [hoverTime, setHoverTime] = useState<number | null>(null);
+    const [hoverPercent, setHoverPercent] = useState<number>(0);
+    const progressTrackRef = useRef<HTMLDivElement>(null);
+
+    const handleTimelineMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!progressTrackRef.current || !duration) return;
+      const rect = progressTrackRef.current.getBoundingClientRect();
+      const posX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      const pct = (posX / rect.width) * 100;
+      setHoverPercent(pct);
+      setHoverTime((posX / rect.width) * duration);
+    };
+
+    const handleTimelineMouseLeave = () => {
+      setHoverTime(null);
+    };
 
     // Menus State
     const [activeMenu, setActiveMenu] = useState<
@@ -165,17 +382,20 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
     // Subtitle State
     const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
+    const [activeSubtitleId, setActiveSubtitleId] = useState<string | null>(null);
     const [activeSubtitleLanguage, setActiveSubtitleLanguage] = useState<
       string | null
     >(null);
+    const [hlsSubtitleTracks, setHlsSubtitleTracks] = useState<SubtitleTrackOption[]>([]);
+    const [nativeSubtitleTracks, setNativeSubtitleTracks] = useState<SubtitleTrackOption[]>([]);
     const [subtitleBlobs, setSubtitleBlobs] = useState<
       { language: string; label: string; url: string; originalUrl: string }[]
     >([]);
 
     // Audio Track State
-    const [selectedAudioTrackUrl, setSelectedAudioTrackUrl] = useState<
-      string | null
-    >(null);
+    const [hlsAudioTracks, setHlsAudioTracks] = useState<AudioTrackOption[]>([]);
+    const [nativeAudioTracks, setNativeAudioTracks] = useState<AudioTrackOption[]>([]);
+    const [activeAudioTrackId, setActiveAudioTrackId] = useState<string | null>(null);
 
     // Dynamic Active Source State for retries
     const [activeSrc, setActiveSrc] = useState(src);
@@ -189,6 +409,91 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     const indicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Unified Subtitle List (combines external subtitles, HLS manifest subtitles, and native subtitles)
+    const allSubtitleTracks = useMemo(() => {
+      const tracks: SubtitleTrackOption[] = [];
+      const seen = new Set<string>();
+
+      // 1. External subtitles (<track> elements)
+      subtitleBlobs.forEach((sub, idx) => {
+        const key = `${sub.language || ''}-${sub.label || ''}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          tracks.push({
+            id: `ext-sub-${idx}`,
+            language: sub.language,
+            label: sub.label || sub.language?.toUpperCase() || `Subtitle ${idx + 1}`,
+            isExternal: true,
+            url: sub.url,
+          });
+        }
+      });
+
+      // 2. HLS Manifest subtitle tracks
+      hlsSubtitleTracks.forEach((sub) => {
+        const key = `${sub.language || ''}-${sub.label || ''}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          tracks.push(sub);
+        }
+      });
+
+      // 3. Native Apple HLS subtitle tracks
+      nativeSubtitleTracks.forEach((sub) => {
+        const key = `${sub.language || ''}-${sub.label || ''}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          tracks.push(sub);
+        }
+      });
+
+      return tracks;
+    }, [subtitleBlobs, hlsSubtitleTracks, nativeSubtitleTracks]);
+
+    // Unified Audio Track List (combines HLS manifest audio tracks, external audioTracks, and native audio tracks)
+    const allAudioTracks = useMemo(() => {
+      const tracks: AudioTrackOption[] = [];
+      const seen = new Set<string>();
+
+      // 1. HLS Manifest audio tracks
+      hlsAudioTracks.forEach((track) => {
+        const key = `${track.language || ''}-${track.label || ''}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          tracks.push(track);
+        }
+      });
+
+      // 2. External audioTracks prop
+      if (audioTracks && Array.isArray(audioTracks)) {
+        audioTracks.forEach((track, idx) => {
+          const key = `${track.language || ''}-${track.label || ''}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            tracks.push({
+              id: `ext-audio-${idx}`,
+              language: track.language,
+              label: track.label || track.language?.toUpperCase() || `Audio ${idx + 1}`,
+              isExternal: true,
+              url: track.url,
+              isDefault: track.isDefault,
+            });
+          }
+        });
+      }
+
+      // 3. Native Apple HLS audio tracks
+      nativeAudioTracks.forEach((track) => {
+        const key = `${track.language || ''}-${track.label || ''}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          tracks.push(track);
+        }
+      });
+
+      return tracks;
+    }, [hlsAudioTracks, audioTracks, nativeAudioTracks]);
+
     // Synchronize prop changes to active source
     useEffect(() => {
       setActiveSrc(src);
@@ -197,6 +502,15 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       setDuration(0);
       setError(null);
       setCurrentQuality(-1);
+      setAutoCurrentLabel('');
+      setQualityLevels([]);
+      setHlsSubtitleTracks([]);
+      setNativeSubtitleTracks([]);
+      setHlsAudioTracks([]);
+      setNativeAudioTracks([]);
+      setActiveAudioTrackId(null);
+      setActiveSubtitleId(null);
+      setSubtitlesEnabled(false);
     }, [src]);
 
     // Audio click feedback sound
@@ -261,6 +575,40 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       }
     }, [playClickSound]);
 
+    // Interactive movie scene navigation logic
+    const isInteractive =
+      contentType === 'interactive_movie' ||
+      Boolean(showPrevious || onPrevious || showSkip || onSkip || showNext || onNext);
+
+    const canGoPrevious = Boolean(showPrevious && onPrevious);
+    const canGoNext = Boolean((showNext || showSkip) && (onNext || onSkip));
+
+    const handlePreviousScene = useCallback(
+      (e?: React.MouseEvent) => {
+        if (!canGoPrevious) return;
+        if (e) e.stopPropagation();
+        playClickSound();
+        if (onPrevious) {
+          onPrevious();
+        }
+      },
+      [canGoPrevious, onPrevious, playClickSound]
+    );
+
+    const handleNextScene = useCallback(
+      (e?: React.MouseEvent) => {
+        if (!canGoNext) return;
+        if (e) e.stopPropagation();
+        playClickSound();
+        if (onNext) {
+          onNext();
+        } else if (onSkip) {
+          onSkip();
+        }
+      },
+      [canGoNext, onNext, onSkip, playClickSound]
+    );
+
     // Fast Seek (+/- 10s)
     const handleSkipSeconds = useCallback(
       (seconds: number) => {
@@ -277,7 +625,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       [playClickSound]
     );
 
-    // Auto-hide UI controls after 3 seconds of mouse inactivity
+    // Auto-hide UI controls after 3 seconds of mouse/touch inactivity
     const resetControlsTimeout = useCallback(() => {
       setShowUI(true);
       if (controlsTimeoutRef.current) {
@@ -291,6 +639,18 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         }, 3000);
       }
     }, [isPlaying, activeMenu]);
+
+    // Kick off auto-hide timer whenever playback starts or resumes
+    useEffect(() => {
+      if (isPlaying) {
+        resetControlsTimeout();
+      } else {
+        setShowUI(true);
+        if (controlsTimeoutRef.current) {
+          clearTimeout(controlsTimeoutRef.current);
+        }
+      }
+    }, [isPlaying, resetControlsTimeout]);
 
     // Handle HLS & Native Video Initialization
     useEffect(() => {
@@ -343,8 +703,161 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       video.addEventListener('playing', handlePlaying);
       video.addEventListener('error', handleError);
 
+      // Helper to parse quality levels from HLS
+      const parseQualityLevels = (instance: Hls) => {
+        if (!instance.levels || instance.levels.length === 0) return;
+        const limitHeight =
+          maxQualityHeight && maxQualityHeight > 0
+            ? maxQualityHeight
+            : Infinity;
+
+        if (limitHeight < Infinity) {
+          let maxLevelId = -1;
+          instance.levels.forEach((lvl, idx) => {
+            if ((lvl.height || 0) <= limitHeight) {
+              maxLevelId = Math.max(maxLevelId, idx);
+            }
+          });
+          if (maxLevelId >= 0) {
+            instance.autoLevelCapping = maxLevelId;
+          }
+        }
+
+        const detectedLevels: HlsQualityLevel[] = instance.levels
+          .map((level, idx) => {
+            let h = level.height || 0;
+            if (!h && (level as any).attrs?.RESOLUTION) {
+              const parts = String((level as any).attrs.RESOLUTION).split('x');
+              if (parts.length === 2) h = parseInt(parts[1], 10) || 0;
+            }
+            const label =
+              h > 0
+                ? `${h}p`
+                : level.name
+                ? level.name
+                : level.bitrate
+                ? `${Math.round(level.bitrate / 1000)}k`
+                : `Level ${idx + 1}`;
+            return {
+              id: idx,
+              height: h,
+              label,
+              bitrate: level.bitrate,
+              isLocked: h > limitHeight,
+            };
+          })
+          .sort((a, b) => (b.height || b.bitrate || 0) - (a.height || a.bitrate || 0));
+
+        // Deduplicate resolutions
+        const uniqueLevels: HlsQualityLevel[] = [];
+        const seenLabels = new Set<string>();
+        for (const lvl of detectedLevels) {
+          if (!seenLabels.has(lvl.label)) {
+            seenLabels.add(lvl.label);
+            uniqueLevels.push(lvl);
+          }
+        }
+
+        setQualityLevels(uniqueLevels);
+      };
+
+      // Helper to parse HLS subtitle tracks
+      const parseHlsSubtitles = (instance: Hls) => {
+        const tracks = instance.subtitleTracks || [];
+        if (tracks.length > 0) {
+          const list: SubtitleTrackOption[] = tracks.map((t, idx) => ({
+            id: `hls-sub-${idx}`,
+            language: t.lang || `track-${idx}`,
+            label: t.name || (t.lang ? t.lang.toUpperCase() : `Subtitle ${idx + 1}`),
+            isHls: true,
+            hlsIndex: idx,
+          }));
+          setHlsSubtitleTracks(list);
+        } else {
+          setHlsSubtitleTracks([]);
+        }
+      };
+
+      // Helper to parse HLS audio tracks
+      const parseHlsAudio = (instance: Hls) => {
+        const tracks = instance.audioTracks || [];
+        if (tracks.length > 0) {
+          const list: AudioTrackOption[] = tracks.map((t, idx) => ({
+            id: `hls-audio-${idx}`,
+            language: t.lang || `audio-${idx}`,
+            label: t.name || (t.lang ? t.lang.toUpperCase() : `Audio ${idx + 1}`),
+            isHls: true,
+            hlsIndex: idx,
+            isDefault: t.default,
+          }));
+          setHlsAudioTracks(list);
+
+          const currentIdx = instance.audioTrack;
+          if (currentIdx >= 0 && currentIdx < tracks.length) {
+            setActiveAudioTrackId(`hls-audio-${currentIdx}`);
+          } else {
+            const defIdx = tracks.findIndex((t) => t.default);
+            setActiveAudioTrackId(`hls-audio-${defIdx >= 0 ? defIdx : 0}`);
+          }
+        } else {
+          setHlsAudioTracks([]);
+        }
+      };
+
+      // Native Apple HLS handler
+      const handleAppleTracks = () => {
+        handleCanPlay();
+        // Check native audio tracks
+        const nativeAudio = (video as any).audioTracks;
+        if (nativeAudio && nativeAudio.length > 0) {
+          const list: AudioTrackOption[] = [];
+          for (let i = 0; i < nativeAudio.length; i++) {
+            const t = nativeAudio[i];
+            list.push({
+              id: `nat-audio-${i}`,
+              label: t.label || t.language || `Audio ${i + 1}`,
+              language: t.language || 'und',
+              isNative: true,
+              nativeIndex: i,
+              isDefault: t.enabled,
+            });
+            if (t.enabled) {
+              setActiveAudioTrackId(`nat-audio-${i}`);
+            }
+          }
+          setNativeAudioTracks(list);
+        }
+
+        // Check native text tracks
+        if (video.textTracks && video.textTracks.length > 0) {
+          const list: SubtitleTrackOption[] = [];
+          for (let i = 0; i < video.textTracks.length; i++) {
+            const t = video.textTracks[i];
+            if (t.kind === 'subtitles' || t.kind === 'captions') {
+              list.push({
+                id: `nat-sub-${i}`,
+                label: t.label || t.language || `Subtitle ${i + 1}`,
+                language: t.language || 'und',
+                isNative: true,
+                nativeIndex: i,
+              });
+              if (t.mode === 'showing') {
+                setSubtitlesEnabled(true);
+                setActiveSubtitleId(`nat-sub-${i}`);
+              }
+            }
+          }
+          setNativeSubtitleTracks(list);
+        }
+      };
+
       // HLS Manifest Playback (.m3u8)
-      if (activeSrc.includes('.m3u8') || activeSrc.includes('playlist')) {
+      const isHls =
+        activeSrc.toLowerCase().includes('.m3u8') ||
+        activeSrc.toLowerCase().includes('playlist') ||
+        activeSrc.toLowerCase().includes('/hls');
+
+      if (isHls) {
         if (Hls.isSupported()) {
           const hls = new Hls({
             enableWorker: true,
@@ -359,52 +872,49 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
           hls.attachMedia(video);
           hlsRef.current = hls;
 
-          // Process Manifest Quality Levels
-          hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
+          // Manifest & Quality Levels
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
             handleCanPlay();
-            if (data.levels && data.levels.length > 0) {
-              const limitHeight = maxQualityHeight && maxQualityHeight > 0 ? maxQualityHeight : Infinity;
-              
-              if (limitHeight < Infinity) {
-                let maxLevelId = -1;
-                data.levels.forEach((lvl, idx) => {
-                   if (lvl.height <= limitHeight) maxLevelId = Math.max(maxLevelId, idx);
-                });
-                if (maxLevelId >= 0) {
-                  hls.autoLevelCapping = maxLevelId;
-                }
-              }
+            parseQualityLevels(hls);
+            parseHlsSubtitles(hls);
+            parseHlsAudio(hls);
+          });
 
-              const detectedLevels: HlsQualityLevel[] = data.levels
-                .map((level, idx) => ({
-                  id: idx,
-                  height: level.height || 0,
-                  label: level.height ? `${level.height}p` : `Level ${idx + 1}`,
-                  bitrate: level.bitrate,
-                  isLocked: level.height > limitHeight,
-                }))
-                .filter((lvl) => lvl.height > 0)
-                .sort((a, b) => b.height - a.height); // Sort descending (1080p, 720p, 480p, 360p)
+          hls.on(Hls.Events.LEVELS_UPDATED, () => {
+            parseQualityLevels(hls);
+          });
 
-              // Deduplicate resolutions
-              const uniqueLevels: HlsQualityLevel[] = [];
-              const seenHeights = new Set<number>();
-              for (const lvl of detectedLevels) {
-                if (!seenHeights.has(lvl.height)) {
-                  seenHeights.add(lvl.height);
-                  uniqueLevels.push(lvl);
-                }
-              }
+          hls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, () => {
+            parseHlsSubtitles(hls);
+          });
 
-              setQualityLevels(uniqueLevels);
-            }
+          hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, () => {
+            parseHlsAudio(hls);
           });
 
           hls.on(Hls.Events.LEVEL_SWITCHED, (_, data) => {
             if (hls.autoLevelEnabled) {
               setCurrentQuality(-1);
+              const lvl = hls.levels?.[data.level];
+              if (lvl) {
+                setAutoCurrentLabel(lvl.height ? `${lvl.height}p` : '');
+              }
             } else {
               setCurrentQuality(data.level);
+            }
+          });
+
+          hls.on(Hls.Events.AUDIO_TRACK_SWITCHED, (_, data) => {
+            setActiveAudioTrackId(`hls-audio-${data.id}`);
+          });
+
+          hls.on(Hls.Events.SUBTITLE_TRACK_SWITCH, (_, data) => {
+            if (data.id === -1) {
+              setSubtitlesEnabled(false);
+              setActiveSubtitleId(null);
+            } else {
+              setSubtitlesEnabled(true);
+              setActiveSubtitleId(`hls-sub-${data.id}`);
             }
           });
 
@@ -439,7 +949,10 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
           // Native Apple HLS support (Safari / iOS)
           video.src = activeSrc;
-          video.addEventListener('loadedmetadata', handleCanPlay);
+          video.addEventListener('loadedmetadata', handleAppleTracks);
+          if (video.textTracks) {
+            video.textTracks.addEventListener('addtrack', handleAppleTracks);
+          }
         } else {
           setError('HLS playback is not supported in your browser.');
         }
@@ -465,8 +978,12 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         video.removeEventListener('error', handleError);
         video.removeEventListener('canplay', handleCanPlay);
         video.removeEventListener('loadedmetadata', handleCanPlay);
+        video.removeEventListener('loadedmetadata', handleAppleTracks);
+        if (video.textTracks) {
+          video.textTracks.removeEventListener('addtrack', handleAppleTracks);
+        }
       };
-    }, [activeSrc, autoPlay, crossOrigin, src, subtitles]);
+    }, [activeSrc, autoPlay, crossOrigin, maxQualityHeight, src, subtitles]);
 
     // Handle Manual Quality Selection
     const handleQualitySelect = (levelId: number) => {
@@ -612,7 +1129,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         containerRef.current,
         videoRef.current
       );
-      if (isCurrentlyFs) {
+      if (isCurrentlyFs || getFullscreenElement()) {
         if (!fullscreenTransitionRef.current) {
           fullscreenTransitionRef.current = true;
           try {
@@ -672,26 +1189,73 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       };
     }, [subtitles]);
 
-    const toggleSubtitle = (e: React.MouseEvent, language?: string) => {
-      e.stopPropagation();
+    const handleSubtitleSelect = (sub: SubtitleTrackOption | null) => {
       playClickSound();
-      if (!videoRef.current) return;
-
-      const tracks = videoRef.current.textTracks;
-      if (!tracks) return;
-
-      if (language) {
-        setSubtitlesEnabled(true);
-        setActiveSubtitleLanguage(language);
-        for (let i = 0; i < tracks.length; i++) {
-          tracks[i].mode =
-            tracks[i].language === language ? 'showing' : 'hidden';
+      if (!sub) {
+        setSubtitlesEnabled(false);
+        setActiveSubtitleId(null);
+        setActiveSubtitleLanguage(null);
+        if (hlsRef.current) {
+          hlsRef.current.subtitleTrack = -1;
+          hlsRef.current.subtitleDisplay = false;
+        }
+        if (videoRef.current?.textTracks) {
+          for (let i = 0; i < videoRef.current.textTracks.length; i++) {
+            videoRef.current.textTracks[i].mode = 'hidden';
+          }
         }
       } else {
-        setSubtitlesEnabled(false);
-        setActiveSubtitleLanguage(null);
-        for (let i = 0; i < tracks.length; i++) {
-          tracks[i].mode = 'hidden';
+        setSubtitlesEnabled(true);
+        setActiveSubtitleId(sub.id);
+        setActiveSubtitleLanguage(sub.language);
+        if (sub.isHls && hlsRef.current && typeof sub.hlsIndex === 'number') {
+          hlsRef.current.subtitleTrack = sub.hlsIndex;
+          hlsRef.current.subtitleDisplay = true;
+          if (videoRef.current?.textTracks) {
+            for (let i = 0; i < videoRef.current.textTracks.length; i++) {
+              videoRef.current.textTracks[i].mode = 'hidden';
+            }
+          }
+        } else {
+          if (hlsRef.current) {
+            hlsRef.current.subtitleTrack = -1;
+            hlsRef.current.subtitleDisplay = false;
+          }
+          if (videoRef.current?.textTracks) {
+            for (let i = 0; i < videoRef.current.textTracks.length; i++) {
+              const t = videoRef.current.textTracks[i];
+              const matches =
+                (sub.isNative && i === sub.nativeIndex) ||
+                (sub.isExternal && (t.language === sub.language || t.label === sub.label));
+              t.mode = matches ? 'showing' : 'hidden';
+            }
+          }
+        }
+      }
+      setActiveMenu('none');
+    };
+
+    const handleAudioTrackSelect = (track: AudioTrackOption) => {
+      playClickSound();
+      setActiveAudioTrackId(track.id);
+
+      if (track.isHls && hlsRef.current && typeof track.hlsIndex === 'number') {
+        hlsRef.current.audioTrack = track.hlsIndex;
+      } else if (track.isNative && videoRef.current) {
+        const nativeAudio = (videoRef.current as any).audioTracks;
+        if (nativeAudio) {
+          for (let i = 0; i < nativeAudio.length; i++) {
+            nativeAudio[i].enabled = i === track.nativeIndex;
+          }
+        }
+      } else if (track.isExternal && track.url) {
+        if (!audioRef.current) {
+          audioRef.current = new Audio();
+        }
+        audioRef.current.src = track.url;
+        audioRef.current.currentTime = videoRef.current?.currentTime || 0;
+        if (isPlaying) {
+          audioRef.current.play().catch(() => {});
         }
       }
       setActiveMenu('none');
@@ -782,6 +1346,20 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             setIsMuted(newVol === 0);
           }
           break;
+        case 'p':
+        case 'P':
+          if (isInteractive && canGoPrevious) {
+            e.preventDefault();
+            handlePreviousScene();
+          }
+          break;
+        case 'n':
+        case 'N':
+          if (isInteractive && canGoNext) {
+            e.preventDefault();
+            handleNextScene();
+          }
+          break;
         case 'm':
         case 'M':
           e.preventDefault();
@@ -824,27 +1402,36 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       videoElement: videoRef.current,
     }));
 
-    const formatTime = (seconds: number) => {
-      if (isNaN(seconds) || seconds < 0) return '0:00';
+    const formatTime = (seconds: number, forceHours = false) => {
+      if (isNaN(seconds) || seconds < 0) return forceHours ? '00:00:00' : '00:00';
       const hrs = Math.floor(seconds / 3600);
       const mins = Math.floor((seconds % 3600) / 60);
       const secs = Math.floor(seconds % 60);
 
-      if (hrs > 0) {
-        return `${hrs}:${mins.toString().padStart(2, '0')}:${secs
+      if (hrs > 0 || forceHours) {
+        return `${hrs.toString().padStart(2, '0')}:${mins
           .toString()
-          .padStart(2, '0')}`;
+          .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
       }
-      return `${mins}:${secs.toString().padStart(2, '0')}`;
+      return `${mins.toString().padStart(2, '0')}:${secs
+        .toString()
+        .padStart(2, '0')}`;
     };
 
     return (
       <div
         ref={containerRef}
         tabIndex={0}
-        className={`relative group bg-black overflow-hidden outline-none select-none font-inter ${className}`}
+        className={`relative group bg-black overflow-hidden outline-none select-none font-inter ${
+          isFullscreen
+            ? 'w-screen h-screen max-w-none max-h-none rounded-none border-0 shadow-none m-0 p-0'
+            : 'w-full h-full rounded-2xl sm:rounded-3xl'
+        } ${!showUI && isPlaying && isFullscreen ? 'cursor-none' : ''} ${className}`}
         onKeyDown={handleKeyDown}
         onMouseMove={resetControlsTimeout}
+        onTouchStart={resetControlsTimeout}
+        onTouchMove={resetControlsTimeout}
+        onClick={resetControlsTimeout}
         onMouseLeave={() => {
           if (isPlaying && activeMenu === 'none') {
             setShowUI(false);
@@ -875,7 +1462,8 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             {/* HTML5 Video Element */}
             <video
               ref={videoRef}
-              className="w-full h-full object-cover cursor-pointer"
+              className="w-full h-full object-cover cursor-pointer block"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               onTimeUpdate={handleTimeUpdate}
               onLoadedMetadata={handleLoadedMetadata}
               onPlay={() => setIsPlaying(true)}
@@ -884,6 +1472,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
               loop={loop}
               muted={isMuted}
               playsInline
+              crossOrigin={crossOrigin || 'anonymous'}
               preload="auto"
               onClick={handleVideoClick}
               poster={poster}
@@ -896,7 +1485,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                   srcLang={sub.language}
                   label={sub.label}
                   default={
-                    activeSubtitleLanguage === sub.language && subtitlesEnabled
+                    subtitlesEnabled && activeSubtitleLanguage === sub.language
                   }
                 />
               ))}
@@ -950,393 +1539,701 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
               </button>
             )}
 
-            {/* Modern Streaming Control Bar */}
+            {/* Top Overlay Bar (Matching Reference Image) */}
             {showControls && (
               <div
-                className={`video-controls-container absolute bottom-0 left-0 right-0 z-30 p-4 sm:p-6 bg-gradient-to-t from-black/95 via-black/70 to-transparent transition-opacity duration-300 ${
+                className={`video-top-overlay absolute top-0 left-0 right-0 z-30 p-4 sm:p-6 bg-gradient-to-b from-black/90 via-black/50 to-transparent flex items-center justify-between gap-3 transition-opacity duration-300 ${
                   showUI || activeMenu !== 'none'
                     ? 'opacity-100'
                     : 'opacity-0 pointer-events-none'
                 }`}
               >
-                {/* Progress Bar Container */}
-                <div className="mb-4 group/progress relative flex items-center cursor-pointer">
-                  {/* Buffer range bar */}
-                  <div className="absolute left-0 right-0 h-1.5 bg-white/20 rounded-full overflow-hidden pointer-events-none">
+                {/* Top Left: Glassmorphic Capsule Card (Reference Image match) */}
+                <div className="bg-black/60 backdrop-blur-md border border-white/15 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl flex items-center gap-2.5 sm:gap-3.5 shadow-2xl max-w-[70%] sm:max-w-md">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 flex items-center justify-center text-white shrink-0 shadow-inner">
+                    <Play size={13} fill="white" className="ml-0.5 text-white" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-white font-bold text-xs sm:text-sm tracking-wide leading-tight truncate">
+                      {title || 'Vtagu Prime'}
+                    </h3>
+                    <p className="text-white/60 text-[10px] sm:text-[11px] font-medium leading-tight truncate mt-0.5">
+                      {metadata || 'Streaming in HD • Premium'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Top Right: Glassmorphic Pills (Quality + PiP + Settings/Close) */}
+                <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+                  {/* Quality Pill Badge */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      playClickSound();
+                      setActiveMenu(activeMenu === 'quality' ? 'none' : 'quality');
+                    }}
+                    className={`bg-black/60 hover:bg-black/80 backdrop-blur-md border px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-xs transition-all cursor-pointer shadow-lg ${
+                      activeMenu === 'quality'
+                        ? 'border-cyan-500/50 text-cyan-400 bg-cyan-500/10'
+                        : 'border-white/15 hover:border-cyan-500/40 text-white/90 hover:text-cyan-400'
+                    }`}
+                    title="Video Quality"
+                  >
+                    <span className="px-1 py-0.2 rounded bg-white/20 text-[9px] font-black tracking-wider text-white">
+                      HD
+                    </span>
+                    <span className="font-semibold text-xs">
+                      {currentQualityLabel}
+                    </span>
+                  </button>
+
+                  {/* Cast / PictureInPicture Pill */}
+                  <button
+                    onClick={togglePictureInPicture}
+                    className="bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/15 hover:border-cyan-500/40 p-2 sm:p-2.5 rounded-xl text-white/80 hover:text-cyan-400 transition-all cursor-pointer shadow-lg hidden sm:flex items-center justify-center"
+                    title="Picture-in-Picture"
+                  >
+                    <PipRectanglesIcon size={17} />
+                  </button>
+
+                  {/* More Options / Settings Pill */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      playClickSound();
+                      setActiveMenu(activeMenu === 'settings' ? 'none' : 'settings');
+                    }}
+                    className={`bg-black/60 hover:bg-black/80 backdrop-blur-md border p-2 sm:p-2.5 rounded-xl transition-all cursor-pointer shadow-lg flex items-center justify-center ${
+                      activeMenu === 'settings'
+                        ? 'border-cyan-500/50 text-cyan-400 bg-cyan-500/10'
+                        : 'border-white/15 hover:border-cyan-500/40 text-white/80 hover:text-cyan-400'
+                    }`}
+                    title="Settings & Options"
+                  >
+                    <MoreVertical size={17} />
+                  </button>
+
+                  {/* Close Modal Button if onClose is passed */}
+                  {onClose && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        playClickSound();
+                        onClose();
+                      }}
+                      className="bg-black/60 hover:bg-rose-500/20 backdrop-blur-md border border-white/15 hover:border-rose-500/40 p-2 sm:p-2.5 rounded-xl text-white/80 hover:text-rose-400 transition-all cursor-pointer shadow-lg flex items-center justify-center"
+                      title="Close Player"
+                    >
+                      <X size={17} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Bottom Controls Bar (Inside video, bottom edge, single aligned row across all viewports) */}
+            {showControls && (
+              <div
+                className={`video-controls-container absolute bottom-0 left-0 right-0 z-30 px-3 py-2.5 sm:px-5 sm:py-3.5 md:px-6 md:py-4 bg-gradient-to-t from-black/95 via-black/75 to-transparent transition-opacity duration-300 pointer-events-auto ${
+                  showUI || activeMenu !== 'none'
+                    ? 'opacity-100'
+                    : 'opacity-0 pointer-events-none'
+                }`}
+              >
+                {/* Single Unified Aligned Row for Desktop, Tablet, and Mobile */}
+                <div className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3 lg:gap-3.5 w-full flex-nowrap min-w-0">
+                  {/* Previous Scene Button (Interactive mode only) */}
+                  {isInteractive && (
+                    <button
+                      onClick={handlePreviousScene}
+                      disabled={!canGoPrevious}
+                      className={`p-1 sm:p-1.5 rounded-lg transition-all flex items-center justify-center shrink-0 ${
+                        canGoPrevious
+                          ? 'text-white/85 hover:text-cyan-400 hover:bg-white/10 active:scale-95 cursor-pointer'
+                          : 'text-white/20 opacity-30 cursor-not-allowed pointer-events-none'
+                      }`}
+                      title={canGoPrevious ? 'Previous Scene (P)' : 'No Previous Scene'}
+                      aria-label="Previous Scene"
+                    >
+                      <SkipBack size={18} className="sm:w-[19px] sm:h-[19px]" />
+                    </button>
+                  )}
+
+                  {/* 1. 10-Second Rewind */}
+                  <button
+                    onClick={() => handleSkipSeconds(-10)}
+                    className="text-white/85 hover:text-cyan-400 transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/10 active:scale-95 shrink-0 flex items-center justify-center cursor-pointer"
+                    title="Rewind 10s (Left Arrow)"
+                    aria-label="Rewind 10 seconds"
+                  >
+                    <Rewind10Icon size={18} className="sm:w-[19px] sm:h-[19px]" />
+                  </button>
+
+                  {/* 2. Play / Pause Button */}
+                  <button
+                    onClick={togglePlay}
+                    className="text-white hover:text-cyan-400 transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/10 active:scale-95 shrink-0 flex items-center justify-center cursor-pointer"
+                    title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
+                    aria-label={isPlaying ? 'Pause' : 'Play'}
+                  >
+                    {isPlaying ? (
+                      <Pause size={19} fill="white" className="text-white sm:w-5 sm:h-5" />
+                    ) : (
+                      <Play size={19} fill="white" className="text-white ml-0.5 sm:w-5 sm:h-5" />
+                    )}
+                  </button>
+
+                  {/* 3. 10-Second Forward */}
+                  <button
+                    onClick={() => handleSkipSeconds(10)}
+                    className="text-white/85 hover:text-cyan-400 transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/10 active:scale-95 shrink-0 flex items-center justify-center cursor-pointer"
+                    title="Forward 10s (Right Arrow)"
+                    aria-label="Forward 10 seconds"
+                  >
+                    <Forward10Icon size={18} className="sm:w-[19px] sm:h-[19px]" />
+                  </button>
+
+                  {/* Next Scene / Skip Button (Interactive mode only) */}
+                  {isInteractive && (
+                    <button
+                      onClick={handleNextScene}
+                      disabled={!canGoNext}
+                      className={`p-1 sm:p-1.5 rounded-lg transition-all flex items-center justify-center shrink-0 ${
+                        canGoNext
+                          ? 'text-white/85 hover:text-cyan-400 hover:bg-white/10 active:scale-95 cursor-pointer'
+                          : 'text-white/20 opacity-30 cursor-not-allowed pointer-events-none'
+                      }`}
+                      title={canGoNext ? 'Next Scene / Skip to Decision (N)' : 'No Next Scene (Story Ended)'}
+                      aria-label="Next Scene"
+                    >
+                      <SkipForward size={18} className="sm:w-[19px] sm:h-[19px]" />
+                    </button>
+                  )}
+
+                  {/* 4. Progress Timeline Bar (flex-1 glowing scrubber) */}
+                  <div
+                    ref={progressTrackRef}
+                    onMouseMove={handleTimelineMouseMove}
+                    onMouseLeave={handleTimelineMouseLeave}
+                    className="relative flex-1 min-w-[50px] sm:min-w-[80px] md:min-w-[120px] h-6 sm:h-7 flex items-center cursor-pointer group/progress mx-0.5 sm:mx-1"
+                  >
+                    {/* Base Track */}
+                    <div className="absolute left-0 right-0 h-1 sm:h-1.5 group-hover/progress:h-2 bg-white/20 rounded-full overflow-hidden transition-all pointer-events-none">
+                      {/* Buffer Bar */}
+                      <div
+                        className="h-full bg-white/30 transition-all duration-200"
+                        style={{
+                          width: `${duration > 0 ? (bufferedEnd / duration) * 100 : 0}%`,
+                        }}
+                      />
+                    </div>
+
+                    {/* Played Progress (Glowing Gradient Cyan to Blue) */}
                     <div
-                      className="h-full bg-white/30 transition-all duration-200"
+                      className="absolute left-0 h-1 sm:h-1.5 group-hover/progress:h-2 bg-gradient-to-r from-blue-600 via-cyan-400 to-cyan-300 rounded-full shadow-[0_0_12px_rgba(34,211,238,0.85)] pointer-events-none transition-all"
                       style={{
-                        width: `${
-                          duration > 0 ? (bufferedEnd / duration) * 100 : 0
-                        }%`,
+                        width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
                       }}
                     />
-                  </div>
-                  {/* Current progress range bar */}
-                  <input
-                    type="range"
-                    min="0"
-                    max={duration || 0}
-                    step="0.1"
-                    value={currentTime}
-                    onChange={handleSeek}
-                    className="w-full h-1.5 bg-transparent appearance-none cursor-pointer accent-cyan-400 hover:h-2.5 transition-all video-range z-10"
-                  />
-                </div>
 
-                {/* Main Controls row */}
-                <div className="flex items-center justify-between gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
-                  {/* Left Controls Group */}
-                  <div className="flex items-center gap-2 sm:gap-4">
+                    {/* Scrubber Thumb (Solid Pure White Circle) */}
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 sm:w-3.5 sm:h-3.5 bg-white rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.6)] pointer-events-none transition-transform group-hover/progress:scale-125"
+                      style={{
+                        left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
+                      }}
+                    />
+
+                    {/* Hover Time Tooltip */}
+                    {hoverTime !== null && duration > 0 && (
+                      <div
+                        className="absolute -top-7 -translate-x-1/2 bg-black/90 text-white text-[10px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-md border border-white/20 shadow-xl pointer-events-none whitespace-nowrap z-30"
+                        style={{ left: `${hoverPercent}%` }}
+                      >
+                        {formatTime(hoverTime, duration >= 3600)}
+                      </div>
+                    )}
+
+                    {/* Interactive Range Input */}
+                    <input
+                      type="range"
+                      min="0"
+                      max={duration || 0}
+                      step="0.1"
+                      value={currentTime}
+                      onChange={handleSeek}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                      aria-label="Seek timeline"
+                    />
+                  </div>
+
+                  {/* 5. Timestamp (00:25 / 05:42) */}
+                  <div className="text-white/90 text-[10px] sm:text-xs font-mono font-bold tracking-tight shrink-0 select-none whitespace-nowrap flex items-center">
+                    <span>{formatTime(currentTime, duration >= 3600)}</span>
+                    <span className="text-white/40 mx-0.5 sm:mx-1">/</span>
+                    <span className="text-white/70">{formatTime(duration, duration >= 3600)}</span>
+                  </div>
+
+                  {/* 6. Volume Control (Speaker icon + responsive slider) */}
+                  <div className="flex items-center gap-1 group/volume relative shrink-0">
                     <button
-                      onClick={togglePlay}
-                      className="text-white hover:text-cyan-400 transition-all p-2 rounded-xl hover:bg-white/10 active:scale-95"
-                      title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
+                      onClick={toggleMute}
+                      className="text-white/80 hover:text-cyan-400 transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/10 active:scale-95 flex items-center justify-center cursor-pointer"
+                      title={isMuted ? 'Unmute (M)' : 'Mute (M)'}
+                      aria-label={isMuted ? 'Unmute' : 'Mute'}
                     >
-                      {isPlaying ? (
-                        <Pause size={24} fill="currentColor" />
+                      {isMuted || volume === 0 ? (
+                        <VolumeX size={17} className="text-red-400 sm:w-[18px] sm:h-[18px]" />
+                      ) : volume < 0.5 ? (
+                        <Volume1 size={17} className="text-cyan-400 sm:w-[18px] sm:h-[18px]" />
                       ) : (
-                        <Play size={24} fill="currentColor" />
+                        <Volume2 size={17} className="text-cyan-400 sm:w-[18px] sm:h-[18px]" />
                       )}
                     </button>
 
-                    <button
-                      onClick={() => handleSkipSeconds(-10)}
-                      className="text-white/80 hover:text-cyan-400 transition-all p-1.5 rounded-xl hover:bg-white/10 hidden sm:flex items-center justify-center"
-                      title="Rewind 10s (Left Arrow)"
-                    >
-                      <RotateCcw size={18} />
-                    </button>
-
-                    <button
-                      onClick={() => handleSkipSeconds(10)}
-                      className="text-white/80 hover:text-cyan-400 transition-all p-1.5 rounded-xl hover:bg-white/10 hidden sm:flex items-center justify-center"
-                      title="Forward 10s (Right Arrow)"
-                    >
-                      <RotateCw size={18} />
-                    </button>
-
-                    {/* Enhanced Volume Control */}
-                    <div className="flex items-center gap-2 group/volume relative">
-                      <button
-                        onClick={toggleMute}
-                        className="text-white/90 hover:text-cyan-400 transition-all p-2 rounded-xl hover:bg-white/10 relative"
-                        title={isMuted ? 'Unmute (M)' : 'Mute (M)'}
-                      >
-                        {isMuted || volume === 0 ? (
-                          <VolumeX size={20} className="text-red-400" />
-                        ) : volume < 0.5 ? (
-                          <Volume1 size={20} className="text-cyan-400" />
-                        ) : (
-                          <Volume2 size={20} className="text-cyan-400" />
-                        )}
-                      </button>
-
-                      {/* Volume Slider Container */}
-                      <div className="relative flex items-center w-16 sm:w-24 h-6">
-                        {/* Background & Filled Track */}
-                        <div className="absolute left-0 right-0 h-1.5 bg-white/20 rounded-full overflow-hidden pointer-events-none">
-                          <div
-                            className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-75"
-                            style={{
-                              width: `${(isMuted ? 0 : volume) * 100}%`,
-                            }}
-                          />
-                        </div>
-                        {/* Interactive Range Input */}
-                        <input
-                          type="range"
-                          min="0"
-                          max="1"
-                          step="0.01"
-                          value={isMuted ? 0 : volume}
-                          onChange={handleVolumeChange}
-                          className="w-full h-full opacity-0 cursor-pointer z-10"
-                          title={`Volume: ${Math.round((isMuted ? 0 : volume) * 100)}%`}
+                    {/* Volume Slider Track (visible on sm: screens and up, keeps mobile clean and uncrowded) */}
+                    <div className="hidden sm:flex relative items-center w-12 md:w-16 lg:w-20 h-6">
+                      <div className="absolute left-0 right-0 h-1 bg-white/20 rounded-full overflow-hidden pointer-events-none">
+                        <div
+                          className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full"
+                          style={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
                         />
                       </div>
-
-                      {/* Hover Volume Percentage Badge */}
-                      <span className="hidden group-hover/volume:inline-block text-[10px] font-mono font-bold text-cyan-400 bg-black/80 px-1.5 py-0.5 rounded-md border border-cyan-500/30">
-                        {isMuted ? '0%' : `${Math.round(volume * 100)}%`}
-                      </span>
-                    </div>
-
-                    {/* Time Counter */}
-                    <div className="text-white/90 text-xs font-mono font-bold tracking-wider ml-1 sm:ml-2">
-                      {formatTime(currentTime)}{' '}
-                      <span className="text-white/30">/</span>{' '}
-                      {formatTime(duration)}
+                      <div
+                        className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rounded-full shadow pointer-events-none"
+                        style={{ left: `calc(${isMuted ? 0 : volume * 100}% - 5px)` }}
+                      />
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value={isMuted ? 0 : volume}
+                        onChange={handleVolumeChange}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        title={`Volume: ${Math.round((isMuted ? 0 : volume) * 100)}%`}
+                        aria-label="Volume"
+                      />
                     </div>
                   </div>
 
-                  {/* Right Controls Group */}
-                  <div className="flex items-center gap-1.5 sm:gap-3">
-                    {/* Previous / Skip Episode Buttons if passed */}
-                    {showPrevious && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          playClickSound();
-                          onPrevious?.();
-                        }}
-                        className="text-white/70 hover:text-cyan-400 transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-white/5 border border-white/10"
-                      >
-                        <ChevronLeft size={14} /> Prev
-                      </button>
+                  {/* 7. Subtitles [CC] Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      playClickSound();
+                      setActiveMenu(activeMenu === 'subtitles' ? 'none' : 'subtitles');
+                    }}
+                    className={`p-1 sm:p-1.5 rounded-lg border transition-all active:scale-95 shrink-0 flex items-center justify-center cursor-pointer relative ${
+                      activeMenu === 'subtitles' || subtitlesEnabled
+                        ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)]'
+                        : 'border-transparent text-white/80 hover:text-cyan-400 hover:bg-white/10'
+                    }`}
+                    title="Subtitles / Closed Captions"
+                    aria-label="Subtitles"
+                  >
+                    <SubtitlesBadgeIcon size={17} className="sm:w-[18px] sm:h-[18px]" />
+                    {subtitlesEnabled && (
+                      <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
                     )}
-                    {showSkip && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          playClickSound();
-                          onSkip?.();
-                        }}
-                        className="text-white/70 hover:text-cyan-400 transition-colors flex items-center gap-1 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-white/5 border border-white/10"
-                      >
-                        Next <ChevronRight size={14} />
-                      </button>
-                    )}
+                  </button>
 
-                    {/* Subtitle / CC Menu */}
-                    <div className="relative">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (!subtitles || subtitles.length === 0) return;
-                          playClickSound();
-                          setActiveMenu(
-                            activeMenu === 'subtitles' ? 'none' : 'subtitles'
-                          );
-                        }}
-                        className={`transition-all p-2 rounded-xl flex items-center justify-center ${
-                          !subtitles || subtitles.length === 0
-                            ? 'text-white/30 bg-white/5 border border-white/5 cursor-not-allowed'
-                            : subtitlesEnabled
-                            ? 'text-cyan-400 bg-cyan-400/10 border border-cyan-500/30'
-                            : 'text-white/80 hover:text-cyan-400 bg-white/5 hover:bg-white/10 border border-white/10'
-                        }`}
-                        title={(!subtitles || subtitles.length === 0) ? "No subtitles available" : "Subtitles / Captions"}
-                        disabled={!subtitles || subtitles.length === 0}
-                      >
-                        <Subtitles size={18} />
-                      </button>
+                  {/* 8. Settings Gear Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      playClickSound();
+                      setActiveMenu(activeMenu === 'settings' ? 'none' : 'settings');
+                    }}
+                    className={`p-1 sm:p-1.5 rounded-lg border transition-all active:scale-95 shrink-0 flex items-center justify-center cursor-pointer ${
+                      activeMenu === 'settings'
+                        ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)]'
+                        : 'border-transparent text-white/80 hover:text-cyan-400 hover:bg-white/10'
+                    }`}
+                    title="Settings (Quality, Audio, Speed)"
+                    aria-label="Settings"
+                  >
+                    <Settings size={17} className="sm:w-[18px] sm:h-[18px]" />
+                  </button>
 
-                      {/* Subtitles Popup Menu */}
-                      {subtitles && subtitles.length > 0 && activeMenu === 'subtitles' && (
-                        <div className="absolute bottom-full right-0 mb-4 bg-black/95 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden min-w-[170px] z-50 shadow-2xl animate-scale-up-fade-in origin-bottom-right">
-                          <div className="px-4 py-2.5 border-b border-white/10 text-[10px] font-black uppercase tracking-widest text-cyan-400">
-                            Subtitles
-                          </div>
-                          <div className="flex flex-col py-1">
-                            <button
-                              onClick={(e) => toggleSubtitle(e)}
-                              className={`text-left px-4 py-2.5 text-xs font-bold transition-colors hover:bg-white/10 flex items-center justify-between ${
-                                !subtitlesEnabled
-                                  ? 'text-cyan-400 bg-cyan-400/5'
-                                  : 'text-white/80'
-                              }`}
-                            >
-                              <span>Off</span>
-                              {!subtitlesEnabled && <Check size={14} />}
-                            </button>
-                            {subtitles.map((sub) => (
-                              <button
-                                key={sub.language}
-                                onClick={(e) =>
-                                  toggleSubtitle(e, sub.language)
-                                }
-                                className={`text-left px-4 py-2.5 text-xs font-bold transition-colors hover:bg-white/10 flex items-center justify-between ${
-                                  subtitlesEnabled &&
-                                  activeSubtitleLanguage === sub.language
-                                    ? 'text-cyan-400 bg-cyan-400/5'
-                                    : 'text-white/80'
-                                }`}
-                              >
-                                <span>{sub.label}</span>
-                                {subtitlesEnabled &&
-                                  activeSubtitleLanguage ===
-                                    sub.language && <Check size={14} />}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Quality Menu (Adaptive Levels from Manifest) */}
-                    <div className="relative">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          playClickSound();
-                          setActiveMenu(
-                            activeMenu === 'quality' ? 'none' : 'quality'
-                          );
-                        }}
-                        className={`transition-all px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-black uppercase tracking-wider ${
-                          currentQuality !== -1
-                            ? 'text-cyan-400 bg-cyan-400/10 border border-cyan-500/30'
-                            : 'text-white/80 hover:text-cyan-400 bg-white/5 hover:bg-white/10 border border-white/10'
-                        }`}
-                        title="Video Quality"
-                      >
-                        <Sliders size={15} />
-                        <span className="hidden sm:inline">
-                          {currentQuality === -1
-                            ? 'Auto'
-                            : qualityLevels.find((q) => q.id === currentQuality)
-                                ?.label || 'Auto'}
-                        </span>
-                      </button>
-
-                      {/* Quality Popup Menu */}
-                      {activeMenu === 'quality' && (
-                        <div className="absolute bottom-full right-0 mb-4 bg-black/95 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden min-w-[170px] z-50 shadow-2xl animate-scale-up-fade-in origin-bottom-right">
-                          <div className="px-4 py-2.5 border-b border-white/10 text-[10px] font-black uppercase tracking-widest text-cyan-400 flex items-center justify-between">
-                            <span>Quality</span>
-                            <Sliders size={12} />
-                          </div>
-                          <div className="flex flex-col py-1">
-                            {/* Auto Option */}
-                            <button
-                              onClick={() => handleQualitySelect(-1)}
-                              className={`text-left px-4 py-2.5 text-xs font-bold transition-colors hover:bg-white/10 flex items-center justify-between ${
-                                currentQuality === -1
-                                  ? 'text-cyan-400 bg-cyan-400/5'
-                                  : 'text-white/80'
-                              }`}
-                            >
-                              <span>Auto</span>
-                              {currentQuality === -1 && <Check size={14} />}
-                            </button>
-
-                            {/* Dynamically Detected Rendition Levels */}
-                            {qualityLevels.map((lvl) => (
-                              <button
-                                key={lvl.id}
-                                onClick={() => {
-                                  if (lvl.isLocked) {
-                                    alert("Please upgrade your subscription plan to unlock this video quality.");
-                                    return;
-                                  }
-                                  handleQualitySelect(lvl.id);
-                                }}
-                                className={`text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center justify-between ${
-                                  lvl.isLocked 
-                                    ? 'text-white/40 cursor-not-allowed bg-black/40 hover:bg-white/5' 
-                                    : 'hover:bg-white/10 text-white/80'
-                                } ${
-                                  currentQuality === lvl.id && !lvl.isLocked
-                                    ? 'text-cyan-400 bg-cyan-400/5'
-                                    : ''
-                                }`}
-                                title={lvl.isLocked ? "Premium Quality - Upgrade Plan to Unlock" : ""}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span>{lvl.label}</span>
-                                  {lvl.isLocked && <AlertCircle size={12} className="text-white/40" />}
-                                </div>
-                                {currentQuality === lvl.id && !lvl.isLocked && (
-                                  <Check size={14} />
-                                )}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Speed Menu */}
-                    <div className="relative">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          playClickSound();
-                          setActiveMenu(
-                            activeMenu === 'speed' ? 'none' : 'speed'
-                          );
-                        }}
-                        className={`transition-all px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-black uppercase tracking-wider ${
-                          selectedSpeed !== 1.0
-                            ? 'text-cyan-400 bg-cyan-400/10 border border-cyan-500/30'
-                            : 'text-white/80 hover:text-cyan-400 bg-white/5 hover:bg-white/10 border border-white/10'
-                        }`}
-                        title="Playback Speed"
-                      >
-                        <Gauge size={15} />
-                        <span className="hidden sm:inline">
-                          {selectedSpeed === 1.0 ? '1x' : `${selectedSpeed}x`}
-                        </span>
-                      </button>
-
-                      {/* Speed Popup Menu */}
-                      {activeMenu === 'speed' && (
-                        <div className="absolute bottom-full right-0 mb-4 bg-black/95 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden min-w-[150px] z-50 shadow-2xl animate-scale-up-fade-in origin-bottom-right">
-                          <div className="px-4 py-2.5 border-b border-white/10 text-[10px] font-black uppercase tracking-widest text-cyan-400 flex items-center justify-between">
-                            <span>Speed</span>
-                            <Gauge size={12} />
-                          </div>
-                          <div className="flex flex-col py-1">
-                            {PLAYBACK_SPEEDS.map((speed) => (
-                              <button
-                                key={speed}
-                                onClick={() => handleSpeedSelect(speed)}
-                                className={`text-left px-4 py-2.5 text-xs font-bold transition-colors hover:bg-white/10 flex items-center justify-between ${
-                                  selectedSpeed === speed
-                                    ? 'text-cyan-400 bg-cyan-400/5'
-                                    : 'text-white/80'
-                                }`}
-                              >
-                                <span>
-                                  {speed === 1.0 ? 'Normal (1x)' : `${speed}x`}
-                                </span>
-                                {selectedSpeed === speed && <Check size={14} />}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Picture in Picture */}
+                  {/* 9. Picture-in-Picture / Minimize Button */}
+                  {showMinimize ? (
+                    <button
+                      onClick={handleMinimizeClick}
+                      className="text-white/80 hover:text-cyan-400 transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/10 active:scale-95 shrink-0 flex items-center justify-center cursor-pointer"
+                      title="Minimize Player"
+                      aria-label="Minimize Player"
+                    >
+                      <PipRectanglesIcon size={17} className="sm:w-[18px] sm:h-[18px]" />
+                    </button>
+                  ) : (
                     <button
                       onClick={togglePictureInPicture}
-                      className="text-white/80 hover:text-cyan-400 transition-all p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 hidden sm:flex"
+                      className="text-white/80 hover:text-cyan-400 transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/10 active:scale-95 shrink-0 flex items-center justify-center cursor-pointer"
                       title="Picture in Picture"
+                      aria-label="Picture in Picture"
                     >
-                      <PictureInPicture2 size={18} />
+                      <PipRectanglesIcon size={17} className="sm:w-[18px] sm:h-[18px]" />
                     </button>
+                  )}
 
-                    {/* Minimize / Floating Player */}
-                    {showMinimize && (
-                      <button
-                        onClick={handleMinimizeClick}
-                        className="text-white/80 hover:text-cyan-400 transition-all p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 cursor-pointer"
-                        title="Minimize Player"
-                        aria-label="Minimize Player"
-                      >
-                        <Minimize2 size={18} />
-                      </button>
+                  {/* 10. Fullscreen Button */}
+                  <button
+                    onClick={handleFullscreen}
+                    className="text-white/80 hover:text-cyan-400 transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/10 active:scale-95 shrink-0 flex items-center justify-center cursor-pointer"
+                    title={isFullscreen ? 'Exit Fullscreen (F)' : 'Enter Fullscreen (F)'}
+                    aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+                  >
+                    {isFullscreen ? (
+                      <ExitFullscreenCornersIcon size={17} className="sm:w-[18px] sm:h-[18px]" />
+                    ) : (
+                      <FullscreenCornersIcon size={17} className="sm:w-[18px] sm:h-[18px]" />
                     )}
-
-                    {/* Fullscreen Button */}
-                    <button
-                      onClick={handleFullscreen}
-                      className="text-white/80 hover:text-cyan-400 transition-all p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 cursor-pointer"
-                      title={isFullscreen ? 'Exit Fullscreen (F)' : 'Enter Fullscreen (F)'}
-                      aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-                    >
-                      {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
-                    </button>
-                  </div>
+                  </button>
                 </div>
+              </div>
+            )}
+
+            {/* UNIFIED SETTINGS & POPUP MENUS (Glassmorphic) */}
+            {activeMenu !== 'none' && (
+              <div
+                className="absolute bottom-16 sm:bottom-20 right-4 sm:right-6 bg-[#0c0d14]/95 backdrop-blur-2xl border border-white/15 rounded-2xl overflow-hidden min-w-[260px] max-w-[320px] z-50 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_30px_rgba(34,211,238,0.2)] animate-scale-up-fade-in"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* 1. Main Settings Menu */}
+                {activeMenu === 'settings' && (
+                  <div>
+                    <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Settings size={14} className="text-cyan-400" />
+                        <span className="text-xs font-black uppercase tracking-wider text-white">Settings</span>
+                      </div>
+                      <button
+                        onClick={() => setActiveMenu('none')}
+                        className="text-white/60 hover:text-white p-1 rounded-lg"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                    <div className="p-1 flex flex-col">
+                      <button
+                        onClick={() => setActiveMenu('quality')}
+                        className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-white/10 text-xs font-semibold text-white/90 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Sliders size={16} className="text-cyan-400" />
+                          <span>Quality</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-white/50 text-[11px]">
+                          <span>{currentQualityLabel}</span>
+                          <ChevronRight size={14} />
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={() => setActiveMenu('audio')}
+                        className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-white/10 text-xs font-semibold text-white/90 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Headphones size={16} className="text-cyan-400" />
+                          <span>Audio Language</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-white/50 text-[11px] max-w-[100px] truncate">
+                          <span className="truncate">
+                            {allAudioTracks.find((t) => t.id === activeAudioTrackId)?.label || (allAudioTracks.length > 0 ? allAudioTracks[0].label : 'Default')}
+                          </span>
+                          <ChevronRight size={14} />
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={() => setActiveMenu('subtitles')}
+                        className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-white/10 text-xs font-semibold text-white/90 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Subtitles size={16} className="text-cyan-400" />
+                          <span>Subtitles</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-white/50 text-[11px] max-w-[100px] truncate">
+                          <span className="truncate">
+                            {subtitlesEnabled
+                              ? allSubtitleTracks.find((s) => s.id === activeSubtitleId)?.label || 'On'
+                              : 'Off'}
+                          </span>
+                          <ChevronRight size={14} />
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={() => setActiveMenu('speed')}
+                        className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-white/10 text-xs font-semibold text-white/90 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Gauge size={16} className="text-cyan-400" />
+                          <span>Playback Speed</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-white/50 text-[11px]">
+                          <span>{selectedSpeed === 1.0 ? 'Normal (1x)' : `${selectedSpeed}x`}</span>
+                          <ChevronRight size={14} />
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. Quality Selection Submenu */}
+                {activeMenu === 'quality' && (
+                  <div>
+                    <div className="px-3.5 py-3 border-b border-white/10 flex items-center justify-between">
+                      <button
+                        onClick={() => setActiveMenu('settings')}
+                        className="flex items-center gap-1.5 text-xs font-bold text-white/80 hover:text-cyan-400 cursor-pointer"
+                      >
+                        <ChevronLeft size={16} />
+                        <span>Quality</span>
+                      </button>
+                      <button
+                        onClick={() => setActiveMenu('none')}
+                        className="text-white/60 hover:text-white p-1 rounded-lg"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                    <div className="flex flex-col py-1 max-h-64 overflow-y-auto">
+                      <button
+                        onClick={() => {
+                          handleQualitySelect(-1);
+                          setActiveMenu('none');
+                        }}
+                        className={`text-left px-4 py-2.5 text-xs font-bold transition-colors hover:bg-white/10 flex items-center justify-between cursor-pointer ${
+                          currentQuality === -1
+                            ? 'text-cyan-400 bg-cyan-400/5'
+                            : 'text-white/80'
+                        }`}
+                      >
+                        <span>Auto {autoCurrentLabel ? `(${autoCurrentLabel})` : ''}</span>
+                        {currentQuality === -1 && <Check size={14} />}
+                      </button>
+
+                      {qualityLevels.map((lvl) => (
+                        <button
+                          key={lvl.id}
+                          onClick={() => {
+                            if (lvl.isLocked) {
+                              alert("Please upgrade your subscription plan to unlock this video quality.");
+                              return;
+                            }
+                            handleQualitySelect(lvl.id);
+                            setActiveMenu('none');
+                          }}
+                          className={`text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center justify-between cursor-pointer ${
+                            lvl.isLocked 
+                              ? 'text-white/40 cursor-not-allowed bg-black/40 hover:bg-white/5' 
+                              : 'hover:bg-white/10 text-white/80'
+                          } ${
+                            currentQuality === lvl.id && !lvl.isLocked
+                              ? 'text-cyan-400 bg-cyan-400/5'
+                              : ''
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span>{lvl.label}</span>
+                            {lvl.isLocked && <AlertCircle size={12} className="text-white/40" />}
+                          </div>
+                          {currentQuality === lvl.id && !lvl.isLocked && (
+                            <Check size={14} />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. Audio Tracks Submenu */}
+                {activeMenu === 'audio' && (
+                  <div>
+                    <div className="px-3.5 py-3 border-b border-white/10 flex items-center justify-between">
+                      <button
+                        onClick={() => setActiveMenu('settings')}
+                        className="flex items-center gap-1.5 text-xs font-bold text-white/80 hover:text-cyan-400 cursor-pointer"
+                      >
+                        <ChevronLeft size={16} />
+                        <span>Audio Language</span>
+                      </button>
+                      <button
+                        onClick={() => setActiveMenu('none')}
+                        className="text-white/60 hover:text-white p-1 rounded-lg"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                    <div className="flex flex-col py-1 max-h-64 overflow-y-auto">
+                      {allAudioTracks.length === 0 ? (
+                        <div className="px-4 py-3 text-xs text-white/50">Default audio only</div>
+                      ) : (
+                        allAudioTracks.map((track) => (
+                          <button
+                            key={track.id}
+                            onClick={() => {
+                              handleAudioTrackSelect(track);
+                              setActiveMenu('none');
+                            }}
+                            className={`text-left px-4 py-2.5 text-xs font-bold transition-colors hover:bg-white/10 flex items-center justify-between cursor-pointer ${
+                              activeAudioTrackId === track.id
+                                ? 'text-cyan-400 bg-cyan-400/5'
+                                : 'text-white/80'
+                            }`}
+                          >
+                            <span>{track.label}</span>
+                            {activeAudioTrackId === track.id && (
+                              <Check size={14} />
+                            )}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. Subtitles Submenu */}
+                {activeMenu === 'subtitles' && (
+                  <div>
+                    <div className="px-3.5 py-3 border-b border-white/10 flex items-center justify-between">
+                      <button
+                        onClick={() => setActiveMenu('settings')}
+                        className="flex items-center gap-1.5 text-xs font-bold text-white/80 hover:text-cyan-400 cursor-pointer"
+                      >
+                        <ChevronLeft size={16} />
+                        <span>Subtitles</span>
+                      </button>
+                      <button
+                        onClick={() => setActiveMenu('none')}
+                        className="text-white/60 hover:text-white p-1 rounded-lg"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                    <div className="flex flex-col py-1 max-h-64 overflow-y-auto">
+                      <button
+                        onClick={() => handleSubtitleSelect(null)}
+                        className={`text-left px-4 py-2.5 text-xs font-bold transition-colors hover:bg-white/10 flex items-center justify-between cursor-pointer ${
+                          !subtitlesEnabled
+                            ? 'text-cyan-400 bg-cyan-400/5'
+                            : 'text-white/80'
+                        }`}
+                      >
+                        <span>Off</span>
+                        {!subtitlesEnabled && <Check size={14} />}
+                      </button>
+                      {allSubtitleTracks.map((sub) => (
+                        <button
+                          key={sub.id}
+                          onClick={() => handleSubtitleSelect(sub)}
+                          className={`text-left px-4 py-2.5 text-xs font-bold transition-colors hover:bg-white/10 flex items-center justify-between cursor-pointer ${
+                            subtitlesEnabled && activeSubtitleId === sub.id
+                              ? 'text-cyan-400 bg-cyan-400/5'
+                              : 'text-white/80'
+                          }`}
+                        >
+                          <span>{sub.label}</span>
+                          {subtitlesEnabled && activeSubtitleId === sub.id && (
+                            <Check size={14} />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. Playback Speed Submenu */}
+                {activeMenu === 'speed' && (
+                  <div>
+                    <div className="px-3.5 py-3 border-b border-white/10 flex items-center justify-between">
+                      <button
+                        onClick={() => setActiveMenu('settings')}
+                        className="flex items-center gap-1.5 text-xs font-bold text-white/80 hover:text-cyan-400 cursor-pointer"
+                      >
+                        <ChevronLeft size={16} />
+                        <span>Playback Speed</span>
+                      </button>
+                      <button
+                        onClick={() => setActiveMenu('none')}
+                        className="text-white/60 hover:text-white p-1 rounded-lg"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                    <div className="flex flex-col py-1">
+                      {PLAYBACK_SPEEDS.map((speed) => (
+                        <button
+                          key={speed}
+                          onClick={() => {
+                            handleSpeedSelect(speed);
+                            setActiveMenu('none');
+                          }}
+                          className={`text-left px-4 py-2.5 text-xs font-bold transition-colors hover:bg-white/10 flex items-center justify-between cursor-pointer ${
+                            selectedSpeed === speed
+                              ? 'text-cyan-400 bg-cyan-400/5'
+                              : 'text-white/80'
+                          }`}
+                        >
+                          <span>
+                            {speed === 1.0 ? 'Normal (1x)' : `${speed}x`}
+                          </span>
+                          {selectedSpeed === speed && <Check size={14} />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </>
         )}
 
-        <style jsx>{`
+        <style jsx global>{`
+          :fullscreen,
+          :-webkit-full-screen,
+          :-moz-full-screen,
+          :-ms-fullscreen {
+            width: 100vw !important;
+            max-width: 100vw !important;
+            height: 100dvh !important;
+            max-height: 100dvh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            aspect-ratio: auto !important;
+            background: #000 !important;
+            overflow: hidden !important;
+          }
+
+          :fullscreen video,
+          :-webkit-full-screen video,
+          :-moz-full-screen video,
+          :-ms-fullscreen video {
+            width: 100vw !important;
+            max-width: 100vw !important;
+            height: 100dvh !important;
+            max-height: 100dvh !important;
+            object-fit: cover !important;
+            border-radius: 0 !important;
+            border: none !important;
+            aspect-ratio: auto !important;
+          }
+
+          :fullscreen [class*="aspect-video"],
+          :-webkit-full-screen [class*="aspect-video"],
+          :-moz-full-screen [class*="aspect-video"] {
+            aspect-ratio: auto !important;
+            width: 100vw !important;
+            height: 100dvh !important;
+            border-radius: 0 !important;
+            border: none !important;
+          }
+
           .video-range::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;

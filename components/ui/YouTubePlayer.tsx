@@ -27,6 +27,8 @@ interface YouTubePlayerProps {
   onSkip?: () => void;
   showPrevious?: boolean;
   onPrevious?: () => void;
+  showNext?: boolean;
+  onNext?: () => void;
   onFullscreenRequest?: () => void;
   showMinimize?: boolean;
   onMinimize?: () => void;

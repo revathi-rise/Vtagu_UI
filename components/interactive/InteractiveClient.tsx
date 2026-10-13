@@ -243,6 +243,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                                     ref={managerRef}
                                     currentScene={currentScene}
                                     choices={choices}
+                                    loadingChoices={loadingChoices}
                                     onChoiceSelect={handleSceneChange}
                                     onRestart={handleRestart}
                                     onPrevious={handlePrevious}

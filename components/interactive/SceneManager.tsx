@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { Target, ChevronRight, RotateCcw, CheckCircle2, Lock, Sparkles } from 'lucide-react';
+import { Target, ChevronRight, RotateCcw, CheckCircle2, Lock, Sparkles, Compass, Film } from 'lucide-react';
 import { Scene, Choice } from '@/lib/vtagu.api';
 import WatchTrackingVideoPlayer from '@/components/ui/WatchTrackingVideoPlayer';
 import { VideoPlayerHandle } from '@/components/ui/VideoPlayer';
@@ -9,6 +9,7 @@ import {
   requestElementFullscreen,
   exitDocumentFullscreen,
   isElementFullscreen,
+  addFullscreenChangeListener,
 } from '@/lib/fullscreen-utils';
 
 interface SceneManagerProps {
@@ -23,6 +24,7 @@ interface SceneManagerProps {
     isAuthorized?: boolean;
     scenes?: Scene[];
     onShowPaywall?: () => void;
+    loadingChoices?: boolean;
 }
 
 export interface SceneManagerHandle {
@@ -86,7 +88,7 @@ const parseTimeToSeconds = (timeVal: string | number | undefined | null): number
 };
 
 const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
-    ({ currentScene, choices, onChoiceSelect, onRestart, onPrevious, hasPrevious, movieId, movieTitle, isAuthorized = false, scenes = [], onShowPaywall }, ref) => {
+    ({ currentScene, choices, onChoiceSelect, onRestart, onPrevious, hasPrevious = false, movieId, movieTitle, isAuthorized = false, scenes = [], onShowPaywall, loadingChoices = false }, ref) => {
     const playerRef = useRef<VideoPlayerHandle>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     
@@ -125,6 +127,17 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
         targetSceneId: number | null;
     } | null>(null);
 
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    useEffect(() => {
+        const updateFs = () => {
+            setIsFullscreen(isElementFullscreen(containerRef.current));
+        };
+        updateFs();
+        const cleanup = addFullscreenChangeListener(updateFs);
+        return cleanup;
+    }, []);
+
     if (currentScene?.scene_id !== prevSceneId) {
         setPrevSceneId(currentScene?.scene_id);
         setShowChoices(false);
@@ -155,6 +168,20 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                 setShowChoices(true);
             }
         }
+    };
+
+    const isEndingScene = Boolean(
+        currentScene?.is_ending || 
+        (!loadingChoices && choices.length === 0)
+    );
+    const hasNextVideo = !isEndingScene && choices.length > 0;
+
+    const handleNextScene = () => {
+        if (!hasNextVideo) return;
+        if (playerRef.current?.videoElement) {
+            playerRef.current.videoElement.currentTime = Math.max(0, (playerRef.current.videoElement.duration || 1) - 0.5);
+        }
+        setShowChoices(true);
     };
 
     const hasShowOnTime = currentScene?.show_choices_on ? parseTimeToSeconds(currentScene.show_choices_on) > 0 : false;
@@ -205,7 +232,14 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
             )}
 
             {/* Interactive Player Area */}
-            <div ref={containerRef} className="relative aspect-video rounded-[2.5rem] bg-black border border-white/5 overflow-hidden shadow-2xl group ring-1 ring-white/10">
+            <div
+                ref={containerRef}
+                className={`relative overflow-hidden group transition-all duration-200 ${
+                    isFullscreen
+                        ? 'w-screen h-screen max-w-none max-h-none rounded-none border-0 ring-0 shadow-none m-0 p-0 aspect-auto bg-black'
+                        : 'aspect-video rounded-[2.5rem] bg-black border border-white/5 shadow-2xl ring-1 ring-white/10'
+                }`}
+            >
                 {currentScene ? (
                     <>
                         <WatchTrackingVideoPlayer
@@ -213,6 +247,8 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                             src={videoUrl}
                             contentId={movieId ? movieId.toString() : (currentScene.scene_id?.toString() || currentScene.title || 'scene')}
                             contentType="interactive_movie"
+                            title={currentScene.title || "Interactive Adventure"}
+                            metadata="Interactive Story • Choices Ahead"
                             autoPlay={true}
                             loop={false}
                             showControls={!showChoices}
@@ -221,65 +257,126 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                 setShowChoices(true);
                             }}
                             className="w-full h-full"
-                            showSkip={true}
-                            onSkip={() => {
-                                if (playerRef.current?.videoElement) {
-                                    playerRef.current.videoElement.currentTime = playerRef.current.videoElement.duration - 1;
-                                }
-                            }}
-                            showPrevious={hasPrevious}
-                            onPrevious={onPrevious}
+                            showSkip={hasNextVideo}
+                            onSkip={hasNextVideo ? handleNextScene : undefined}
+                            showNext={hasNextVideo}
+                            onNext={hasNextVideo ? handleNextScene : undefined}
+                            showPrevious={Boolean(hasPrevious)}
+                            onPrevious={hasPrevious ? onPrevious : undefined}
                             onFullscreenRequest={handleFullscreenRequest}
                             subtitles={currentScene.subtitles}
+                            audioTracks={(currentScene as any).audioTracks || (currentScene as any).audio_tracks}
                         />
 
-                        {/* Choice Overlay */}
-                        <div className={`absolute inset-0 z-20 flex flex-col items-center justify-center transition-opacity duration-500 ${showChoices ? 'opacity-100' : 'opacity-0 pointer-events-none'} ${hasShowOnTime && !currentScene.is_ending ? '' : 'bg-black/40 backdrop-blur-md'}`}>
+                        {/* Choice & Scene End Overlay */}
+                        <div className={`absolute inset-0 z-20 flex flex-col items-center justify-center transition-opacity duration-500 ${showChoices ? 'opacity-100' : 'opacity-0 pointer-events-none'} ${hasShowOnTime && !isEndingScene ? '' : 'bg-black/60 backdrop-blur-md'}`}>
                             {showChoices && (
-                                currentScene.is_ending ? (
-                                    <div className="text-center space-y-6 p-8 animate-in fade-in zoom-in duration-500">
-                                        <div className="w-20 h-20 bg-cyan-400 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-cyan-400/40">
-                                            <CheckCircle2 size={40} className="text-black" />
+                                loadingChoices ? (
+                                    <div className="flex flex-col items-center justify-center gap-3 p-8 animate-in fade-in duration-300">
+                                        <div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(34,211,238,0.5)]" />
+                                        <span className="text-xs font-black uppercase tracking-widest text-cyan-300/80">Loading Narrative Choices...</span>
+                                    </div>
+                                ) : isEndingScene ? (
+                                    <div className="relative z-30 max-w-2xl w-full mx-4 p-8 sm:p-10 rounded-[2.5rem] bg-[#0c0d14]/90 backdrop-blur-2xl border border-white/15 shadow-[0_25px_60px_rgba(0,0,0,0.9),0_0_40px_rgba(34,211,238,0.15)] text-center space-y-6 animate-in fade-in zoom-in-95 duration-500 overflow-hidden">
+                                        {/* Ambient radial glow inside card */}
+                                        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-b from-cyan-500/20 via-blue-600/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+                                        {/* Top Badge */}
+                                        <div className="relative z-10 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 border border-cyan-400/40 text-cyan-300 text-xs font-black uppercase tracking-widest shadow-lg shadow-cyan-500/10">
+                                            <Sparkles size={14} className="text-cyan-400 animate-pulse" />
+                                            <span>Story Path Concluded</span>
                                         </div>
-                                        <h3 className="text-3xl font-bold">{currentScene.end_text || "The End"}</h3>
-                                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                                            <button 
+
+                                        {/* Cinematic Title & Narrative */}
+                                        <div className="relative z-10 space-y-2">
+                                            <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight uppercase drop-shadow-lg">
+                                                {currentScene.end_text || currentScene.title || "The End"}
+                                            </h3>
+                                            <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-lg mx-auto">
+                                                {currentScene.description || "You have reached the culmination of this story path. Step back to your previous decision to explore an alternative destiny, or restart the adventure from the beginning."}
+                                            </p>
+                                        </div>
+
+                                        {/* Action Buttons */}
+                                        <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
+                                            {/* Rewind to Previous Decision */}
+                                            <button
+                                                onClick={() => {
+                                                    if (!hasPrevious || !onPrevious) return;
+                                                    playClickSound();
+                                                    setShowChoices(false);
+                                                    onPrevious();
+                                                }}
+                                                disabled={!hasPrevious}
+                                                className={`flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 w-full sm:w-auto shadow-xl active:scale-95 ${
+                                                    hasPrevious
+                                                        ? 'bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black shadow-cyan-500/25 hover:shadow-cyan-500/40 cursor-pointer'
+                                                        : 'bg-white/5 border border-white/10 text-white/30 opacity-40 cursor-not-allowed select-none pointer-events-none'
+                                                }`}
+                                                title={hasPrevious ? "Go back to your previous choice" : "No previous choice available"}
+                                            >
+                                                <RotateCcw size={16} className={hasPrevious ? "group-hover:-rotate-45 transition-transform" : ""} />
+                                                <span>Rewind Decision</span>
+                                            </button>
+
+                                            {/* Restart Story */}
+                                            <button
                                                 onClick={() => {
                                                     playClickSound();
                                                     setShowChoices(false);
                                                     onRestart();
-                                                }} 
-                                                className="flex items-center gap-2 px-8 py-3 bg-white text-black rounded-xl font-bold hover:bg-cyan-400 transition-colors w-full sm:w-auto justify-center"
+                                                }}
+                                                className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 w-full sm:w-auto backdrop-blur-md active:scale-95 cursor-pointer shadow-lg"
                                             >
-                                                <RotateCcw size={18} /> Restart Story
+                                                <RotateCcw size={16} />
+                                                <span>Restart Story</span>
                                             </button>
-                                            <a 
-                                                href="/"
+
+                                            {/* Explore Other Movies / Home */}
+                                            <a
+                                                href="/interactive"
                                                 onClick={() => playClickSound()}
-                                                className="flex items-center gap-2 px-8 py-3 bg-white/10 text-white border border-white/20 rounded-xl font-bold hover:bg-white/20 transition-colors w-full sm:w-auto justify-center"
+                                                className="flex items-center justify-center gap-2 px-5 py-3.5 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white border border-white/10 hover:border-white/20 rounded-2xl font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 w-full sm:w-auto active:scale-95"
                                             >
-                                                Return Home
+                                                <Compass size={16} className="text-cyan-400" />
+                                                <span>Explore Library</span>
                                             </a>
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="absolute inset-0 pointer-events-none animate-in fade-in duration-700">
-                                        {/* Small Previous and Restart Buttons */}
-                                        <div className="absolute top-6 right-6 flex items-center gap-3 z-30">
-                                            {hasPrevious && onPrevious && (
-                                                <button 
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        playClickSound();
-                                                        setShowChoices(false);
-                                                        onPrevious();
-                                                    }}
-                                                    className="pointer-events-auto flex items-center gap-2 px-4 py-2 bg-black/60 hover:bg-[var(--btn-color)] backdrop-blur-md border border-white/20 hover:border-transparent rounded-full text-white/80 hover:text-black transition-all text-[11px] font-bold uppercase tracking-widest group"
-                                                >
-                                                    <RotateCcw size={14} className="group-hover:-rotate-45 transition-transform duration-500" /> 
-                                                    Previous
-                                                </button>
-                                            )}
+                                        {/* Floating "Make Your Decision" Prompt Pill */}
+                                        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+                                            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-black/75 backdrop-blur-xl border border-cyan-400/30 text-white shadow-[0_10px_25px_rgba(0,0,0,0.6),0_0_15px_rgba(34,211,238,0.2)]">
+                                                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,1)] animate-ping" />
+                                                <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-cyan-300">
+                                                    Make Your Decision
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Top Previous and Restart Buttons */}
+                                        <div className="absolute top-6 right-6 flex items-center gap-2.5 z-30 pointer-events-auto">
+                                            <button 
+                                                onClick={(e) => {
+                                                    if (!hasPrevious || !onPrevious) return;
+                                                    e.stopPropagation();
+                                                    playClickSound();
+                                                    setShowChoices(false);
+                                                    onPrevious();
+                                                }}
+                                                disabled={!hasPrevious}
+                                                className={`flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 backdrop-blur-md rounded-full text-[11px] font-bold uppercase tracking-wider transition-all border ${
+                                                    hasPrevious
+                                                        ? 'bg-black/70 hover:bg-cyan-500 hover:text-black text-white/90 border-white/25 hover:border-transparent cursor-pointer shadow-lg active:scale-95 group'
+                                                        : 'bg-black/40 text-white/30 border-white/10 opacity-35 cursor-not-allowed pointer-events-none'
+                                                }`}
+                                                title={hasPrevious ? "Previous Scene (P)" : "No Previous Scene"}
+                                                aria-label="Previous Scene"
+                                            >
+                                                <RotateCcw size={13} className={hasPrevious ? "group-hover:-rotate-45 transition-transform duration-300" : ""} /> 
+                                                <span>Previous</span>
+                                            </button>
                                             <button 
                                                 onClick={(e) => {
                                                     e.stopPropagation();
@@ -287,10 +384,12 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                     setShowChoices(false);
                                                     onRestart();
                                                 }}
-                                                className="pointer-events-auto flex items-center gap-2 px-4 py-2 bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/20 rounded-full text-white/80 hover:text-white transition-all text-[11px] font-bold uppercase tracking-widest group"
+                                                className="flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-black/70 hover:bg-white text-white/90 hover:text-black backdrop-blur-md border border-white/25 hover:border-transparent rounded-full transition-all text-[11px] font-bold uppercase tracking-wider shadow-lg active:scale-95 cursor-pointer group"
+                                                title="Restart Story from Beginning"
+                                                aria-label="Restart Story"
                                             >
-                                                <RotateCcw size={14} className="group-hover:-rotate-180 transition-transform duration-500" /> 
-                                                Restart
+                                                <RotateCcw size={13} className="group-hover:-rotate-180 transition-transform duration-500" /> 
+                                                <span>Restart</span>
                                             </button>
                                         </div>
                                         

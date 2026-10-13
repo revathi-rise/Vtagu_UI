@@ -24,10 +24,20 @@ export function isElementFullscreen(
 
   const fsElement = getFullscreenElement();
   if (fsElement) {
-    if (element && (fsElement === element || element.contains(fsElement))) {
+    if (
+      element &&
+      (fsElement === element ||
+        element.contains(fsElement) ||
+        fsElement.contains(element))
+    ) {
       return true;
     }
-    if (videoElement && (fsElement === videoElement || videoElement.contains(fsElement))) {
+    if (
+      videoElement &&
+      (fsElement === videoElement ||
+        videoElement.contains(fsElement) ||
+        fsElement.contains(videoElement))
+    ) {
       return true;
     }
   }

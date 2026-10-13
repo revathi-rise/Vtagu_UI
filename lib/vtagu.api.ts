@@ -349,6 +349,7 @@ export interface Scene {
   movie_id: number;
   title: string;
   scene_text?: string;
+  description?: string;
   scene_url: string;
   poster_url?: string;
   show_choices_on?: string | number | null;

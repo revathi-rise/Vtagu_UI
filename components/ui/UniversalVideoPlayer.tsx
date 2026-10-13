@@ -137,6 +137,7 @@ const UniversalVideoPlayer = forwardRef<UniversalVideoPlayerHandle, UniversalVid
       <VideoPlayer
         ref={nativePlayerRef}
         src={src}
+        contentType={contentType}
         onTimeUpdate={handleTimeUpdate}
         onEnded={onEnded}
         maxQualityHeight={rest.maxQualityHeight}

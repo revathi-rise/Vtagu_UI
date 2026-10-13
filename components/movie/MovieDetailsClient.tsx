@@ -135,6 +135,8 @@ export default function MovieDetailsClient({ movie: initialMovie }: MovieDetails
                 contentType="movie"
                 internal={true}
                 onLockedClick={() => setShowPaywallModal(true)}
+                subtitles={(movie as any).subtitles || (movie as any).media?.subtitles}
+                audioTracks={(movie as any).audioTracks || (movie as any).audio_tracks}
               />
 
               <button className="flex items-center justify-center w-16 h-16 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-white/20 transition-all group">
