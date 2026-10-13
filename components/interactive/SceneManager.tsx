@@ -5,6 +5,11 @@ import { Target, ChevronRight, RotateCcw, CheckCircle2, Lock, Sparkles } from 'l
 import { Scene, Choice } from '@/lib/vtagu.api';
 import WatchTrackingVideoPlayer from '@/components/ui/WatchTrackingVideoPlayer';
 import { VideoPlayerHandle } from '@/components/ui/VideoPlayer';
+import {
+  requestElementFullscreen,
+  exitDocumentFullscreen,
+  isElementFullscreen,
+} from '@/lib/fullscreen-utils';
 
 interface SceneManagerProps {
     currentScene: Scene | null;
@@ -126,28 +131,16 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
     }
     
     useImperativeHandle(ref, () => ({
-        requestFullScreen: () => {
-            if (containerRef.current) {
-                if (containerRef.current.requestFullscreen) {
-                    containerRef.current.requestFullscreen();
-                } else if ((containerRef.current as any).webkitRequestFullscreen) {
-                    (containerRef.current as any).webkitRequestFullscreen();
-                }
-            }
+        requestFullScreen: async () => {
+            await requestElementFullscreen(containerRef.current);
         }
     }));
 
-    const handleFullscreenRequest = () => {
-        const doc = document as any;
-        if (doc.fullscreenElement || doc.webkitFullscreenElement) {
-            if (doc.exitFullscreen) doc.exitFullscreen();
-            else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
-        } else if (containerRef.current) {
-            if (containerRef.current.requestFullscreen) {
-                containerRef.current.requestFullscreen();
-            } else if ((containerRef.current as any).webkitRequestFullscreen) {
-                (containerRef.current as any).webkitRequestFullscreen();
-            }
+    const handleFullscreenRequest = async () => {
+        if (isElementFullscreen(containerRef.current)) {
+            await exitDocumentFullscreen();
+        } else {
+            await requestElementFullscreen(containerRef.current);
         }
     };
 

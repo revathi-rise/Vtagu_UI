@@ -12,6 +12,7 @@ import {
   Play,
   Pause,
   Maximize,
+  Minimize,
   Minimize2,
   Volume1,
   Volume2,
@@ -31,6 +32,12 @@ import {
 } from 'lucide-react';
 import Hls from 'hls.js';
 import { getFallbackVideoUrl } from '@/lib/video-utils';
+import {
+  requestElementFullscreen,
+  exitDocumentFullscreen,
+  isElementFullscreen,
+  addFullscreenChangeListener,
+} from '@/lib/fullscreen-utils';
 
 export interface HlsQualityLevel {
   id: number; // -1 for Auto, or level index in hls.js
@@ -119,6 +126,10 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     const [isBuffering, setIsBuffering] = useState(false);
     const [showUI, setShowUI] = useState(true);
 
+    // Fullscreen State
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const fullscreenTransitionRef = useRef(false);
+
     // Video Playback State
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(muted);
@@ -126,6 +137,21 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [bufferedEnd, setBufferedEnd] = useState(0);
+
+    // Synchronize fullscreen state from document / video events
+    const updateFullscreenState = useCallback(() => {
+      const isFs = isElementFullscreen(containerRef.current, videoRef.current);
+      setIsFullscreen(isFs);
+    }, []);
+
+    useEffect(() => {
+      const cleanup = addFullscreenChangeListener(
+        updateFullscreenState,
+        videoRef.current
+      );
+      updateFullscreenState();
+      return cleanup;
+    }, [updateFullscreenState]);
 
     // Adaptive Quality & Speed State
     const [qualityLevels, setQualityLevels] = useState<HlsQualityLevel[]>([]);
@@ -541,23 +567,67 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       }
     };
 
-    const handleFullscreen = (e: React.MouseEvent) => {
-      e.stopPropagation();
+    const handleFullscreen = async (
+      e?: React.MouseEvent | React.KeyboardEvent
+    ) => {
+      if (e) {
+        e.stopPropagation();
+      }
       playClickSound();
+
       if (onFullscreenRequest) {
         onFullscreenRequest();
-      } else {
-        const doc = document as any;
-        if (doc.fullscreenElement || doc.webkitFullscreenElement) {
-          if (doc.exitFullscreen) doc.exitFullscreen();
-          else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
-        } else if (containerRef.current?.requestFullscreen) {
-          containerRef.current.requestFullscreen();
-        } else if ((containerRef.current as any).webkitRequestFullscreen) {
-          (containerRef.current as any).webkitRequestFullscreen();
-        } else if ((videoRef.current as any)?.webkitEnterFullscreen) {
-          (videoRef.current as any).webkitEnterFullscreen();
+        return;
+      }
+
+      if (fullscreenTransitionRef.current) return;
+      fullscreenTransitionRef.current = true;
+
+      try {
+        const isCurrentlyFs = isElementFullscreen(
+          containerRef.current,
+          videoRef.current
+        );
+        if (isCurrentlyFs) {
+          await exitDocumentFullscreen(videoRef.current);
+        } else {
+          await requestElementFullscreen(
+            containerRef.current,
+            videoRef.current
+          );
         }
+      } catch (err) {
+        console.warn('Fullscreen toggle failed:', err);
+      } finally {
+        fullscreenTransitionRef.current = false;
+        updateFullscreenState();
+      }
+    };
+
+    const handleMinimizeClick = async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      playClickSound();
+
+      const isCurrentlyFs = isElementFullscreen(
+        containerRef.current,
+        videoRef.current
+      );
+      if (isCurrentlyFs) {
+        if (!fullscreenTransitionRef.current) {
+          fullscreenTransitionRef.current = true;
+          try {
+            await exitDocumentFullscreen(videoRef.current);
+          } catch (err) {
+            console.warn('Exit fullscreen on minimize failed:', err);
+          } finally {
+            fullscreenTransitionRef.current = false;
+            updateFullscreenState();
+          }
+        }
+      }
+
+      if (onMinimize) {
+        onMinimize();
       }
     };
 
@@ -732,13 +802,23 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       play: () => videoRef.current?.play(),
       pause: () => videoRef.current?.pause(),
       togglePlay: () => togglePlay(),
-      requestFullScreen: () => {
-        if (containerRef.current) {
-          if (containerRef.current.requestFullscreen) {
-            containerRef.current.requestFullscreen();
-          } else if ((containerRef.current as any).webkitRequestFullscreen) {
-            (containerRef.current as any).webkitRequestFullscreen();
-          }
+      requestFullScreen: async () => {
+        if (onFullscreenRequest) {
+          onFullscreenRequest();
+          return;
+        }
+        if (fullscreenTransitionRef.current) return;
+        fullscreenTransitionRef.current = true;
+        try {
+          await requestElementFullscreen(
+            containerRef.current,
+            videoRef.current
+          );
+        } catch (err) {
+          console.warn('Imperative request fullscreen failed:', err);
+        } finally {
+          fullscreenTransitionRef.current = false;
+          updateFullscreenState();
         }
       },
       videoElement: videoRef.current,
@@ -1231,18 +1311,10 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                     {/* Minimize / Floating Player */}
                     {showMinimize && (
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          playClickSound();
-                          const doc = document as any;
-                          if (doc.fullscreenElement || doc.webkitFullscreenElement) {
-                            if (doc.exitFullscreen) doc.exitFullscreen();
-                            else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
-                          }
-                          if (onMinimize) onMinimize();
-                        }}
-                        className="text-white/80 hover:text-cyan-400 transition-all p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10"
+                        onClick={handleMinimizeClick}
+                        className="text-white/80 hover:text-cyan-400 transition-all p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 cursor-pointer"
                         title="Minimize Player"
+                        aria-label="Minimize Player"
                       >
                         <Minimize2 size={18} />
                       </button>
@@ -1251,10 +1323,11 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                     {/* Fullscreen Button */}
                     <button
                       onClick={handleFullscreen}
-                      className="text-white/80 hover:text-cyan-400 transition-all p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10"
-                      title="Fullscreen (F)"
+                      className="text-white/80 hover:text-cyan-400 transition-all p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 cursor-pointer"
+                      title={isFullscreen ? 'Exit Fullscreen (F)' : 'Enter Fullscreen (F)'}
+                      aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
                     >
-                      <Maximize size={18} />
+                      {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
                     </button>
                   </div>
                 </div>

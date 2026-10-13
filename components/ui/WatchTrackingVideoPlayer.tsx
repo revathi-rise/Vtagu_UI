@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useImperativeHandle } from 'react';
 import UniversalVideoPlayer, { UniversalVideoPlayerHandle } from './UniversalVideoPlayer';
 import { useWatchProgress } from '@/hooks/useWatchProgress';
 import { getUserId } from '@/lib/api-client';
@@ -178,16 +178,16 @@ const WatchTrackingVideoPlayer = React.forwardRef<
       onEnded?.();
     };
 
-    // Merge refs - support both internal ref and external ref
-    useEffect(() => {
-      if (ref) {
-        if (typeof ref === 'function') {
-          ref(videoPlayerRef.current);
-        } else {
-          ref.current = videoPlayerRef.current;
-        }
-      }
-    }, [ref]);
+    // Forward refs immediately and reliably
+    useImperativeHandle(ref, () => ({
+      play: () => videoPlayerRef.current?.play?.(),
+      pause: () => videoPlayerRef.current?.pause?.(),
+      togglePlay: () => videoPlayerRef.current?.togglePlay?.(),
+      requestFullScreen: () => videoPlayerRef.current?.requestFullScreen?.(),
+      get videoElement() {
+        return videoPlayerRef.current?.videoElement ?? null;
+      },
+    }), []);
 
     return (
       <div className="relative w-full h-full min-h-[inherit]">

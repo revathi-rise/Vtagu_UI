@@ -1,7 +1,13 @@
 'use client';
 
-import React, { useRef, useState, useImperativeHandle, forwardRef, useEffect } from 'react';
-import { AlertCircle, Maximize, Minimize2, Play, Pause, Volume2, VolumeX, SkipForward, SkipBack, ChevronRight, ChevronLeft } from 'lucide-react';
+import React, { useRef, useState, useImperativeHandle, forwardRef, useEffect, useCallback } from 'react';
+import { AlertCircle, Maximize, Minimize, Minimize2, Play, Pause, Volume2, VolumeX, SkipForward, SkipBack, ChevronRight, ChevronLeft } from 'lucide-react';
+import {
+  requestElementFullscreen,
+  exitDocumentFullscreen,
+  isElementFullscreen,
+  addFullscreenChangeListener,
+} from '@/lib/fullscreen-utils';
 
 export interface YouTubePlayerHandle {
   play: () => void;
@@ -54,6 +60,21 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [showUI, setShowUI] = useState(true);
+
+    // Fullscreen State
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const fullscreenTransitionRef = useRef(false);
+
+    const updateFullscreenState = useCallback(() => {
+      const isFs = isElementFullscreen(containerRef.current);
+      setIsFullscreen(isFs);
+    }, []);
+
+    useEffect(() => {
+      const cleanup = addFullscreenChangeListener(updateFullscreenState);
+      updateFullscreenState();
+      return cleanup;
+    }, [updateFullscreenState]);
 
     const [indicator, setIndicator] = useState<{ type: 'play' | 'pause' | 'forward' | 'rewind'; id: number } | null>(null);
     const indicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -282,11 +303,20 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
           playerRef.current.pauseVideo();
         }
       },
-      requestFullScreen: () => {
-        if (containerRef.current?.requestFullscreen) {
-          containerRef.current.requestFullscreen();
-        } else if ((containerRef.current as any).webkitRequestFullscreen) {
-          (containerRef.current as any).webkitRequestFullscreen();
+      requestFullScreen: async () => {
+        if (onFullscreenRequest) {
+          onFullscreenRequest();
+          return;
+        }
+        if (fullscreenTransitionRef.current) return;
+        fullscreenTransitionRef.current = true;
+        try {
+          await requestElementFullscreen(containerRef.current);
+        } catch (err) {
+          console.warn('YouTube imperative request fullscreen failed:', err);
+        } finally {
+          fullscreenTransitionRef.current = false;
+          updateFullscreenState();
         }
       },
     }));
@@ -433,14 +463,7 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
         case 'f':
         case 'F':
           e.preventDefault();
-          playClickSound();
-          if (onFullscreenRequest) {
-            onFullscreenRequest();
-          } else if (containerRef.current?.requestFullscreen) {
-            containerRef.current.requestFullscreen();
-          } else if ((containerRef.current as any).webkitRequestFullscreen) {
-            (containerRef.current as any).webkitRequestFullscreen();
-          }
+          handleFullscreen(e);
           break;
         default:
           break;
@@ -467,32 +490,52 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
       setCurrentTime(time);
     };
 
-    const handleFullscreen = (e: React.MouseEvent) => {
-      e.stopPropagation();
+    const handleFullscreen = async (e?: React.MouseEvent | React.KeyboardEvent) => {
+      if (e) {
+        e.stopPropagation();
+      }
       playClickSound();
       if (onFullscreenRequest) {
         onFullscreenRequest();
-      } else {
-        const doc = document as any;
-        if (doc.fullscreenElement || doc.webkitFullscreenElement) {
-          if (doc.exitFullscreen) doc.exitFullscreen();
-          else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
-        } else if (containerRef.current?.requestFullscreen) {
-          containerRef.current.requestFullscreen();
-        } else if ((containerRef.current as any).webkitRequestFullscreen) {
-          (containerRef.current as any).webkitRequestFullscreen();
+        return;
+      }
+      if (fullscreenTransitionRef.current) return;
+      fullscreenTransitionRef.current = true;
+
+      try {
+        const isCurrentlyFs = isElementFullscreen(containerRef.current);
+        if (isCurrentlyFs) {
+          await exitDocumentFullscreen();
+        } else {
+          await requestElementFullscreen(containerRef.current);
         }
+      } catch (err) {
+        console.warn('YouTube fullscreen toggle failed:', err);
+      } finally {
+        fullscreenTransitionRef.current = false;
+        updateFullscreenState();
       }
     };
 
-    const handleMinimizeToggle = (e: React.MouseEvent) => {
+    const handleMinimizeToggle = async (e: React.MouseEvent) => {
       e.stopPropagation();
       playClickSound();
-      const doc = document as any;
-      if (doc.fullscreenElement || doc.webkitFullscreenElement) {
-        if (doc.exitFullscreen) doc.exitFullscreen();
-        else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
+
+      const isCurrentlyFs = isElementFullscreen(containerRef.current);
+      if (isCurrentlyFs) {
+        if (!fullscreenTransitionRef.current) {
+          fullscreenTransitionRef.current = true;
+          try {
+            await exitDocumentFullscreen();
+          } catch (err) {
+            console.warn('YouTube exit fullscreen on minimize failed:', err);
+          } finally {
+            fullscreenTransitionRef.current = false;
+            updateFullscreenState();
+          }
+        }
       }
+
       if (onMinimize) {
         onMinimize();
       }
@@ -639,18 +682,20 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(
                         {showMinimize && (
                             <button 
                                 onClick={handleMinimizeToggle}
-                                className="text-white hover:text-cyan-400 transition-colors p-2 bg-white/5 rounded-lg"
-                                title="Minimize / Floating Player"
+                                className="text-white hover:text-cyan-400 transition-colors p-2 bg-white/5 rounded-lg cursor-pointer"
+                                title="Minimize Player"
+                                aria-label="Minimize Player"
                             >
                                 <Minimize2 size={18} />
                             </button>
                         )}
                         <button 
                             onClick={handleFullscreen}
-                            className="text-white hover:text-cyan-400 transition-colors p-2 bg-white/5 rounded-lg"
-                            title="Fullscreen"
+                            className="text-white hover:text-cyan-400 transition-colors p-2 bg-white/5 rounded-lg cursor-pointer"
+                            title={isFullscreen ? "Exit Fullscreen (F)" : "Enter Fullscreen (F)"}
+                            aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
                         >
-                            <Maximize size={18} />
+                            {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
                         </button>
                     </div>
                 </div>

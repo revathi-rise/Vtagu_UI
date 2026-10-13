@@ -2,6 +2,7 @@
 
 import React, { forwardRef, useImperativeHandle, useRef, useState, useEffect } from 'react';
 import { fetchRumbleEmbedUrl, getRumbleEmbedUrl } from '@/lib/video-utils';
+import { requestElementFullscreen } from '@/lib/fullscreen-utils';
 
 export interface RumblePlayerHandle {
   play: () => void;
@@ -47,10 +48,8 @@ const RumblePlayer = forwardRef<RumblePlayerHandle, RumblePlayerProps>(
     useImperativeHandle(ref, () => ({
       play: () => {},
       pause: () => {},
-      requestFullScreen: () => {
-        if (containerRef.current?.requestFullscreen) {
-          containerRef.current.requestFullscreen();
-        }
+      requestFullScreen: async () => {
+        await requestElementFullscreen(containerRef.current);
       },
     }));
 
