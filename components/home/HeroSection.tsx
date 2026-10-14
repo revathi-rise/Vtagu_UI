@@ -6,7 +6,7 @@ import { Play, Plus, Check, Star, ChevronLeft, ChevronRight, Globe, Sparkles, Sh
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Poster, Movie, Episode, toggleWatchlist, checkWatchlist, isKidsProfileActive, isContentKidsApproved } from "@/lib/vtagu.api";
+import { Poster, Movie, Episode, toggleWatchlist, checkWatchlist, isKidsProfileActive, isContentKidsApproved, cleanHtmlString } from "@/lib/vtagu.api";
 import { useAlert } from '../shared/CustomAlertModal';
 import { getUserId } from "@/lib/api-client";
 import HeroThumbnailSlider from "./HeroThumbnailSlider";
@@ -33,20 +33,7 @@ interface HeroSectionProps {
 
 const IMAGE_BASE_URL = "https://www.vtagu.in/";
 
-function cleanHtml(str?: string): string {
-  if (!str) return "";
-  return str
-    .replace(/<!--[sS]*?-->/g, "")
-    .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+const cleanHtml = cleanHtmlString;
 
 export default function HeroSection({ posters = [], movies = [], episodes = [] }: HeroSectionProps) {
   const { showAlert } = useAlert();
@@ -123,6 +110,23 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
     };
   });
 
+  // Fallback: If no normal posters available, use movies
+  if (items.length === 0 && !isKids && movies && movies.length > 0) {
+    items = movies.slice(0, 5).map((movie) => ({
+      id: movie.id,
+      title: cleanHtml(movie.title || ""),
+      description: cleanHtml(movie.longDescription || movie.shortDescription || ""),
+      image: movie.posterImage || "",
+      category: "",
+      rating: movie.rating ? movie.rating.toString() : "",
+      link: `/movies/${movie.slug || movie.id}`,
+      languages: movie.languages || "",
+      trailerUrl: movie.trailerUrl || "",
+      referenceType: 'movie',
+      referenceId: movie.id,
+    }));
+  }
+
   // Ensure activeIndex is within range
   const safeActiveIndex = items.length > 0 ? activeIndex % items.length : 0;
   const currentItem = items[safeActiveIndex];
@@ -182,6 +186,35 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
   };
 
   if (items.length === 0 || !currentItem) {
+    if (!isKids) {
+      return (
+        <section className="relative w-full py-28 sm:py-36 px-6 overflow-hidden bg-[#0c0714] border-b border-white/10 flex flex-col items-center justify-center text-center">
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-brand-gradient opacity-20 rounded-full blur-[120px] pointer-events-none" />
+          <div className="relative z-10 max-w-2xl mx-auto space-y-6">
+            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight uppercase leading-tight">
+              Stream Unlimited Movies &amp; Originals
+            </h1>
+            <p className="text-white/70 text-sm sm:text-base max-w-lg mx-auto">
+              Discover blockbuster films, exclusive web series, and premium entertainment on PrimeTime.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+              <Link
+                href="/movies"
+                className="px-8 py-3.5 rounded-2xl bg-brand-gradient text-white font-black text-sm uppercase tracking-wider shadow-lg hover:scale-105 active:scale-95 transition-all"
+              >
+                Explore Movies
+              </Link>
+              <Link
+                href="/episodes"
+                className="px-8 py-3.5 rounded-2xl bg-white/10 text-white font-black text-sm uppercase tracking-wider border border-white/20 hover:bg-white/20 transition-all"
+              >
+                Explore Series
+              </Link>
+            </div>
+          </div>
+        </section>
+      );
+    }
     return (
       <section className="relative w-full py-20 sm:py-28 lg:py-36 px-6 overflow-hidden bg-[#0c0714] border-b border-white/10 flex flex-col items-center justify-center text-center">
         {/* Dynamic Glow Nebulas */}

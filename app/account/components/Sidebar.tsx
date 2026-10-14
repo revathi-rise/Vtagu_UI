@@ -1,6 +1,6 @@
 import React from "react";
 import { User, CreditCard, Laptop, Shield, HelpCircle, LogOut } from "lucide-react";
-import { removeToken } from "@/lib/api-client";
+import { removeToken, clearAuthSession } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/store/slices/authSlice";
@@ -15,14 +15,7 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   const dispatch = useDispatch();
   
   const handleLogout = () => {
-    removeToken();
-    localStorage.removeItem('user');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('currentProfile');
-    // Clear cookies
-    document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    
+    clearAuthSession();
     dispatch(setUser(null));
     router.push('/');
     router.refresh();

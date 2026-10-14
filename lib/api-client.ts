@@ -62,11 +62,29 @@ export const setUserId = (userId: string) => {
   }
 };
 
-export const removeToken = () => {
+export const clearAuthSession = () => {
   if (typeof window !== 'undefined') {
+    // 1. Remove localStorage auth and profile data
     localStorage.removeItem('token');
-    document.cookie = `token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    localStorage.removeItem('userId');
+    localStorage.removeItem('user');
+    localStorage.removeItem('currentProfile');
+    localStorage.removeItem('kids_mode');
+
+    // 2. Clear cookies
+    const cookiesToClear = ['token', 'userId', 'kids_mode', 'currentProfile'];
+    cookiesToClear.forEach((name) => {
+      document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax`;
+    });
+
+    // 3. Dispatch events to notify all active UI components
+    window.dispatchEvent(new Event('profileChanged'));
+    window.dispatchEvent(new Event('authChanged'));
   }
+};
+
+export const removeToken = () => {
+  clearAuthSession();
 };
 
 // Fetch wrapper
@@ -82,19 +100,22 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}, retr
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  // Append kidsMode query param if kids mode is active (avoids CORS preflight header issues)
+  // Append kidsMode query param if kids mode is active and user is authenticated
   let targetUrl = url;
   if (typeof window !== 'undefined') {
-    const isKidsCookie = document.cookie.includes('kids_mode=true') || document.cookie.includes('kids_mode=1');
-    const profileStr = localStorage.getItem('currentProfile');
-    let isKidsProfile = false;
-    try {
-      isKidsProfile = profileStr ? !!JSON.parse(profileStr)?.isKids : false;
-    } catch (e) {}
+    const userId = getUserId();
+    if (token || userId) {
+      const isKidsCookie = document.cookie.includes('kids_mode=true') || document.cookie.includes('kids_mode=1');
+      const profileStr = localStorage.getItem('currentProfile');
+      let isKidsProfile = false;
+      try {
+        isKidsProfile = profileStr ? !!JSON.parse(profileStr)?.isKids : false;
+      } catch (e) {}
 
-    if ((isKidsCookie || isKidsProfile) && !targetUrl.includes('kidsMode=')) {
-      const sep = targetUrl.includes('?') ? '&' : '?';
-      targetUrl = `${targetUrl}${sep}kidsMode=true`;
+      if ((isKidsCookie || isKidsProfile) && !targetUrl.includes('kidsMode=')) {
+        const sep = targetUrl.includes('?') ? '&' : '?';
+        targetUrl = `${targetUrl}${sep}kidsMode=true`;
+      }
     }
   }
 

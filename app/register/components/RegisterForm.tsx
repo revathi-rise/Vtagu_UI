@@ -117,6 +117,9 @@ export default function RegisterForm() {
           const userData = res.data || res.user || (res as any).userData;
           if (userData) {
             localStorage.removeItem('currentProfile');
+        localStorage.removeItem('kids_mode');
+        document.cookie = "kids_mode=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax";
+        document.cookie = "currentProfile=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax";
             localStorage.setItem('user', JSON.stringify(userData));
             const userId = userData.userId || userData.id;
             if (userId) {

@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { Search, Menu, X, ChevronRight, LogOut, User, Users, ChevronDown, Settings, Shield, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Genre, InteractiveMovie, getInteractiveMovies, Language, getLanguages, getGenres } from "@/lib/vtagu.api";
-import { removeToken } from "@/lib/api-client";
+import { removeToken, clearAuthSession } from "@/lib/api-client";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
 import { setUser } from "@/store/slices/authSlice";
@@ -94,6 +94,12 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
 
     const loadProfile = () => {
       try {
+        const token = localStorage.getItem('token');
+        const userJson = localStorage.getItem('user');
+        if (!token || !userJson) {
+          setCurrentProfile(null);
+          return;
+        }
         const profileStr = localStorage.getItem('currentProfile');
         if (profileStr) {
           setCurrentProfile(JSON.parse(profileStr));
@@ -313,12 +319,7 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
                       <button
                         suppressHydrationWarning
                         onClick={() => {
-                          removeToken();
-                          localStorage.removeItem('user');
-                          localStorage.removeItem('userId');
-                          localStorage.removeItem('currentProfile');
-                          document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                          clearAuthSession();
                           dispatch(setUser(null));
                           window.location.href = '/login';
                         }}
@@ -456,11 +457,7 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
                   </Link>
                   <button
                     onClick={() => {
-                      removeToken();
-                      localStorage.removeItem('user');
-                      localStorage.removeItem('userId');
-                      document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                      clearAuthSession();
                       dispatch(setUser(null));
                       setIsMobileMenuOpen(false);
                       window.location.href = '/login';

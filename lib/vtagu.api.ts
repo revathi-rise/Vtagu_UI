@@ -23,6 +23,25 @@ async function getAuthHeader(): Promise<Record<string, string>> {
 export function isKidsProfileActive(): boolean {
   if (typeof window !== 'undefined') {
     try {
+      // 0. Auth check: An unauthenticated guest user can NEVER be in Kids Mode.
+      const token = localStorage.getItem('token') || (document.cookie.match(/(?:^|; )token=([^;]*)/)?.[1]);
+      const userId = localStorage.getItem('userId') || localStorage.getItem('user') || (document.cookie.match(/(?:^|; )userId=([^;]*)/)?.[1]);
+
+      if (!token && !userId) {
+        // Automatically sanitize any orphaned cookies or storage
+        if (document.cookie.includes('kids_mode=') || document.cookie.includes('currentProfile=')) {
+          document.cookie = "kids_mode=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax";
+          document.cookie = "currentProfile=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax";
+        }
+        if (localStorage.getItem('kids_mode')) {
+          localStorage.removeItem('kids_mode');
+        }
+        if (localStorage.getItem('currentProfile')) {
+          localStorage.removeItem('currentProfile');
+        }
+        return false;
+      }
+
       // 1. Check kids_mode cookie
       const cookieMatch = document.cookie.match(/(?:^|; )kids_mode=([^;]*)/);
       if (cookieMatch) {
@@ -33,14 +52,18 @@ export function isKidsProfileActive(): boolean {
       // 2. Check currentProfile cookie
       const profileCookieMatch = document.cookie.match(/(?:^|; )currentProfile=([^;]*)/);
       if (profileCookieMatch) {
-        const prof = JSON.parse(decodeURIComponent(profileCookieMatch[1]));
-        if (prof?.isKids) return true;
+        try {
+          const prof = JSON.parse(decodeURIComponent(profileCookieMatch[1]));
+          if (prof?.isKids) return true;
+        } catch (e) {}
       }
       // 3. Check currentProfile in localStorage
       const currentProfileStr = localStorage.getItem('currentProfile');
       if (currentProfileStr) {
-        const profile = JSON.parse(currentProfileStr);
-        return !!profile.isKids;
+        try {
+          const profile = JSON.parse(currentProfileStr);
+          return !!profile.isKids;
+        } catch (e) {}
       }
     } catch (e) {
       // ignore
@@ -56,13 +79,23 @@ export async function isKidsProfileActiveAsync(): Promise<boolean> {
   try {
     const { cookies } = await import('next/headers');
     const cookieStore = await cookies();
+
+    // 0. Auth check on server: If no token or userId cookie exists, user is an unauthenticated guest
+    const token = cookieStore.get('token')?.value;
+    const userId = cookieStore.get('userId')?.value;
+    if (!token && !userId) {
+      return false;
+    }
+
     const kidsCookie = cookieStore.get('kids_mode')?.value;
     if (kidsCookie === 'true' || kidsCookie === '1') return true;
     if (kidsCookie === 'false' || kidsCookie === '0') return false;
     const profileCookie = cookieStore.get('currentProfile')?.value;
     if (profileCookie) {
-      const profile = JSON.parse(decodeURIComponent(profileCookie));
-      return !!profile.isKids;
+      try {
+        const profile = JSON.parse(decodeURIComponent(profileCookie));
+        return !!profile.isKids;
+      } catch (e) {}
     }
   } catch (e) {
     // ignore server context errors if not available
@@ -76,12 +109,33 @@ export function isContentKidsApproved(item: any): boolean {
   return val === true || val === 1 || val === '1' || val === 'true';
 }
 
+export function isContentKidsOnly(item: any): boolean {
+  if (!item) return false;
+  // 1. Check if explicitly marked as kids_only / kidsOnly (true = exclusive to Kids Mode)
+  if (item.kids_only !== undefined && item.kids_only !== null) {
+    const val = item.kids_only;
+    return val === true || val === 1 || val === '1' || val === 'true';
+  }
+  if (item.kidsOnly !== undefined && item.kidsOnly !== null) {
+    const val = item.kidsOnly;
+    return val === true || val === 1 || val === '1' || val === 'true';
+  }
+  // 2. Check if showInNormalMode was explicitly set to false (exclusive to Kids Mode)
+  const showNormal = item.showInNormalMode ?? item.show_in_normal_mode;
+  if (showNormal !== undefined && showNormal !== null) {
+    return showNormal === false || showNormal === 0 || showNormal === '0' || showNormal === 'false';
+  }
+  // 3. Default: Not kids only (meaning it is KIDS & NORMAL, visible in normal mode as well)
+  return false;
+}
+
 export function filterForProfile<T>(items: T[]): T[] {
   if (!items || !Array.isArray(items)) return [];
   if (isKidsProfileActive()) {
     return items.filter(item => isContentKidsApproved(item));
   }
-  return items;
+  // Normal mode: exclude items that are exclusive to Kids Mode
+  return items.filter(item => !isContentKidsOnly(item));
 }
 
 export async function filterForProfileAsync<T>(items: T[]): Promise<T[]> {
@@ -90,7 +144,8 @@ export async function filterForProfileAsync<T>(items: T[]): Promise<T[]> {
   if (isKids) {
     return items.filter(item => isContentKidsApproved(item));
   }
-  return items;
+  // Normal mode: exclude items that are exclusive to Kids Mode
+  return items.filter(item => !isContentKidsOnly(item));
 }
 
 async function getKidsHeader(): Promise<Record<string, string>> {
@@ -248,7 +303,7 @@ export async function getPosters(pageType?: string, language?: string, limit?: n
       return posters.filter(p => p.page_type === 'kids' || p.kids_only || (p as any).kidsOnly || isContentKidsApproved(p));
     }
     // Normal mode: exclude posters that are Kids Mode Only
-    return posters.filter(p => !p.kids_only && !(p as any).kidsOnly && p.page_type !== 'kids');
+    return posters.filter(p => !p.kids_only && !(p as any).kidsOnly);
   } catch (err: any) {
     return [];
   }
@@ -474,6 +529,10 @@ export function normalizeEpisode(episode: any): Episode {
     isFree: parseBool(episode.isFree ?? episode.free ?? episode.is_free),
     isFeatured: parseBool(episode.isFeatured ?? episode.featured ?? episode.is_featured),
     movieType: episode.movieType || episode.movie_type,
+    kidsRestriction: parseBool(episode.kidsRestriction ?? episode.kids_restriction ?? episode.is_kids_approved),
+    kids_restriction: parseBool(episode.kidsRestriction ?? episode.kids_restriction ?? episode.is_kids_approved),
+    kids_only: episode.kids_only !== undefined ? parseBool(episode.kids_only) : (episode.kidsOnly !== undefined ? parseBool(episode.kidsOnly) : undefined),
+    kidsOnly: episode.kids_only !== undefined ? parseBool(episode.kids_only) : (episode.kidsOnly !== undefined ? parseBool(episode.kidsOnly) : undefined),
     // Provide backwards compatible fields just in case
     episodeId: episode.id || episode.episodeId,
     seasonId: episode.season_id || episode.seasonId,
@@ -539,6 +598,9 @@ export interface Movie {
   contentType: number;
   ageRestriction: string;
   kidsRestriction: boolean;
+  kids_restriction?: boolean;
+  kids_only?: boolean;
+  kidsOnly?: boolean;
   videoUrl: string;
   trailerUrl: string;
   trailerAlt: string;
@@ -574,22 +636,61 @@ export interface Movie {
 export function cleanHtmlString(htmlStr: string): string {
   if (!htmlStr) return '';
 
-  let cleaned = htmlStr;
+  let cleaned = String(htmlStr);
 
-  // 1. Remove CodeMirror syntax highlighting spans or any span tags, but KEEP their inner content
-  // E.g., <span class="ͼ1a">p</span> -> p
-  cleaned = cleaned.replace(/<span[^>]*>(.*?)<\/span>/gi, '$1');
+  // 1. Remove HTML comments (e.g. <!--StartFragment-->, <!--EndFragment-->)
+  cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, '');
 
-  // 2. Decode HTML entities
+  // 2. Remove script and style elements and their contents
+  cleaned = cleaned.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  cleaned = cleaned.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+
+  // 3. Replace block tag closings and line breaks with spaces so words don't merge
+  cleaned = cleaned.replace(/<\/(p|div|h[1-6]|li|tr)>/gi, ' ');
+  cleaned = cleaned.replace(/<br\s*[\/]?>/gi, ' ');
+
+  // 4. Strip all remaining HTML tags
+  cleaned = cleaned.replace(/<[^>]+>/g, '');
+
+  // 5. Decode numeric & hex HTML entities (vital for emojis, e.g. &#127925; -> 🎵, &#127775; -> 🌟, &#127926; -> 🎶)
   cleaned = cleaned
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ');
+    .replace(/&#(\d+);/g, (_, dec) => {
+      try {
+        return String.fromCodePoint(Number(dec));
+      } catch (e) {
+        return '';
+      }
+    })
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => {
+      try {
+        return String.fromCodePoint(parseInt(hex, 16));
+      } catch (e) {
+        return '';
+      }
+    });
 
-  return cleaned.trim();
+  // 6. Decode common named HTML entities
+  cleaned = cleaned
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&apos;/gi, "'");
+
+  // 7. Heal legacy corrupted '??' or '? ' icons from legacy non-utf8mb4 database columns
+  if (cleaned.includes('Moonbug Kids') && (cleaned.includes('??') || cleaned.startsWith('? ') || cleaned.endsWith(' ??') || cleaned.endsWith(' ?'))) {
+    cleaned = cleaned
+      .replace(/\?\?/g, '🎵')
+      .replace(/^\?\s*/, '🎵 ')
+      .replace(/\s*\?$/, ' 🌟🎶');
+  }
+  // Replace standalone ?? around emojis
+  cleaned = cleaned.replace(/(^|\s)\?\?(\s|$)/g, '$1🎵$2');
+
+  // 8. Collapse whitespace and trim
+  return cleaned.replace(/\s+/g, ' ').trim();
 }
 
 export function getBadgeText(media: any): string | null {
@@ -620,6 +721,10 @@ export function normalizeMovie(movie: any): Movie {
     is_coming_soon: parseBool(movie.isComingSoon ?? movie.is_coming_soon),
     isFree: parseBool(movie.isFree ?? movie.free ?? movie.is_free),
     isFeatured: parseBool(movie.isFeatured ?? movie.featured ?? movie.is_featured),
+    kidsRestriction: parseBool(movie.kidsRestriction ?? movie.kids_restriction ?? movie.is_kids_approved),
+    kids_restriction: parseBool(movie.kidsRestriction ?? movie.kids_restriction ?? movie.is_kids_approved),
+    kids_only: movie.kids_only !== undefined ? parseBool(movie.kids_only) : (movie.kidsOnly !== undefined ? parseBool(movie.kidsOnly) : undefined),
+    kidsOnly: movie.kids_only !== undefined ? parseBool(movie.kids_only) : (movie.kidsOnly !== undefined ? parseBool(movie.kidsOnly) : undefined),
     movieType: movie.movieType || movie.movie_type,
     contentType: movie.contentType || movie.type,
     posterImage: movie.media?.card_image?.url || movie.media?.image?.url || movie.posterImage || "",
@@ -880,11 +985,13 @@ export async function getMoviesByLanguage(slug: string): Promise<LanguageMoviesR
     }
     const result = await res.json();
     const data = result.data || {};
+    const normMovies = (data.movies || []).map(normalizeMovie);
+    const normEpisodes = (data.episodes || []).map(normalizeEpisode);
     return {
       language: data.language || '',
-      movies: (data.movies || []).map(normalizeMovie),
+      movies: await filterForProfileAsync(normMovies),
       Interactive: data.Interactive || [],
-      episodes: (data.episodes || []).map(normalizeEpisode),
+      episodes: await filterForProfileAsync(normEpisodes),
     };
   } catch (err: any) {
     console.error(`Error fetching movies by language ${slug} in API:`, err);
