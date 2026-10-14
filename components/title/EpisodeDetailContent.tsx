@@ -7,6 +7,7 @@ import { Episode, getEpisodeById, incrementEpisodeView } from '@/lib/vtagu.api';
 import { getUserId } from '@/lib/api-client';
 import VideoPlayerModal from '@/components/ui/VideoPlayerModal';
 import WatchNowButton from '@/components/ui/WatchNowButton';
+import WatchTrackingVideoPlayer from '@/components/ui/WatchTrackingVideoPlayer';
 
 interface EpisodeDetailContentProps {
   episode: Episode;
@@ -72,36 +73,23 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
       <section className="py-20 tv-container px-6 md:px-12 lg:px-20">
         <div className="skeuo-surface-high p-8 lg:p-16 relative overflow-visible space-y-12">
 
-          {/* ── Inline Preview Player (if displayIframeSrc available) ── */}
+          {/* ── Inline Preview Player (Matching VideoPlayer UI) ── */}
           {displayIframeSrc && (
-            <div id="episode-player" className="relative w-full rounded-[2rem] overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/10">
-              {/* 16:9 aspect ratio container */}
-              <div style={{ position: 'relative', paddingTop: '56.25%' }}>
-                <iframe
-                  src={displayIframeSrc}
-                  loading="lazy"
-                  style={{
-                    border: 'none',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    height: '100%',
-                    width: '100%',
-                  }}
-                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-                  allowFullScreen
-                  title={episode.title}
-                />
-              </div>
-
-              {/* Fullscreen button overlay */}
-              <button
-                onClick={() => setPlayerOpen(true)}
-                className="absolute top-4 right-4 z-10 flex items-center gap-2 bg-black/60 hover:bg-black/90 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-xl border border-white/10 transition-all hover:border-cyan-400/40 hover:text-cyan-400"
-              >
-                <Maximize2 size={14} />
-                Full Screen
-              </button>
+            <div id="episode-player" className="relative w-full aspect-video rounded-[2rem] overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/10 bg-black">
+              <WatchTrackingVideoPlayer
+                src={displayIframeSrc}
+                title={episode.title}
+                metadata={`Season ${(episode as any).seasonNumber || (episode as any).season_number || 1} • Episode ${episode.episode_number || (episode as any).episodeNumber || 1}`}
+                contentId={(episode.id || episode.episodeId || "").toString()}
+                contentType="episode"
+                autoPlay={false}
+                showControls={true}
+                showMinimize={false}
+                onFullscreenRequest={() => setPlayerOpen(true)}
+                subtitles={(episode as any).subtitles || (episode as any).media?.video?.subtitles}
+                audioTracks={(episode as any).audioTracks || (episode as any).audio_tracks}
+                className="w-full h-full"
+              />
             </div>
           )}
 
