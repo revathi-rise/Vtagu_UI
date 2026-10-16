@@ -22,7 +22,6 @@ export default async function MoviesPage() {
     getMovies(),
     getPosters("movies"),
   ]);
-console.log(movies, "movies");
 
   let carouselItems;
   if (posters && posters.length > 0) {

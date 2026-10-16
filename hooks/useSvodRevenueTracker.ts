@@ -56,7 +56,7 @@ export function useSvodRevenueTracker({
           console.warn('[SVOD Tracker] Failed to log watch time:', data);
           timeAccumulator.current += secondsToLog; // Restore time on failure
         } else {
-          console.log(`[SVOD Tracker] Logged ${secondsToLog}s watched for film ${filmId}`);
+          // console.log(`[SVOD Tracker] Logged ${secondsToLog}s watched for film ${filmId}`);
         }
       } catch (error) {
         console.error('[SVOD Tracker] Network error logging watch time:', error);

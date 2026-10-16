@@ -206,14 +206,11 @@ function CheckoutContent() {
 
       // Re-use pre-calculated userId and amount values
 
-      console.log('[DEBUG] Initiating payment:', { userId, amount, type: checkoutType });
-
       const orderData = await transactionsApi.createOrder({
         userId,
         amount,
         planId: checkoutType === 'plan' ? plan?.planId : undefined,
       });
-      console.log('[DEBUG] Received order data:', orderData);
 
       if (!orderData.status || !orderData.data) {
         setError(orderData.message || 'Could not create order.');
@@ -237,7 +234,6 @@ function CheckoutContent() {
         },
         modal: {
           ondismiss: function () {
-            console.log('[DEBUG] Razorpay modal closed by user');
             setIsProcessing(false);
           }
         },
@@ -302,13 +298,6 @@ function CheckoutContent() {
           color: '#b28cff'
         }
       };
-
-      console.log('[DEBUG] Razorpay options:', {
-        key: options.key,
-        order_id: options.order_id,
-        amount: options.amount,
-        currency: options.currency
-      });
 
       const paymentObject = new (window as any).Razorpay(options);
       paymentObject.on('payment.failed', function (response: any) {

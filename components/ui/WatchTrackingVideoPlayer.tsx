@@ -151,7 +151,7 @@ const WatchTrackingVideoPlayer = React.forwardRef<
             try {
               videoPlayerRef.current.videoElement.currentTime = savedTime;
             } catch (e) {
-              console.log('Could not set video time (may be YouTube):', e);
+              // console.log('Could not set video time (may be YouTube):', e);
             }
           }
         });

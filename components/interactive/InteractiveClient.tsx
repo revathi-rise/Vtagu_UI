@@ -18,7 +18,10 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
     const safeInitialScenes = Array.isArray(initialScenes) ? initialScenes : [];
     const [scenes, setScenes] = useState<Scene[]>(safeInitialScenes);
     const [currentScene, setCurrentScene] = useState<Scene | null>(
-        safeInitialScenes.find(s => s?.is_start) || safeInitialScenes[0] || null
+        safeInitialScenes.find(s => s?.is_start) ||
+        safeInitialScenes.find(s => Number(s?.is_free) === 1 || Boolean(s?.is_free) === true || String(s?.is_free) === '1' || (!!s?.scene_url && s.scene_url.length > 0)) ||
+        safeInitialScenes[0] ||
+        null
     );
     const [sceneHistory, setSceneHistory] = useState<Scene[]>([]);
 
@@ -34,49 +37,71 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
     } | null>(null);
     const [checkingAccess, setCheckingAccess] = useState(true);
 
-    // Fallback: If initialScenes is empty, attempt to fetch scenes client-side
-    useEffect(() => {
-        if (scenes.length === 0 && movie?.interactive_movie_id) {
-            getScenes(movie.interactive_movie_id).then((fetchedScenes) => {
-                if (Array.isArray(fetchedScenes) && fetchedScenes.length > 0) {
-                    setScenes(fetchedScenes);
-                    setCurrentScene(fetchedScenes.find(s => s?.is_start) || fetchedScenes[0] || null);
-                }
-            }).catch(err => {
-                console.error("Error fetching scenes client-side:", err);
-            });
-        }
-    }, [movie?.interactive_movie_id, scenes.length]);
-
     const checkAccess = async () => {
         setCheckingAccess(true);
 
-        // Check if user is logged in with an active paid account/subscription
+        // Check if user is logged in with an active paid account/subscription or admin
         let isUserPaidAccount = false;
         try {
             const userJson = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
             if (userJson) {
                 const userObj = JSON.parse(userJson);
-                if (userObj.is_subscribed || userObj.isSubscribed || (userObj.plan && String(userObj.plan).toLowerCase() !== 'free')) {
+                if (
+                    userObj.is_subscribed ||
+                    userObj.isSubscribed ||
+                    (userObj.plan && String(userObj.plan).toLowerCase() !== 'free') ||
+                    String(userObj.type) === '1' ||
+                    String(userObj.type) === '2' ||
+                    userObj.role === 'admin'
+                ) {
                     isUserPaidAccount = true;
                 }
             }
         } catch (e) {}
 
-        const isMovieFree = Number(movie.is_free) === 1 || Number((movie as any).isFree) === 1 || Boolean(movie.is_free) === true || String(movie.is_free) === '1';
+        const isMovieFree =
+            Number(movie.is_free) === 1 ||
+            Number((movie as any).isFree) === 1 ||
+            Boolean(movie.is_free) === true ||
+            String(movie.is_free) === '1' ||
+            Number(movie.price) === 0 ||
+            movie.price === 0;
 
         try {
             const userId = getUserId();
             const result = await checkMovieAccess(movie.interactive_movie_id, userId);
             setAccessData(result);
-            if (isUserPaidAccount || result.hasAccess || isMovieFree) {
-                setIsAuthorized(true);
-            } else {
-                setIsAuthorized(false);
+            const authorized = Boolean(isUserPaidAccount || result.hasAccess || isMovieFree);
+            setIsAuthorized(authorized);
+
+            // Re-fetch scenes with client credentials if authorized, free, or if initial scenes have missing URLs
+            const needsSceneRefresh = authorized || isMovieFree || scenes.length === 0 || scenes.some(s => !s.scene_url || s.scene_url.trim() === '');
+            if (needsSceneRefresh) {
+                const refreshedScenes = await getScenes(movie.interactive_movie_id, userId);
+                if (Array.isArray(refreshedScenes) && refreshedScenes.length > 0) {
+                    setScenes(refreshedScenes);
+                    setCurrentScene(prev => {
+                        if (!prev) return refreshedScenes.find(s => s?.is_start) || refreshedScenes[0];
+                        return refreshedScenes.find(s => s.scene_id === prev.scene_id) || refreshedScenes[0];
+                    });
+                }
             }
         } catch (error) {
             console.error('Error checking movie access:', error);
-            setIsAuthorized(isUserPaidAccount || isMovieFree);
+            const fallbackAuthorized = Boolean(isUserPaidAccount || isMovieFree);
+            setIsAuthorized(fallbackAuthorized);
+            if (fallbackAuthorized) {
+                try {
+                    const fallbackScenes = await getScenes(movie.interactive_movie_id, getUserId());
+                    if (Array.isArray(fallbackScenes) && fallbackScenes.length > 0) {
+                        setScenes(fallbackScenes);
+                        setCurrentScene(prev => {
+                            if (!prev) return fallbackScenes.find(s => s?.is_start) || fallbackScenes[0];
+                            return fallbackScenes.find(s => s.scene_id === prev.scene_id) || fallbackScenes[0];
+                        });
+                    }
+                } catch (e) {}
+            }
         } finally {
             setCheckingAccess(false);
         }
@@ -84,6 +109,17 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
 
     useEffect(() => {
         checkAccess();
+
+        const handleAuthUpdate = () => {
+            checkAccess();
+        };
+
+        window.addEventListener('authChanged', handleAuthUpdate);
+        window.addEventListener('storage', handleAuthUpdate);
+        return () => {
+            window.removeEventListener('authChanged', handleAuthUpdate);
+            window.removeEventListener('storage', handleAuthUpdate);
+        };
     }, [movie.interactive_movie_id]);
 
     const fetchChoicesForScene = async (scene: Scene) => {
@@ -250,7 +286,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                                     hasPrevious={sceneHistory.length > 0}
                                     movieId={movie.interactive_movie_id}
                                     movieTitle={movie.title}
-                                    isAuthorized={isAuthorized || Number(movie.is_free) === 1}
+                                    isAuthorized={isAuthorized || Number(movie.is_free) === 1 || Number(movie.price) === 0}
                                     scenes={scenes}
                                     onShowPaywall={() => setShowPaywallModal(true)}
                                 />

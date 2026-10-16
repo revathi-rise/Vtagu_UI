@@ -13,7 +13,6 @@ interface MovieDetailsPageProps {
 export async function generateMetadata({ params }: MovieDetailsPageProps) {
   const { slug } = await params;
   const movie = await getMovieBySlug(slug);
-  console.log(movie, "movie");
   
   if (!movie) return { title: 'Movie Not Found' };
 

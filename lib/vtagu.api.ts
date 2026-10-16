@@ -450,7 +450,21 @@ export async function getInteractiveMovies(): Promise<InteractiveMovie[]> {
 
 
 export async function getScenes(movieId: number, userId?: string | number | null): Promise<Scene[]> {
-  const url = appendUserId(`${API_BASE}/scenes?id=${movieId}`, userId ? String(userId) : null);
+  let effectiveUserId = userId;
+  if (!effectiveUserId && typeof window !== 'undefined') {
+    try {
+      const u = localStorage.getItem('user');
+      if (u) {
+        const parsed = JSON.parse(u);
+        effectiveUserId = parsed.userId || parsed.id || null;
+      }
+    } catch (e) {}
+    if (!effectiveUserId) {
+      effectiveUserId = localStorage.getItem('userId') || (document.cookie.match(/(?:^|; )userId=([^;]*)/)?.[1]) || null;
+    }
+  }
+
+  const url = appendUserId(`${API_BASE}/scenes?id=${movieId}`, effectiveUserId ? String(effectiveUserId) : null);
   try {
     const res = await fetchWithRetry(url);
     if (!res.ok) {

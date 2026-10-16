@@ -35,8 +35,6 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function LanguageMoviesPage({ params }: PageProps) {
   const { slug } = await params;
   const { language, movies, Interactive, episodes } = await getMoviesByLanguage(slug);
-  console.log("Language Page Loaded Content:", { movies, Interactive, episodes });
-
   const displayLanguage = language || slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
   // Fetch banners specifically for this language

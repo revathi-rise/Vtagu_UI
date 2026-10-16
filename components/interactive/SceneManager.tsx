@@ -185,7 +185,11 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
     };
 
     const hasShowOnTime = currentScene?.show_choices_on ? parseTimeToSeconds(currentScene.show_choices_on) > 0 : false;
-    const isCurrentSceneFree = Number(currentScene?.is_free) === 1 || currentScene?.is_free === true;
+    const isCurrentSceneFree =
+        Number(currentScene?.is_free) === 1 ||
+        currentScene?.is_free === true ||
+        String(currentScene?.is_free) === '1' ||
+        String(currentScene?.is_free).toLowerCase() === 'true';
 
     return (
         <div className="space-y-8">
@@ -242,31 +246,51 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
             >
                 {currentScene ? (
                     <>
-                        <WatchTrackingVideoPlayer
-                            ref={playerRef}
-                            src={videoUrl}
-                            contentId={movieId ? movieId.toString() : (currentScene.scene_id?.toString() || currentScene.title || 'scene')}
-                            contentType="interactive_movie"
-                            title={currentScene.title || "Interactive Adventure"}
-                            metadata="Interactive Story • Choices Ahead"
-                            autoPlay={true}
-                            loop={false}
-                            showControls={!showChoices}
-                            onTimeUpdate={handleTimeUpdate}
-                            onEnded={() => {
-                                setShowChoices(true);
-                            }}
-                            className="w-full h-full"
-                            showSkip={hasNextVideo}
-                            onSkip={hasNextVideo ? handleNextScene : undefined}
-                            showNext={hasNextVideo}
-                            onNext={hasNextVideo ? handleNextScene : undefined}
-                            showPrevious={Boolean(hasPrevious)}
-                            onPrevious={hasPrevious ? onPrevious : undefined}
-                            onFullscreenRequest={handleFullscreenRequest}
-                            subtitles={currentScene.subtitles}
-                            audioTracks={(currentScene as any).audioTracks || (currentScene as any).audio_tracks}
-                        />
+                        {videoUrl ? (
+                            <WatchTrackingVideoPlayer
+                                ref={playerRef}
+                                src={videoUrl}
+                                contentId={movieId ? movieId.toString() : (currentScene.scene_id?.toString() || currentScene.title || 'scene')}
+                                contentType="interactive_movie"
+                                title={currentScene.title || currentScene.scene_text || "Interactive Adventure"}
+                                metadata="Interactive Story • Choices Ahead"
+                                autoPlay={true}
+                                loop={false}
+                                showControls={!showChoices}
+                                onTimeUpdate={handleTimeUpdate}
+                                onEnded={() => {
+                                    setShowChoices(true);
+                                }}
+                                className="w-full h-full"
+                                showSkip={hasNextVideo}
+                                onSkip={hasNextVideo ? handleNextScene : undefined}
+                                showNext={hasNextVideo}
+                                onNext={hasNextVideo ? handleNextScene : undefined}
+                                showPrevious={Boolean(hasPrevious)}
+                                onPrevious={hasPrevious ? onPrevious : undefined}
+                                onFullscreenRequest={handleFullscreenRequest}
+                                subtitles={currentScene.subtitles}
+                                audioTracks={(currentScene as any).audioTracks || (currentScene as any).audio_tracks}
+                            />
+                        ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-black/95 p-8 text-center gap-5">
+                                <div className="w-16 h-16 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                                    <Lock size={30} />
+                                </div>
+                                <div className="space-y-1">
+                                    <h3 className="text-xl font-bold text-white uppercase tracking-tight">Scene Locked</h3>
+                                    <p className="text-white/60 text-sm max-w-md">
+                                        This scene requires an active PrimeTime subscription or access to play.
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => onShowPaywall && onShowPaywall()}
+                                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm uppercase tracking-wider transition-all shadow-lg active:scale-95"
+                                >
+                                    Unlock Movie
+                                </button>
+                            </div>
+                        )}
 
                         {/* Choice & Scene End Overlay */}
                         <div className={`absolute inset-0 z-20 flex flex-col items-center justify-center transition-opacity duration-500 ${showChoices ? 'opacity-100' : 'opacity-0 pointer-events-none'} ${hasShowOnTime && !isEndingScene ? '' : 'bg-black/60 backdrop-blur-md'}`}>
@@ -398,10 +422,12 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                             const targetScene = scenes.find(s => s.scene_id === nextId);
 
                                             // Determine if target scene choice is locked for non-subscribed users
-                                            const isTargetLocked = !isAuthorized && targetScene && (
-                                                targetScene.is_locked === true || 
-                                                (targetScene.is_free !== undefined && !targetScene.is_free && Number(targetScene.is_free) !== 1)
-                                            );
+                                            const isTargetSceneFree =
+                                                targetScene?.is_free === true ||
+                                                Number(targetScene?.is_free) === 1 ||
+                                                String(targetScene?.is_free) === '1' ||
+                                                String(targetScene?.is_free).toLowerCase() === 'true';
+                                            const isTargetLocked = !isAuthorized && targetScene && (targetScene.is_locked === true || !isTargetSceneFree);
 
                                             const styles = getButtonStyles(isTargetLocked ? '#f59e0b' : choice.button_color);
                                             const isSingle = choices.length === 1;

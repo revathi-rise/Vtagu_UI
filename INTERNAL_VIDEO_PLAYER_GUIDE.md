@@ -250,7 +250,7 @@ function MoviePlayer({ movie, userId }) {
         showControls={true}
         onProgressUpdate={(percent, currentTime) => {
           setProgress(percent);
-          console.log(`Progress: ${percent}%`);
+          // console.log(`Progress: ${percent}%`);
         }}
       />
       <div className="text-white">
@@ -286,7 +286,7 @@ Get real-time progress updates:
 
 ```tsx
 const handleProgressUpdate = (percent, currentTime) => {
-  console.log(`${percent}% watched, at ${currentTime}s`);
+  // console.log(`${percent}% watched, at ${currentTime}s`);
 };
 
 <WatchTrackingVideoPlayer

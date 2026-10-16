@@ -82,7 +82,7 @@ import UniversalVideoPlayer from '@/components/ui/UniversalVideoPlayer';
   autoPlay={true}
   showControls={true}
   onTimeUpdate={(current, duration) => {
-    console.log(`${current}s / ${duration}s`);
+    // console.log(`${current}s / ${duration}s`);
   }}
 />
 ```
@@ -189,7 +189,7 @@ export function MoviePlayer({ movie }) {
 
   const handleProgress = (progressPercent: number, currentTime: number) => {
     setProgress(progressPercent);
-    console.log(`Progress: ${progressPercent.toFixed(1)}%`);
+    // console.log(`Progress: ${progressPercent.toFixed(1)}%`);
   };
 
   const videoType = getVideoType(movie.videoUrl);

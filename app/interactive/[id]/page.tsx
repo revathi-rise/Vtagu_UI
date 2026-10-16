@@ -30,7 +30,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function InteractiveMoviePage({ params }: Props) {
     const { id } = await params;
-    console.log(id, "id from params");
 
     try {
         // Fetch all movies to find the specific one (SSR)
@@ -51,9 +50,14 @@ export default async function InteractiveMoviePage({ params }: Props) {
         }
 
         // Fetch scenes (SSR)
-        const scenes = await getScenes(movie.interactive_movie_id);
-        console.log(scenes);
+        let userId: string | null = null;
+        try {
+            const { cookies } = await import('next/headers');
+            const cookieStore = await cookies();
+            userId = cookieStore.get('userId')?.value || null;
+        } catch (e) {}
 
+        const scenes = await getScenes(movie.interactive_movie_id, userId);
         return (
             <InteractiveClient
                 movie={movie}

@@ -136,10 +136,7 @@ export function MoviePage({ movie }) {
    localStorage.setItem('DEBUG_VIDEO_PLAYER', 'true');
    
    // Your code
-   if (localStorage.getItem('DEBUG_VIDEO_PLAYER')) {
-     console.log('Video URL:', videoUrl);
-     console.log('Is Valid:', isValidVideoUrl(videoUrl));
-   }
+
    ```
 
 ## 📝 API Integration

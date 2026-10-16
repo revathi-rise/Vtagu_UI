@@ -80,8 +80,6 @@ export default function LoginForm() {
           localStorage.setItem('userId', userId.toString());
           document.cookie = `userId=${userId}; path=/; max-age=86400; SameSite=Lax`;
         }
-
-        console.log('[DEBUG] Login successful, user saved:', userData);
         dispatch(setUser(userData));
       } else {
         console.warn('[DEBUG] Login successful but no user data returned in res.data or res.user');
