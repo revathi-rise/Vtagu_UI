@@ -611,6 +611,18 @@ export interface Movie {
   movieType: number;
   contentType: number;
   ageRestriction: string;
+  certificate_id?: number | null;
+  certificateId?: number | null;
+  certificate?: {
+    id: number;
+    code: string;
+    name: string;
+    certification_system: string;
+    country: string;
+    maturity_level?: string;
+    badge_color?: string;
+    description?: string;
+  } | null;
   kidsRestriction: boolean;
   kids_restriction?: boolean;
   kids_only?: boolean;
