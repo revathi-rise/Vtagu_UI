@@ -20,6 +20,7 @@ interface MediaCardProps {
   year?: string | number;
   progress?: number;
   infoLabel?: string;
+  quality?: string;
   trailerUrl?: string;
   isComingSoon?: boolean;
   onClick?: () => void;
@@ -100,6 +101,7 @@ export const MediaCard = ({
   year,
   progress,
   infoLabel,
+  quality,
   onClick,
   className,
   variant = 'portrait',
@@ -258,13 +260,17 @@ export const MediaCard = ({
                   {duration}
                 </span>
               )}
-              {((year || duration) && (infoLabel || true)) && <span className="w-1 h-1 rounded-full bg-white/40" />}
-              <span className="px-1.5 py-0.5 rounded bg-white/10 border border-white/15 text-[9px] font-black uppercase text-white/90 tracking-wider">
-                {infoLabel || 'MOVIE'}
-              </span>
-              <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/30 text-[9px] font-black uppercase text-cyan-300 tracking-wider">
-                4K UHD
-              </span>
+              {((year || duration) && infoLabel) && <span className="w-1 h-1 rounded-full bg-white/40" />}
+              {infoLabel && (
+                <span className="px-1.5 py-0.5 rounded bg-white/10 border border-white/15 text-[9px] font-black uppercase text-white/90 tracking-wider">
+                  {infoLabel}
+                </span>
+              )}
+              {Boolean(quality) && (
+                <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/30 text-[9px] font-black uppercase text-cyan-300 tracking-wider">
+                  {quality}
+                </span>
+              )}
             </div>
 
             {/* Description expander on hover (desktop only) */}

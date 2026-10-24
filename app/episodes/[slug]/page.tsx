@@ -86,7 +86,9 @@ export default async function EpisodeDetailsPage({ params }: PageProps) {
       <TitleHero
         title={episode.title}
         year={new Date().getFullYear().toString()}
-        rating="TV-MA"
+        rating={episode.rating ? `★ ${episode.rating}` : undefined}
+        certificate={(episode as any).certificate}
+        quality={(episode as any).quality || (episode as any).video_quality || (episode as any).play_quality}
         seasons={`Season ${episode.season_id || episode.seasonId}`}
         description={episode.shortDescription || `Watch the latest episode of ${episode.title}. Experience premium episodic storytelling at its finest — exclusively on PrimeTime.`}
         backdropUrl={backdropUrl}

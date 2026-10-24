@@ -207,9 +207,37 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                     </div>
 
                     <div className="relative z-10 max-w-[90%] mx-auto h-full flex flex-col justify-end pb-16">
-                        <div className="inline-flex items-center gap-2 bg-cyan-400 text-black px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest mb-6 w-fit shadow-lg shadow-cyan-400/20 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                            <Zap size={14} fill="black" />
-                            Interactive Original
+                        <div className="flex flex-wrap items-center gap-3 mb-6">
+                            <div className="inline-flex items-center gap-2 bg-cyan-400 text-black px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest w-fit shadow-lg shadow-cyan-400/20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                                <Zap size={14} fill="black" />
+                                Interactive Original
+                            </div>
+                            {Boolean((movie as any).quality || (movie as any).video_quality || (movie as any).play_quality) && (
+                                <div className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 text-white/70 px-3 py-1.5 rounded-full font-black text-[11px] uppercase tracking-widest w-fit">
+                                    {(movie as any).quality || (movie as any).video_quality || (movie as any).play_quality}
+                                </div>
+                            )}
+                            {(movie as any).certificate?.code && (
+                                <div 
+                                    style={
+                                        (movie as any).certificate?.badge_color 
+                                            ? { 
+                                                borderColor: `${(movie as any).certificate.badge_color}50`, 
+                                                backgroundColor: `${(movie as any).certificate.badge_color}20`,
+                                                color: (movie as any).certificate.badge_color || '#fff'
+                                              } 
+                                            : undefined
+                                    }
+                                    className="inline-flex items-center gap-1.5 bg-amber-400/10 border border-amber-400/30 text-amber-400 px-3 py-1.5 rounded-full font-black text-[11px] uppercase tracking-widest w-fit shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-700"
+                                >
+                                    <span>{(movie as any).certificate.code}</span>
+                                    {Boolean((movie as any).certificate?.certification_system) && (
+                                        <span className="text-[9px] px-1.5 py-0.5 bg-white/10 text-white/90 rounded font-bold">
+                                            {(movie as any).certificate.certification_system}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
                         </div>
                         <h1 className="text-[28px] md:text-[40px] font-bold mb-3 tracking-tighter animate-in fade-in slide-in-from-bottom-6 duration-1000">
                             {movie.title}

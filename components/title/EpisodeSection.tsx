@@ -68,6 +68,24 @@ export default function EpisodeSection({ episodes = [], currentEpisodeId }: Epis
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-80" />
                       
+                      {/* Certificate Badge */
+                      (episode as any).certificate?.code && (
+                        <div 
+                          style={
+                            (episode as any).certificate?.badge_color 
+                              ? { 
+                                  borderColor: `${(episode as any).certificate.badge_color}60`, 
+                                  backgroundColor: `${(episode as any).certificate.badge_color}30`,
+                                  color: (episode as any).certificate.badge_color || '#fff'
+                                } 
+                              : undefined
+                          }
+                          className="absolute top-3 left-7 bg-black/70 backdrop-blur-md text-amber-400 border border-amber-400/30 text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-lg tracking-wider"
+                        >
+                          {(episode as any).certificate.code}
+                        </div>
+                      )}
+
                       {/* Active / Current indicator dot */}
                       <div className={`absolute top-3 left-3 w-2 h-2 rounded-full animate-pulse ${
                         isCurrent ? 'bg-primary shadow-[0_0_8px_rgba(50,153,255,1)]' : 'bg-white/30'

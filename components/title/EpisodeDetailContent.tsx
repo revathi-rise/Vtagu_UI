@@ -143,10 +143,33 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
                     ★ {episode.rating}
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-white/60 bg-white/5 px-3 py-2 rounded-xl border border-white/10">
-                  <span className="text-primary text-[10px] font-black">4K</span>
-                  HDR
-                </div>
+                {(episode as any).certificate?.code && (
+                  <div 
+                    style={
+                      (episode as any).certificate?.badge_color 
+                        ? { 
+                            borderColor: `${(episode as any).certificate.badge_color}50`, 
+                            backgroundColor: `${(episode as any).certificate.badge_color}20`,
+                            color: (episode as any).certificate.badge_color || '#fff'
+                          } 
+                        : undefined
+                    }
+                    className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-amber-400 bg-amber-400/10 px-3 py-2 rounded-xl border border-amber-400/30"
+                  >
+                    <span>{(episode as any).certificate.code}</span>
+                    {Boolean((episode as any).certificate?.certification_system) && (
+                      <span className="text-[9px] px-1.5 py-0.5 bg-white/10 text-white/90 rounded font-bold">
+                        {(episode as any).certificate.certification_system}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {Boolean((episode as any).quality || (episode as any).video_quality || (episode as any).play_quality) && (
+                  <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-white/60 bg-white/5 px-3 py-2 rounded-xl border border-white/10">
+                    <span className="text-primary text-[10px] font-black">PLAY</span>
+                    {(episode as any).quality || (episode as any).video_quality || (episode as any).play_quality}
+                  </div>
+                )}
               </div>
 
               {/* Description */}

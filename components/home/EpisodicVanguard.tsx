@@ -101,7 +101,8 @@ export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
                       badge={episode.isFree ? "FREE" : (episode.isFeatured ? "FEATURED" : "PAID")}
                       badgeColor={episode.isFree ? "green" : (episode.isFeatured ? "purple" : "orange")}
                       isFree={episode.isFree}
-                      infoLabel="EPISODE"
+                      infoLabel={(episode as any).certificate?.code || undefined}
+                      quality={(episode as any).quality || (episode as any).video_quality || (episode as any).play_quality}
                       duration={episode.duration}
                       rating={episode.rating}
                     />

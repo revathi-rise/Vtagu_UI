@@ -153,6 +153,8 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
                         badgeColor={movie.isFree ? 'green' : 'orange'}
                         trailerUrl={movie.trailerUrl}
                         isComingSoon={movie.isComingSoon || movie.is_coming_soon}
+                        infoLabel={(movie as any).certificate?.code || movie.ageRestriction || undefined}
+                        quality={(movie as any).quality || (movie as any).video_quality || (movie as any).play_quality}
                       />
                     </Link>
                   </div>
@@ -190,6 +192,8 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
                         badgeColor="blue"
                         trailerUrl={movie.trailer_video_url}
                         isComingSoon={Boolean(movie.isComingSoon || movie.is_coming_soon)}
+                        infoLabel={(movie as any).certificate?.code || undefined}
+                        quality={(movie as any).quality || (movie as any).video_quality || (movie as any).play_quality}
                       />
                     </Link>
                   </div>
@@ -227,6 +231,8 @@ export default async function LanguageMoviesPage({ params }: PageProps) {
                         badgeColor={episode.isFree ? 'green' : 'orange'}
                         trailerUrl={episode.media?.trailer?.url || episode.url}
                         isComingSoon={episode.isComingSoon || episode.is_coming_soon}
+                        infoLabel={(episode as any).certificate?.code || undefined}
+                        quality={(episode as any).quality || (episode as any).video_quality || (episode as any).play_quality}
                       />
                     </Link>
                   </div>

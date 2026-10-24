@@ -18,6 +18,7 @@ export interface HeroItem {
   image: string;
   category: string;
   rating: string;
+  certificate?: any;
   link: string;
   languages?: string;
   trailerUrl?: string;
@@ -102,6 +103,7 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
       image: poster.path.startsWith('http') ? poster.path : `${IMAGE_BASE_URL}${poster.path}`,
       category: poster.genres_list || "",
       rating,
+      certificate: (poster as any).certificate || (poster.reference_type === 'movie' ? movies.find(m => m.id === poster.reference_id)?.certificate : (poster.reference_type === 'series' || poster.reference_type === 'episode') ? (episodes.find(e => e.id === poster.reference_id || e.episodeId === poster.reference_id) as any)?.certificate : null),
       link: link || "#",
       languages: poster.languages || "",
       trailerUrl: poster.trailer_url || "",
@@ -119,6 +121,7 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
       image: movie.posterImage || "",
       category: "",
       rating: movie.rating ? movie.rating.toString() : "",
+      certificate: (movie as any).certificate,
       link: `/movies/${movie.slug || movie.id}`,
       languages: movie.languages || "",
       trailerUrl: movie.trailerUrl || "",
@@ -424,13 +427,34 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
               className="flex flex-col gap-6"
             >
               {/* Badge System */}
-              {(currentItem.category || currentItem.rating) && (
-                <div className="flex items-center gap-4">
+              {(currentItem.category || currentItem.rating || currentItem.certificate) && (
+                <div className="flex items-center gap-3 md:gap-4 flex-wrap">
                   {currentItem.category && (
                     <div className="glass-panel px-4 py-1.5 rounded-full border-white/20 flex items-center gap-2">
                       <span className="text-[10px] md:text-[12px] font-bold text-primary tracking-[0.2em] uppercase">
                         {currentItem.category}
                       </span>
+                    </div>
+                  )}
+                  {Boolean(currentItem.certificate?.code) && (
+                    <div 
+                      style={
+                        currentItem.certificate?.badge_color 
+                          ? { 
+                              borderColor: `${currentItem.certificate.badge_color}40`, 
+                              backgroundColor: `${currentItem.certificate.badge_color}20`,
+                              color: currentItem.certificate.badge_color || '#fff'
+                            } 
+                          : undefined
+                      }
+                      className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md py-1.5 px-3.5 rounded-full border border-white/10 text-[11px] md:text-[13px] font-extrabold tracking-wider uppercase"
+                    >
+                      <span>{currentItem.certificate.code}</span>
+                      {Boolean(currentItem.certificate.certification_system) && (
+                        <span className="text-[9px] px-1 py-0.2 rounded font-bold bg-white/15 text-white/80">
+                          {currentItem.certificate.certification_system}
+                        </span>
+                      )}
                     </div>
                   )}
                   {currentItem.rating && (

@@ -239,6 +239,16 @@ export interface Poster {
   page_type?: string;
   reference_id?: number;
   reference_type?: string;
+  certificate_id?: number | null;
+  certificateId?: number | null;
+  certificate?: {
+    id: number;
+    code: string;
+    name: string;
+    certification_system: string;
+    maturity_level?: string;
+    badge_color?: string;
+  } | null;
   status: string;
   is_coming_soon?: boolean;
   isComingSoon?: boolean;
@@ -322,6 +332,21 @@ export interface Series {
   country_id: number;
   rating: number;
   featured: number;
+  certificate_id?: number | null;
+  certificateId?: number | null;
+  quality?: string;
+  video_quality?: string;
+  play_quality?: string;
+  certificate?: {
+    id?: number;
+    certificate_id?: number;
+    code: string;
+    name: string;
+    certification_system: string;
+    country?: string;
+    maturity_level?: string;
+    badge_color?: string;
+  } | null;
   is_coming_soon?: boolean;
   isComingSoon?: boolean;
 }
@@ -355,6 +380,18 @@ export interface InteractiveMovie {
   currency?: string;
   is_coming_soon?: boolean | number;
   isComingSoon?: boolean;
+  certificate_id?: number | null;
+  certificateId?: number | null;
+  certificate?: {
+    id?: number;
+    certificate_id?: number;
+    code: string;
+    name: string;
+    certification_system: string;
+    country?: string;
+    maturity_level?: string;
+    badge_color?: string;
+  } | null;
 }
 
 export interface MovieAccessResponse {
@@ -503,6 +540,9 @@ export interface Episode {
   shortDescription: string;
   longDescription: string;
   duration: string;
+  quality?: string;
+  video_quality?: string;
+  play_quality?: string;
   languages: string;
   rating: number;
   isFeatured: boolean;
@@ -517,6 +557,16 @@ export interface Episode {
     video?: { url: string; alt?: string };
     trailer?: { url: string; alt?: string };
   };
+  certificate_id?: number | null;
+  certificateId?: number | null;
+  certificate?: {
+    id: number;
+    code: string;
+    name: string;
+    certification_system: string;
+    maturity_level?: string;
+    badge_color?: string;
+  } | null;
   createdAt?: string;
   updatedAt?: string;
 

@@ -72,7 +72,8 @@ export default function MovieSection({ movies }: MovieSectionProps) {
                     description={movie.shortDescription}
                     badge={getBadgeText(movie) || undefined}
                     badgeColor={movie.isFree ? 'green' : 'orange'}
-                    infoLabel={(movie as any).certificate?.code || movie.ageRestriction || "MOVIE"}
+                    infoLabel={(movie as any).certificate?.code || movie.ageRestriction || undefined}
+                      quality={(movie as any).quality || (movie as any).video_quality || (movie as any).play_quality}
                   />
                 </Link>
               </div>
@@ -112,7 +113,8 @@ export default function MovieSection({ movies }: MovieSectionProps) {
                       description={movie.shortDescription}
                       badge={getBadgeText(movie) || undefined}
                       badgeColor={movie.isFree ? 'green' : 'orange'}
-                      infoLabel={(movie as any).certificate?.code || movie.ageRestriction || "MOVIE"}
+                      infoLabel={(movie as any).certificate?.code || movie.ageRestriction || undefined}
+                      quality={(movie as any).quality || (movie as any).video_quality || (movie as any).play_quality}
                     />
                   </Link>
                 </SwiperSlide>

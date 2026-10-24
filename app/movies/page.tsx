@@ -86,6 +86,8 @@ export default async function MoviesPage() {
                         badgeColor={index < 10 ? 'purple' : (movie.isFree ? 'green' : 'orange')}
                         trailerUrl={movie.trailerUrl}
                         isComingSoon={movie.isComingSoon || movie.is_coming_soon}
+                        infoLabel={(movie as any).certificate?.code || movie.ageRestriction || undefined}
+                        quality={(movie as any).quality || (movie as any).video_quality || (movie as any).play_quality}
                       />
                     </Link>
                   </div>

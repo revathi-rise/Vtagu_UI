@@ -94,17 +94,32 @@ export default function MovieDetailsClient({ movie: initialMovie }: MovieDetails
               <Star size={14} className="fill-yellow-500" />
               {movie.rating} / 10
             </div>
-            <div className="bg-white/5 backdrop-blur-md px-5 py-2 rounded-full border border-white/10 text-[12px] font-black text-white/70 tracking-widest uppercase flex items-center gap-1.5">
-              <span>{((movie as any).certificate?.code || movie.ageRestriction || 'U')}</span>
-              {(((movie as any).certificate?.certification_system || 'CBFC') === 'CBFC') && (
-                <span className="text-[9px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 rounded font-bold border border-emerald-500/30">
-                  CBFC
-                </span>
-              )}
-            </div>
-            <div className="bg-white/5 backdrop-blur-md px-5 py-2 rounded-full border border-white/10 text-[12px] font-black text-white/70 tracking-widest">
-              4K ULTRA HD
-            </div>
+            {Boolean((movie as any).certificate?.code || movie.ageRestriction) && (
+              <div 
+                style={
+                  (movie as any).certificate?.badge_color 
+                    ? { 
+                        borderColor: `${(movie as any).certificate.badge_color}40`, 
+                        backgroundColor: `${(movie as any).certificate.badge_color}18`,
+                        color: (movie as any).certificate.badge_color || '#fff'
+                      } 
+                    : undefined
+                }
+                className="backdrop-blur-md px-5 py-2 rounded-full border border-white/10 text-[12px] font-black tracking-widest uppercase flex items-center gap-1.5"
+              >
+                <span>{(movie as any).certificate?.code || movie.ageRestriction}</span>
+                {Boolean((movie as any).certificate?.certification_system) && (
+                  <span className="text-[9px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 rounded font-bold border border-emerald-500/30">
+                    {(movie as any).certificate.certification_system}
+                  </span>
+                )}
+              </div>
+            )}
+            {Boolean((movie as any).quality || (movie as any).video_quality || (movie as any).play_quality) && (
+              <div className="bg-white/5 backdrop-blur-md px-5 py-2 rounded-full border border-white/10 text-[12px] font-black text-white/70 tracking-widest uppercase">
+                {(movie as any).quality || (movie as any).video_quality || (movie as any).play_quality}
+              </div>
+            )}
           </motion.div>
 
           {/* Title & Description with Luxury Typography */}

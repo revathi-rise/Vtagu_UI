@@ -110,6 +110,8 @@ export default function InteractiveGridHero({ interactiveMovies }: InteractiveHe
                                             badgeColor={badgeColor}
                                             trailerUrl={movie.trailer_video_url}
                                             isComingSoon={isComingSoon}
+                                            infoLabel={(movie as any).certificate?.code || undefined}
+                                            quality={(movie as any).quality || (movie as any).video_quality || (movie as any).play_quality}
                                             onClick={() => {
                                                 router.push(`/interactive/${movie.interactive_movie_id}`);
                                             }}

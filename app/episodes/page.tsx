@@ -108,6 +108,8 @@ export default async function EpisodesPage() {
                       badgeColor={episode.isFeatured ? "orange" : (index < 10 ? 'purple' : 'blue')}
                       trailerUrl={episode.media?.trailer?.url}
                       isComingSoon={episode.isComingSoon || episode.is_coming_soon}
+                      infoLabel={(episode as any).certificate?.code || undefined}
+                      quality={(episode as any).quality || (episode as any).video_quality || (episode as any).play_quality}
                     />
                   </Link>
                 </div>

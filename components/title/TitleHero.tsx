@@ -11,9 +11,16 @@ interface TitleHeroProps {
   description: string;
   backdropUrl: string;
   videoUrl?: string;
+  quality?: string;
+  certificate?: {
+    code: string;
+    name?: string;
+    certification_system?: string;
+    badge_color?: string;
+  } | null;
 }
 
-export default function TitleHero({ title, year, rating, seasons, description, backdropUrl, videoUrl }: TitleHeroProps) {
+export default function TitleHero({ title, year, rating, seasons, description, backdropUrl, videoUrl, certificate, quality }: TitleHeroProps) {
   
   // Logic to separate Title from Episode if it's concatenated
   const isEpisode = title.toUpperCase().includes("EPISODE");
@@ -62,6 +69,38 @@ export default function TitleHero({ title, year, rating, seasons, description, b
             </div>
             <span className="text-white/40">•</span>
             <span className="bg-white/5 px-2.5 py-1.5 rounded-xl border border-white/10 shadow-[inner_0_1px_1px_rgba(255,255,255,0.05)]">{year}</span>
+            {quality && (
+              <>
+                <span className="text-white/40">•</span>
+                <span className="border border-white/20 text-white/80 px-2.5 py-1.5 rounded-xl text-xs bg-white/5 font-black shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] tracking-wider uppercase">
+                  {quality}
+                </span>
+              </>
+            )}
+            {certificate?.code && (
+              <>
+                <span className="text-white/40">•</span>
+                <span 
+                  style={
+                    certificate.badge_color 
+                      ? { 
+                          borderColor: `${certificate.badge_color}50`, 
+                          backgroundColor: `${certificate.badge_color}20`,
+                          color: certificate.badge_color || '#fff'
+                        } 
+                      : undefined
+                  }
+                  className="border border-amber-400/40 text-amber-400 px-2.5 py-1.5 rounded-xl text-xs bg-amber-400/10 font-black shadow-[inset_0_1px_1px_rgba(251,191,36,0.15)] tracking-wider uppercase flex items-center gap-1.5"
+                >
+                  <span>{certificate.code}</span>
+                  {certificate.certification_system && (
+                    <span className="text-[9px] px-1 py-0.2 rounded font-bold bg-white/15 text-white/80">
+                      {certificate.certification_system}
+                    </span>
+                  )}
+                </span>
+              </>
+            )}
             {rating && (
               <>
                 <span className="text-white/40">•</span>
