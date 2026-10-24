@@ -8,13 +8,13 @@ import { AlertProvider } from '@/components/shared/CustomAlertModal';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  display: 'swap',
   variable: '--font-montserrat'
 });
 
 const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '500'],
+  display: 'swap',
   variable: '--font-inter'
 });
 
