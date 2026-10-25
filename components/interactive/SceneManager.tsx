@@ -3,8 +3,7 @@
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Target, ChevronRight, RotateCcw, CheckCircle2, Lock, Sparkles, Compass, Film } from 'lucide-react';
 import { Scene, Choice } from '@/lib/vtagu.api';
-import WatchTrackingVideoPlayer from '@/components/ui/WatchTrackingVideoPlayer';
-import { VideoPlayerHandle } from '@/components/ui/VideoPlayer';
+import WatchTrackingVideoPlayer, { VideoPlayerHandle } from '@/components/ui/WatchTrackingVideoPlayer';
 import {
   requestElementFullscreen,
   exitDocumentFullscreen,
@@ -29,6 +28,7 @@ interface SceneManagerProps {
 
 export interface SceneManagerHandle {
     requestFullScreen: () => void;
+    restartPlayback: () => void;
 }
 
 // Helpers for premium button coloring and timing logic
@@ -146,8 +146,30 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
     useImperativeHandle(ref, () => ({
         requestFullScreen: async () => {
             await requestElementFullscreen(containerRef.current);
+        },
+        restartPlayback: () => {
+            setShowChoices(false);
+            if (playerRef.current?.restartPlayback) {
+                playerRef.current.restartPlayback();
+            } else if (playerRef.current?.videoElement) {
+                playerRef.current.videoElement.currentTime = 0;
+                playerRef.current.videoElement.play().catch(() => {});
+            }
         }
     }));
+
+    const handleRestartClick = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        playClickSound();
+        setShowChoices(false);
+        if (playerRef.current?.restartPlayback) {
+            playerRef.current.restartPlayback();
+        } else if (playerRef.current?.videoElement) {
+            playerRef.current.videoElement.currentTime = 0;
+            playerRef.current.videoElement.play().catch(() => {});
+        }
+        onRestart();
+    };
 
     const handleFullscreenRequest = async () => {
         if (isElementFullscreen(containerRef.current)) {
@@ -345,11 +367,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
 
                                             {/* Restart Story */}
                                             <button
-                                                onClick={() => {
-                                                    playClickSound();
-                                                    setShowChoices(false);
-                                                    onRestart();
-                                                }}
+                                                onClick={handleRestartClick}
                                                 className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 w-full sm:w-auto backdrop-blur-md active:scale-95 cursor-pointer shadow-lg"
                                             >
                                                 <RotateCcw size={16} />
@@ -402,12 +420,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                 <span>Previous</span>
                                             </button>
                                             <button 
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    playClickSound();
-                                                    setShowChoices(false);
-                                                    onRestart();
-                                                }}
+                                                onClick={handleRestartClick}
                                                 className="flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-black/70 hover:bg-white text-white/90 hover:text-black backdrop-blur-md border border-white/25 hover:border-transparent rounded-full transition-all text-[11px] font-bold uppercase tracking-wider shadow-lg active:scale-95 cursor-pointer group"
                                                 title="Restart Story from Beginning"
                                                 aria-label="Restart Story"

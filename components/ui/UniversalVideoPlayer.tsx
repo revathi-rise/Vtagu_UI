@@ -12,6 +12,8 @@ export interface UniversalVideoPlayerHandle {
   pause: () => void;
   togglePlay: () => void;
   requestFullScreen: () => void;
+  seek?: (time: number) => void;
+  restartPlayback?: () => void;
   videoElement?: HTMLVideoElement | null;
 }
 
@@ -82,6 +84,24 @@ const UniversalVideoPlayer = forwardRef<UniversalVideoPlayerHandle, UniversalVid
           rumblePlayerRef.current?.requestFullScreen?.();
         } else {
           nativePlayerRef.current?.requestFullScreen?.();
+        }
+      },
+      seek: (time: number) => {
+        if (videoType === 'native' && nativePlayerRef.current?.videoElement) {
+          nativePlayerRef.current.videoElement.currentTime = time;
+        } else if (videoType === 'youtube') {
+          (youtubePlayerRef.current as any)?.seek?.(time);
+        }
+      },
+      restartPlayback: () => {
+        if (videoType === 'native' && nativePlayerRef.current?.videoElement) {
+          nativePlayerRef.current.videoElement.currentTime = 0;
+          nativePlayerRef.current.videoElement.play().catch(() => {});
+        } else if (videoType === 'youtube') {
+          (youtubePlayerRef.current as any)?.seek?.(0);
+          youtubePlayerRef.current?.play?.();
+        } else {
+          nativePlayerRef.current?.play?.();
         }
       },
       videoElement: videoType === 'native' ? nativePlayerRef.current?.videoElement : null,

@@ -380,6 +380,16 @@ export interface InteractiveMovie {
   currency?: string;
   is_coming_soon?: boolean | number;
   isComingSoon?: boolean;
+  quality?: string | null;
+  video_quality?: string | null;
+  play_quality?: string | null;
+  director?: string | null;
+  actors?: string | null;
+  duration?: string | null;
+  year?: number | null;
+  genre_id?: string | null;
+  genres?: string[] | string | null;
+  total_endings?: number | null;
   certificate_id?: number | null;
   certificateId?: number | null;
   certificate?: {

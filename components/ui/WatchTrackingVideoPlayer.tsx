@@ -196,10 +196,21 @@ const WatchTrackingVideoPlayer = React.forwardRef<
       pause: () => videoPlayerRef.current?.pause?.(),
       togglePlay: () => videoPlayerRef.current?.togglePlay?.(),
       requestFullScreen: () => videoPlayerRef.current?.requestFullScreen?.(),
+      seek: (time: number) => {
+        videoPlayerRef.current?.seek?.(time);
+      },
+      restartPlayback: () => {
+        hasResumedRef.current = true;
+        videoPlayerRef.current?.restartPlayback?.();
+        // Reset stored watch progress to 0
+        try {
+          updateProgress(0, videoPlayerRef.current?.videoElement?.duration || 100);
+        } catch (e) {}
+      },
       get videoElement() {
         return videoPlayerRef.current?.videoElement ?? null;
       },
-    }), []);
+    }), [updateProgress]);
 
     return (
       <div className="relative w-full h-full min-h-[inherit]">
