@@ -18,8 +18,6 @@ import {
     X,
     Volume2,
     Sparkles,
-    Share2,
-    Film,
     ArrowRight
 } from 'lucide-react';
 import Image from 'next/image';
@@ -52,7 +50,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
     const [showCastModal, setShowCastModal] = useState(false);
     const [showInfoModal, setShowInfoModal] = useState(false);
 
-    // Endings tracking state
+    // Endings tracking state (dynamic, initialized to 0)
     const [unlockedEndings, setUnlockedEndings] = useState<number>(0);
 
     const [accessData, setAccessData] = useState<{
@@ -291,7 +289,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                 movieTitle={movie.title}
             />
 
-            {/* Cast & Crew Modal */}
+            {/* Cast & Creative Crew Modal */}
             <AnimatePresence>
                 {showCastModal && (
                     <motion.div
@@ -444,7 +442,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
             </AnimatePresence>
 
             <main className="min-h-screen bg-[#070913] text-white overflow-x-hidden font-inter selection:bg-cyan-500/30">
-                {/* Hero Header Section matching Image 1 */}
+                {/* Hero Header Section */}
                 <div className="relative w-full h-[520px] md:h-[660px] lg:h-[760px] overflow-hidden">
                     <div className="absolute inset-0 z-0">
                         <Image
@@ -473,12 +471,13 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                             </div>
                         </motion.div>
 
-                        {/* Title matching Image 1 */}
+                        {/* Title */}
                         <motion.h1
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.1 }}
-                            className="text-[clamp(1.75rem,3.5vw,4rem)] font-black tracking-tight uppercase leading-[1.05] max-w-4xl mb-4 drop-shadow-2xl"          >
+                            className="text-[clamp(1.75rem,3.5vw,4rem)] font-black tracking-tight uppercase leading-[1.05] max-w-4xl mb-4 drop-shadow-2xl"
+                        >
                             {movie.title}
                         </motion.h1>
 
@@ -559,7 +558,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                             </motion.p>
                         )}
 
-                        {/* Begin Narrative CTA Button matching Image 1 */}
+                        {/* Begin Narrative CTA Button */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}

@@ -180,6 +180,9 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
     };
 
     const videoUrl = currentScene?.poster_url || currentScene?.scene_url || '';
+    const sceneIndex = scenes.findIndex(s => s.scene_id === currentScene?.scene_id);
+    const currentSceneNum = sceneIndex >= 0 ? sceneIndex + 1 : 1;
+    const totalScenesNum = Math.max(scenes.length, 1);
 
     const handleTimeUpdate = (currentTime: number, duration: number) => {
         if (currentScene?.is_ending) return;
@@ -268,6 +271,34 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
             >
                 {currentScene ? (
                     <>
+                        {/* Top-Right Scene Progress Indicator */}
+                        <div className="absolute top-4 right-4 sm:top-5 sm:right-5 z-25 pointer-events-none flex items-center gap-2">
+                            <div className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-black/80 backdrop-blur-md border border-cyan-400/40 text-white shadow-[0_4px_20px_rgba(0,0,0,0.8),0_0_15px_rgba(34,211,238,0.25)]">
+                                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,1)] animate-pulse" />
+                                <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] text-white">
+                                    SCENE {currentSceneNum} OF {totalScenesNum}
+                                </span>
+                                {totalScenesNum > 1 && (
+                                    <div className="hidden sm:flex items-center gap-1.5 pl-2 border-l border-white/20">
+                                        {Array.from({ length: Math.min(totalScenesNum, 8) }).map((_, i) => (
+                                            <div key={i} className="flex items-center">
+                                                <span 
+                                                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                                                        i < currentSceneNum 
+                                                            ? 'bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,1)]' 
+                                                            : 'bg-white/20'
+                                                    }`} 
+                                                />
+                                                {i < Math.min(totalScenesNum, 8) - 1 && (
+                                                    <span className={`w-2 h-[1px] ${i < currentSceneNum - 1 ? 'bg-cyan-400/60' : 'bg-white/15'}`} />
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         {videoUrl ? (
                             <WatchTrackingVideoPlayer
                                 ref={playerRef}
@@ -442,13 +473,17 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                 String(targetScene?.is_free).toLowerCase() === 'true';
                                             const isTargetLocked = !isAuthorized && targetScene && (targetScene.is_locked === true || !isTargetSceneFree);
 
-                                            const styles = getButtonStyles(isTargetLocked ? '#f59e0b' : choice.button_color);
                                             const isSingle = choices.length === 1;
-                                            const isLeft = isSingle ? true : index % 2 === 0;
+                                            const isChoiceA = index === 0;
                                             const positionClass = isSingle 
                                                 ? 'left-1/2 -translate-x-1/2' 
-                                                : (isLeft ? 'left-[5%] sm:left-[10%] md:left-[15%]' : 'right-[5%] sm:right-[10%] md:right-[15%]');
-                                            const boxText = choice.choice_text || choice.button_text;
+                                                : (isChoiceA ? 'left-[4%] sm:left-[8%] md:left-[10%]' : 'right-[4%] sm:right-[8%] md:right-[10%]');
+                                            
+                                            const rawBoxText = choice.choice_text || choice.button_text || (isChoiceA ? 'Option A' : 'Option B');
+                                            const letter = isChoiceA ? 'A' : index === 1 ? 'B' : String.fromCharCode(65 + index);
+                                            const boxText = rawBoxText.toUpperCase().startsWith(`${letter}:`) || rawBoxText.toUpperCase().startsWith(`${letter} :`)
+                                                ? rawBoxText
+                                                : `${letter}: ${rawBoxText}`;
 
                                             return (
                                                 <div 
@@ -466,61 +501,35 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                             setShowChoices(false);
                                                             setTimeout(() => {
                                                                 onChoiceSelect(nextId!);
-                                                            }, 500);
+                                                            }, 400);
                                                         }
                                                     }}
-                                                    style={{ 
-                                                        '--btn-color': styles.baseColor,
-                                                        '--btn-bg-hover': styles.rgbaBgHover 
-                                                    } as React.CSSProperties}
-                                                    className={`absolute bottom-[20%] md:bottom-[25%] ${positionClass} flex flex-col items-center pointer-events-auto cursor-pointer group hover:scale-105 transition-transform duration-500`}
+                                                    className={`absolute bottom-[16%] md:bottom-[20%] ${positionClass} flex flex-col items-center pointer-events-auto cursor-pointer group hover:scale-105 active:scale-95 transition-all duration-300 z-30`}
                                                 >
-                                                    {isLeft ? (
-                                                        <>
-                                                            <div className={`bg-[var(--btn-bg-hover)] backdrop-blur-md border ${isTargetLocked ? 'border-amber-500/80 bg-amber-950/30' : 'border-[var(--btn-color)]'} px-6 py-2 md:px-10 md:py-3 transform -skew-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_25px_var(--btn-color)] hover:bg-[var(--btn-color)] transition-all duration-500 relative overflow-hidden z-10 group/btn`}>
-                                                                <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover/btn:animate-[shine_1s_ease-in-out]" />
-                                                                <span className="transform skew-x-12 font-black italic text-xl md:text-3xl tracking-wide whitespace-pre-line text-center text-white transition-colors duration-500 drop-shadow-lg flex items-center justify-center gap-2">
-                                                                    {isTargetLocked && (
-                                                                        <Lock size={20} className="text-amber-400 shrink-0 inline-block mr-1" />
-                                                                    )}
-                                                                    {boxText}
-                                                                </span>
-                                                            </div>
+                                                    <div
+                                                        className={`relative px-6 py-3 sm:px-10 sm:py-3.5 md:px-12 md:py-4 rounded-2xl md:rounded-3xl border transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-xl ${
+                                                            isTargetLocked
+                                                                ? 'bg-gradient-to-r from-amber-950/90 via-amber-900/80 to-amber-950/90 border-amber-500/80 shadow-[0_0_25px_rgba(245,158,11,0.4)]'
+                                                                : isChoiceA
+                                                                    ? 'bg-gradient-to-r from-[#0055ff] via-[#0088ff] to-[#00d4ff] border-cyan-300/80 shadow-[0_0_35px_rgba(0,180,255,0.65)] hover:shadow-[0_0_50px_rgba(0,212,255,0.95)]'
+                                                                    : 'bg-gradient-to-r from-[#7900c4] via-[#bd00b8] to-[#ff0099] border-pink-300/80 shadow-[0_0_35px_rgba(236,72,153,0.65)] hover:shadow-[0_0_50px_rgba(255,0,153,0.95)]'
+                                                        }`}
+                                                    >
+                                                        {/* Subtle sheen reflection overlay */}
+                                                        <span className="absolute inset-0 rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+                                                        <span className="font-black italic text-base sm:text-2xl md:text-3xl tracking-wide uppercase text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] flex items-center gap-2">
                                                             {isTargetLocked && (
-                                                                <span className="mt-2 text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-500/20 border border-amber-500/40 px-3 py-1 rounded-full backdrop-blur-md shadow-lg flex items-center gap-1">
-                                                                    <Lock size={10} /> Locked Choice (Upgrade Plan)
-                                                                </span>
+                                                                <Lock size={20} className="text-amber-400 shrink-0 inline-block" />
                                                             )}
-                                                            {!isSingle && (
-                                                                <svg className="absolute top-[90%] right-4 w-[60px] h-[40px] overflow-visible pointer-events-none opacity-70 group-hover:opacity-100 group-hover:drop-shadow-[0_0_8px_var(--btn-color)] transition-all duration-500 z-0" style={{ stroke: 'var(--btn-color)' }}>
-                                                                    <path d="M 0,0 L 15,0 L 35,20" fill="none" strokeWidth="3" />
-                                                                    <circle cx="35" cy="20" r="4" fill="transparent" strokeWidth="3" />
-                                                                </svg>
-                                                            )}
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <div className={`bg-[var(--btn-bg-hover)] backdrop-blur-md border ${isTargetLocked ? 'border-amber-500/80 bg-amber-950/30' : 'border-[var(--btn-color)]'} px-6 py-2 md:px-10 md:py-3 transform -skew-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_25px_var(--btn-color)] hover:bg-[var(--btn-color)] transition-all duration-500 relative overflow-hidden z-10 group/btn`}>
-                                                                <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover/btn:animate-[shine_1s_ease-in-out]" />
-                                                                <span className="transform skew-x-12 font-black italic text-xl md:text-3xl tracking-wide whitespace-pre-line text-center text-white transition-colors duration-500 drop-shadow-lg flex items-center justify-center gap-2">
-                                                                    {isTargetLocked && (
-                                                                        <Lock size={20} className="text-amber-400 shrink-0 inline-block mr-1" />
-                                                                    )}
-                                                                    {boxText}
-                                                                </span>
-                                                            </div>
-                                                            {isTargetLocked && (
-                                                                <span className="mt-2 text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-500/20 border border-amber-500/40 px-3 py-1 rounded-full backdrop-blur-md shadow-lg flex items-center gap-1">
-                                                                    <Lock size={10} /> Locked Choice (Upgrade Plan)
-                                                                </span>
-                                                            )}
-                                                            {!isSingle && (
-                                                                <svg className="absolute top-[90%] left-4 w-[60px] h-[40px] overflow-visible pointer-events-none opacity-70 group-hover:opacity-100 group-hover:drop-shadow-[0_0_8px_var(--btn-color)] transition-all duration-500 z-0" style={{ stroke: 'var(--btn-color)' }}>
-                                                                    <path d="M 0,0 L -15,0 L -35,20" fill="none" strokeWidth="3" />
-                                                                    <circle cx="-35" cy="20" r="4" fill="transparent" strokeWidth="3" />
-                                                                </svg>
-                                                            )}
-                                                        </>
+                                                            {boxText}
+                                                        </span>
+                                                        <ChevronRight size={26} className="text-white shrink-0 group-hover:translate-x-1.5 transition-transform drop-shadow" />
+                                                    </div>
+
+                                                    {isTargetLocked && (
+                                                        <span className="mt-2 text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-500/20 border border-amber-500/40 px-3 py-1 rounded-full backdrop-blur-md shadow-lg flex items-center gap-1">
+                                                            <Lock size={10} /> Locked Choice (Upgrade Plan)
+                                                        </span>
                                                     )}
                                                 </div>
                                             );
