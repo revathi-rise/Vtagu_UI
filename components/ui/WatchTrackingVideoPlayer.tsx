@@ -51,6 +51,7 @@ interface WatchTrackingVideoPlayerProps {
       isDefault?: boolean;
   }[];
   maxQualityHeight?: number;
+  onPlay?: () => void;
 }
 
 const WatchTrackingVideoPlayer = React.forwardRef<

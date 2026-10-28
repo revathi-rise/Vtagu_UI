@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SceneManager, { SceneManagerHandle } from './SceneManager';
 import { PaywallGateModal } from './PaywallGateModal';
 import { getUserId } from '@/lib/api-client';
+import { exitDocumentFullscreen } from '@/lib/fullscreen-utils';
 
 interface InteractiveClientProps {
     movie: InteractiveMovie;
@@ -49,6 +50,12 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
     const [showPaywallModal, setShowPaywallModal] = useState(false);
     const [showCastModal, setShowCastModal] = useState(false);
     const [showInfoModal, setShowInfoModal] = useState(false);
+
+    useEffect(() => {
+        if (showPaywallModal) {
+            exitDocumentFullscreen().catch(() => {});
+        }
+    }, [showPaywallModal]);
 
     // Endings tracking state (dynamic, initialized to 0)
     const [unlockedEndings, setUnlockedEndings] = useState<number>(0);
@@ -240,6 +247,20 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
         if (sceneId === undefined) return;
         const scene = scenes.find(s => s.scene_id === sceneId);
         if (scene) {
+            const isMovieFree = Number(movie.is_free) === 1 || Number(movie.price) === 0;
+            const isSceneFree =
+                Number(scene.is_free) === 1 ||
+                Boolean(scene.is_free) === true ||
+                String(scene.is_free) === '1' ||
+                String(scene.is_free).toLowerCase() === 'true';
+            const hasVideo = Boolean(scene.scene_url && scene.scene_url.trim().length > 0);
+
+            // If user is not authorized and target scene is locked or lacks video, show recommended unlock modal instead of broken black screen
+            if (!isAuthorized && !isMovieFree && (scene.is_locked || !isSceneFree || !hasVideo)) {
+                setShowPaywallModal(true);
+                return;
+            }
+
             if (currentScene) {
                 setSceneHistory(prev => [...prev, currentScene]);
             }
@@ -614,6 +635,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                                 isAuthorized={isAuthorized || Number(movie.is_free) === 1 || Number(movie.price) === 0}
                                 scenes={scenes}
                                 onShowPaywall={() => setShowPaywallModal(true)}
+                                previewStep={sceneHistory.length + 1}
                             />
                         ) : (
                             <div className="p-12 md:p-16 rounded-[2.5rem] bg-white/5 border border-white/10 flex flex-col items-center justify-center text-center gap-6 backdrop-blur-xl">

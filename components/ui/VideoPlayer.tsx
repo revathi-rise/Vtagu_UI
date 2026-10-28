@@ -235,6 +235,7 @@ export interface VideoPlayerProps {
   showControls?: boolean;
   className?: string;
   onEnded?: () => void;
+  onPlay?: () => void;
   onTimeUpdate?: (currentTime: number, duration: number) => void;
   crossOrigin?: 'anonymous' | 'use-credentials' | '';
   showSkip?: boolean;
@@ -286,6 +287,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       showControls = true,
       className = '',
       onEnded,
+      onPlay,
       onTimeUpdate,
       crossOrigin,
       showSkip = false,
@@ -1466,7 +1468,10 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               onTimeUpdate={handleTimeUpdate}
               onLoadedMetadata={handleLoadedMetadata}
-              onPlay={() => setIsPlaying(true)}
+              onPlay={() => {
+                setIsPlaying(true);
+                onPlay?.();
+              }}
               onPause={() => setIsPlaying(false)}
               onEnded={onEnded}
               loop={loop}
