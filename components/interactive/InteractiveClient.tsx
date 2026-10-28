@@ -132,13 +132,18 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
             const userJson = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
             if (userJson) {
                 const userObj = JSON.parse(userJson);
+                const nowSec = Math.floor(Date.now() / 1000);
+                const subExpiry = userObj.active_subscription?.timestamp_to;
+                const isSubExpired = userObj.is_expired || (subExpiry ? Number(subExpiry) < nowSec : false);
+
                 if (
-                    userObj.is_subscribed ||
-                    userObj.isSubscribed ||
-                    (userObj.plan && String(userObj.plan).toLowerCase() !== 'free') ||
-                    String(userObj.type) === '1' ||
-                    String(userObj.type) === '2' ||
-                    userObj.role === 'admin'
+                    !isSubExpired && (
+                        userObj.is_subscribed ||
+                        userObj.isSubscribed ||
+                        String(userObj.type) === '1' ||
+                        String(userObj.type) === '2' ||
+                        userObj.role === 'admin'
+                    )
                 ) {
                     isUserPaidAccount = true;
                 }

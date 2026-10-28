@@ -55,6 +55,18 @@ export default function ProfileTab({ profile, activeTab }: { profile: any; activ
   useEffect(() => {
     const refreshProfile = async () => {
       // First, read from localStorage for instant display
+      const nowSec = Math.floor(Date.now() / 1000);
+      const getBadge = (user: any) => {
+        const activeSub = user.active_subscription;
+        const expiryTimestamp = activeSub?.timestamp_to;
+        const isExpired = activeSub?.is_expired !== undefined 
+          ? Boolean(activeSub.is_expired) 
+          : (expiryTimestamp ? Number(expiryTimestamp) < nowSec : false);
+        const rawName = activeSub?.planName || user.planName || (user.plan === '4' ? 'Premium' : user.plan) || "Free Member";
+        if (isExpired) return `${rawName} (Expired)`;
+        return rawName;
+      };
+
       const userJson = localStorage.getItem('user');
       if (userJson) {
         try {
@@ -64,7 +76,7 @@ export default function ProfileTab({ profile, activeTab }: { profile: any; activ
             name: user.user_name || user.name || "User",
             email: user.email,
             avatarUrl: user.profile_picture || user.avatarUrl || "https://images.unsplash.com/photo-1542204165-65bf26472b9b?q=80&w=300&auto=format&fit=crop",
-            badges: [user.active_subscription?.planName || user.planName || (user.plan === '4' ? 'Premium' : user.plan) || "Free Member"],
+            badges: [getBadge(user)],
             age: user.age,
             gender: user.gender,
             mobile: user.mobile,
@@ -99,7 +111,7 @@ export default function ProfileTab({ profile, activeTab }: { profile: any; activ
               name: user.user_name || user.name || "User",
               email: user.email,
               avatarUrl: user.profile_picture || user.avatarUrl || "https://images.unsplash.com/photo-1542204165-65bf26472b9b?q=80&w=300&auto=format&fit=crop",
-              badges: [user.active_subscription?.planName || user.planName || (user.plan === '4' ? 'Premium' : user.plan) || "Free Member"],
+              badges: [getBadge(user)],
               age: user.age,
               gender: user.gender,
               mobile: user.mobile,

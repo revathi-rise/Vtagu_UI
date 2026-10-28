@@ -41,9 +41,15 @@ export async function getAccountDetails() {
         const activeSub = user.active_subscription || sub;
         const devices = deviceData?.data || [];
 
-        let planName = activeSub?.planName || activeSub?.plan?.name || user.plan || (user.is_subscribed ? "Active Member" : "Free Member");
-        if (planName === '4') planName = 'Premium';
+        const nowSec = Math.floor(Date.now() / 1000);
         const expiryTimestamp = activeSub?.timestamp_to;
+        const isExpired = activeSub?.is_expired !== undefined 
+          ? Boolean(activeSub.is_expired) 
+          : (expiryTimestamp ? Number(expiryTimestamp) < nowSec : false);
+        const isSubscribed = Boolean(user.is_subscribed && !isExpired);
+
+        let planName = activeSub?.planName || activeSub?.plan?.name || user.plan_name || user.plan || (isSubscribed ? "Active Member" : (isExpired ? (activeSub?.planName || "Expired Plan") : "Free Member"));
+        if (planName === '4') planName = 'Premium';
         const nextBilling = expiryTimestamp ? new Date(expiryTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
         const amount = activeSub?.paid_amount !== undefined ? `INR ${activeSub.paid_amount}` : (user.plan_price ? `INR ${user.plan_price}` : "Free");
 
@@ -53,19 +59,23 @@ export async function getAccountDetails() {
             name: user.user_name || "User",
             email: user.email,
             avatarUrl: user.profile_picture || "https://images.unsplash.com/photo-1542204165-65bf26472b9b?q=80&w=300&auto=format&fit=crop",
-            badges: [planName],
+            badges: isExpired ? [`${planName} (Expired)`] : [planName],
             age: user.age,
             gender: user.gender,
             mobile: user.mobile,
-            is_subscribed: user.is_subscribed,
+            is_subscribed: isSubscribed,
+            is_expired: isExpired,
             isGuest: false
           },
           billing: {
             planName: planName,
-            planDescription: user.plan || (user.is_subscribed ? "Active Subscription Plan" : "Manage your subscription plan"),
+            planDescription: isExpired 
+              ? "Your subscription plan has expired. Renew to continue." 
+              : ((user.plan === '4' ? 'Premium Plan' : user.planName) || (isSubscribed ? "Active Subscription Plan" : "Manage your subscription plan")),
             nextBillingDate: nextBilling,
             amount: amount,
-            is_subscribed: user.is_subscribed,
+            is_subscribed: isSubscribed,
+            is_expired: isExpired,
             paymentMethod: {
               type: activeSub?.payment_method || "Online",
               last4: "****",

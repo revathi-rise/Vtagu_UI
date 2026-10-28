@@ -11,6 +11,54 @@ export default function BillingTab({ billing }: { billing: any }) {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
 
+  const resolveBillingData = (user: any) => {
+    const activeSub = user.active_subscription;
+    const nowSec = Math.floor(Date.now() / 1000);
+    const expiryTimestamp = activeSub?.timestamp_to;
+
+    // Strict expiry check: If API marks is_expired, or if timestamp_to is in the past
+    const isExpired = activeSub?.is_expired !== undefined
+      ? Boolean(activeSub.is_expired)
+      : (expiryTimestamp ? Number(expiryTimestamp) < nowSec : false);
+
+    const isSubscribed = Boolean(user.is_subscribed && !isExpired);
+
+    const planName = activeSub?.planName || (user.plan === '4' ? 'Premium' : user.plan) || (isSubscribed ? "Active Subscription" : (isExpired ? (activeSub?.planName || "Expired Plan") : "No Active Plan"));
+    const nextBilling = expiryTimestamp ? new Date(expiryTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
+    const amount = user.plan_price ? `INR ${user.plan_price}` : (activeSub?.paid_amount ? `INR ${activeSub.paid_amount}` : (activeSub?.price ? `INR ${activeSub.price}` : "Free"));
+
+    const screens = activeSub?.screens || 1;
+    const quality = activeSub?.quality || 'HD';
+    const isInteractiveIncluded = activeSub?.isInteractiveIncluded !== undefined ? Number(activeSub.isInteractiveIncluded) : 0;
+    const isStandardIncluded = activeSub?.isStandardIncluded !== undefined ? Number(activeSub.isStandardIncluded) : (activeSub?.isShortsIncluded !== undefined ? Number(activeSub.isShortsIncluded) : 0);
+    const validity = activeSub?.validity || '';
+
+    const cardNum = user.card_number || "";
+    const last4Str = cardNum ? (cardNum.length >= 4 ? cardNum.slice(-4) : cardNum) : "****";
+
+    return {
+      planName,
+      planDescription: isExpired
+        ? "Your subscription has expired. Renew your plan to continue watching."
+        : ((user.plan === '4' ? 'Premium Plan' : user.planName) || (isSubscribed ? "Active Subscription Plan" : "Manage your subscription plan")),
+      nextBillingDate: nextBilling,
+      amount,
+      screens,
+      quality,
+      isInteractiveIncluded,
+      isStandardIncluded,
+      validity,
+      is_subscribed: isSubscribed,
+      is_expired: isExpired,
+      paymentMethod: {
+        type: activeSub?.payment_method || (user.upi ? "UPI" : "Online Payment"),
+        last4: last4Str,
+        nameOnCard: user.card_name || user.user_name || "N/A",
+        expiry: user.card_expiry || "N/A",
+      }
+    };
+  };
+
   useEffect(() => {
     const fetchLatestBilling = async () => {
       const storedUser = localStorage.getItem('user');
@@ -19,39 +67,14 @@ export default function BillingTab({ billing }: { billing: any }) {
       if (storedUser) {
         try {
           const user = JSON.parse(storedUser);
-          const activeSub = user.active_subscription;
-          const planName = activeSub?.planName || (user.plan === '4' ? 'Premium' : user.plan) || (user.is_subscribed ? "Active Subscription" : "No Active Plan");
-          const expiryTimestamp = activeSub?.timestamp_to;
-          const nextBilling = expiryTimestamp ? new Date(expiryTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
-          const amount = user.plan_price ? `INR ${user.plan_price}` : (activeSub?.paid_amount ? `INR ${activeSub.paid_amount}` : "Free");
+          const resolved = resolveBillingData(user);
+          setCurrentBilling(resolved);
 
-          const screens = activeSub?.screens || 1;
-          const quality = activeSub?.quality || 'HD';
-          const isInteractiveIncluded = activeSub?.isInteractiveIncluded !== undefined ? Number(activeSub.isInteractiveIncluded) : 0;
-          const isStandardIncluded = activeSub?.isStandardIncluded !== undefined ? Number(activeSub.isStandardIncluded) : (activeSub?.isShortsIncluded !== undefined ? Number(activeSub.isShortsIncluded) : 0);
-          const validity = activeSub?.validity || '';
-
-          const cardNum = user.card_number || "";
-          const last4Str = cardNum ? (cardNum.length >= 4 ? cardNum.slice(-4) : cardNum) : "****";
-
-          setCurrentBilling({
-            planName,
-            planDescription: (user.plan === '4' ? 'Premium Plan' : user.planName) || (user.is_subscribed ? "Active Subscription Plan" : "Manage your subscription plan"),
-            nextBillingDate: nextBilling,
-            amount,
-            screens,
-            quality,
-            isInteractiveIncluded,
-            isStandardIncluded,
-            validity,
-            is_subscribed: user.is_subscribed,
-            paymentMethod: {
-              type: activeSub?.payment_method || (user.upi ? "UPI" : "Online Payment"),
-              last4: last4Str,
-              nameOnCard: user.card_name || user.user_name || "N/A",
-              expiry: user.card_expiry || "N/A",
-            }
-          });
+          if (resolved.is_expired && user.is_subscribed) {
+            user.is_subscribed = false;
+            user.is_expired = true;
+            localStorage.setItem('user', JSON.stringify(user));
+          }
         } catch (e) {
           console.error("Error parsing stored user in BillingTab:", e);
         }
@@ -62,39 +85,13 @@ export default function BillingTab({ billing }: { billing: any }) {
           const res = await authApi.getProfile(storedUserId);
           if (res.status && res.data) {
             const user = res.data;
-            const activeSub = user.active_subscription;
-            const planName = activeSub?.planName || (user.plan === '4' ? 'Premium' : user.plan) || (user.is_subscribed ? "Active Subscription" : "No Active Plan");
-            const expiryTimestamp = activeSub?.timestamp_to;
-            const nextBilling = expiryTimestamp ? new Date(expiryTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
-            const amount = user.plan_price ? `INR ${user.plan_price}` : (activeSub?.paid_amount ? `INR ${activeSub.paid_amount}` : "Free");
+            const resolved = resolveBillingData(user);
+            setCurrentBilling(resolved);
 
-            const screens = activeSub?.screens || 1;
-            const quality = activeSub?.quality || 'HD';
-            const isInteractiveIncluded = activeSub?.isInteractiveIncluded !== undefined ? Number(activeSub.isInteractiveIncluded) : 0;
-            const isStandardIncluded = activeSub?.isStandardIncluded !== undefined ? Number(activeSub.isStandardIncluded) : (activeSub?.isShortsIncluded !== undefined ? Number(activeSub.isShortsIncluded) : 0);
-            const validity = activeSub?.validity || '';
-
-            const cardNum = user.card_number || "";
-            const last4Str = cardNum ? (cardNum.length >= 4 ? cardNum.slice(-4) : cardNum) : "****";
-
-            setCurrentBilling({
-              planName,
-              planDescription: (user.plan === '4' ? 'Premium Plan' : user.planName) || (user.is_subscribed ? "Active Subscription Plan" : "Manage your subscription plan"),
-              nextBillingDate: nextBilling,
-              amount,
-              screens,
-              quality,
-              isInteractiveIncluded,
-              isStandardIncluded,
-              validity,
-              is_subscribed: user.is_subscribed,
-              paymentMethod: {
-                type: activeSub?.payment_method || (user.upi ? "UPI" : "Online Payment"),
-                last4: last4Str,
-                nameOnCard: user.card_name || user.user_name || "N/A",
-                expiry: user.card_expiry || "N/A",
-              }
-            });
+            if (resolved.is_expired) {
+              user.is_subscribed = false;
+              user.is_expired = true;
+            }
             localStorage.setItem('user', JSON.stringify(user));
           }
         } catch (e) {
@@ -246,16 +243,45 @@ export default function BillingTab({ billing }: { billing: any }) {
       <section className="bg-[#1a1329]/80 backdrop-blur-xl border border-white/5 rounded-2xl p-6 lg:p-8 flex flex-col justify-between shadow-xl">
         <div>
           <div className="flex items-start justify-between mb-4">
-            <div className="w-10 h-10 rounded-full bg-[#9248FF] flex items-center justify-center shadow-[0_0_20px_rgba(146,72,255,0.5)]">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg ${
+              currentBilling.is_expired
+                ? 'bg-red-500 shadow-red-500/30'
+                : (currentBilling.is_subscribed ? 'bg-[#9248FF] shadow-[0_0_20px_rgba(146,72,255,0.5)]' : 'bg-gray-700 shadow-gray-700/30')
+            }`}>
               <Star size={20} className="text-white fill-white" />
             </div>
-            <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${currentBilling.is_subscribed ? 'bg-[#b28cff]/20 text-[#cca8ff] border-[#9248FF]/30' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}>
-              {currentBilling.is_subscribed ? 'Active Subscription' : 'No Active Plan'}
-            </span>
+            {currentBilling.is_subscribed && !currentBilling.is_expired ? (
+              <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border bg-[#b28cff]/20 text-[#cca8ff] border-[#9248FF]/30">
+                Active Subscription
+              </span>
+            ) : currentBilling.is_expired ? (
+              <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border bg-red-500/20 text-red-400 border-red-500/30 flex items-center gap-1.5">
+                <XCircle size={11} className="text-red-400" /> Subscription Expired
+              </span>
+            ) : (
+              <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border bg-gray-500/20 text-gray-400 border-gray-500/30">
+                No Active Plan
+              </span>
+            )}
           </div>
 
           <h3 className="text-2xl font-bold text-white mb-1">{currentBilling.planName}</h3>
-          <p className="text-gray-400 text-sm mb-6 font-medium">{currentBilling.planDescription}</p>
+          <p className="text-gray-400 text-sm mb-4 font-medium">{currentBilling.planDescription}</p>
+
+          {/* Expiration Notice Banner */}
+          {currentBilling.is_expired && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3.5 mb-5 flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                <Clock size={12} className="text-red-400" />
+              </div>
+              <div className="text-xs">
+                <div className="font-bold text-red-400 mb-0.5">Your Plan Expired on {currentBilling.nextBillingDate}</div>
+                <div className="text-red-200/80 leading-relaxed">
+                  Renew your subscription now to restore full access to premium Movies, Web Series, and interactive content.
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Full Plan Details Breakdown */}
           <div className="bg-[#25183d]/60 border border-[#9248FF]/20 rounded-xl p-4 mb-6 space-y-3">
@@ -300,8 +326,17 @@ export default function BillingTab({ billing }: { billing: any }) {
           </div>
 
           <div className="flex items-center justify-between text-sm mb-3">
-            <span className="text-gray-400 font-medium">Next Billing / Expiration</span>
-            <span className="text-white font-bold">{currentBilling.nextBillingDate}</span>
+            <span className="text-gray-400 font-medium">
+              {currentBilling.is_expired ? 'Expiration Date' : 'Next Billing / Expiration'}
+            </span>
+            <span className={`font-bold flex items-center gap-2 ${currentBilling.is_expired ? 'text-red-400' : 'text-white'}`}>
+              {currentBilling.nextBillingDate}
+              {currentBilling.is_expired && (
+                <span className="text-[9px] uppercase font-black px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">
+                  Expired
+                </span>
+              )}
+            </span>
           </div>
           <div className="flex items-center justify-between text-sm mb-8">
             <span className="text-gray-400 font-medium">Amount</span>
@@ -311,9 +346,13 @@ export default function BillingTab({ billing }: { billing: any }) {
 
         <button 
           onClick={() => setIsChangingPlan(true)} 
-          className="w-full py-3.5 rounded-xl bg-[#9248FF] hover:bg-[#a663ff] text-white font-bold transition-all shadow-lg shadow-[#9248FF]/20 flex items-center justify-center gap-2"
+          className={`w-full py-3.5 rounded-xl font-bold transition-all shadow-lg flex items-center justify-center gap-2 ${
+            currentBilling.is_expired
+              ? 'bg-gradient-to-r from-red-600 via-[#9248FF] to-[#b28cff] hover:from-red-500 hover:to-[#a663ff] text-white shadow-red-500/25 ring-1 ring-red-400/40'
+              : 'bg-[#9248FF] hover:bg-[#a663ff] text-white shadow-[#9248FF]/20'
+          }`}
         >
-          {currentBilling.is_subscribed ? 'Change / Renew Plan' : 'Subscribe to a Plan'}
+          {currentBilling.is_expired ? 'Renew Expired Plan' : (currentBilling.is_subscribed ? 'Change / Renew Plan' : 'Subscribe to a Plan')}
           <ArrowRight size={16} />
         </button>
       </section>

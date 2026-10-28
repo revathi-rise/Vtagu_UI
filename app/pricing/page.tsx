@@ -141,7 +141,9 @@ export default async function PricingPage() {
           {plans.map((plan, index) => {
             const style = getPlanStyle(plan.name, index);
             const Icon = style.icon;
-            const isActivePlan = activeSubscription && activeSubscription.planId === plan.planId && activeSubscription.status === 1;
+            const nowSec = Math.floor(Date.now() / 1000);
+            const isSubExpired = activeSubscription?.is_expired || (activeSubscription?.timestamp_to ? Number(activeSubscription.timestamp_to) < nowSec : false);
+            const isActivePlan = !isSubExpired && activeSubscription && activeSubscription.planId === plan.planId && activeSubscription.status === 1;
             const isInteractiveOnly = (plan.quality?.toLowerCase() === 'none' || !plan.quality || plan.isStandardIncluded === 0) && (plan.isInteractiveIncluded === 1 || plan.is_interactive_included === 1);
             const isFeatured = style.featured || isInteractiveOnly || plan.discount > 0;
 
