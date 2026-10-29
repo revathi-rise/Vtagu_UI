@@ -990,20 +990,30 @@ export async function deleteEpisode(id: number): Promise<any> {
 
 export interface Plan {
   planId: number;
+  id?: number;
   name: string;
-  screens: string;
+  plan_name?: string;
+  screens: string | number;
   quality: string;
   compatibility: number;
   unlimited: number;
   cancellation: number;
   price: string;
+  plan_price?: string;
   discount: number;
   validity: string;
+  plan_duration?: string;
+  plan_description?: string | null;
   status: number;
+  currency?: string;
   isInteractiveIncluded?: number;
   is_interactive_included?: number;
   isStandardIncluded?: number;
   is_standard_included?: number;
+  isStandardAccess?: number;
+  is_standard_access?: number;
+  isShortsIncluded?: number;
+  is_shorts_included?: number;
 }
 
 export async function getPlans(): Promise<Plan[]> {

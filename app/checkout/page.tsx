@@ -426,7 +426,7 @@ function CheckoutContent() {
                     {plan.name}
                   </h2>
                   <p className="text-gray-400 text-sm mb-10 font-medium">
-                    {plan.validity} of unlimited streaming
+                    {plan.validity || (plan as any).plan_duration || 'Standard'} of {(plan.isStandardIncluded === 0 || (plan as any).is_standard_included === 0) ? 'interactive streaming' : 'unlimited streaming'}
                   </p>
 
                   <div className="space-y-6 mb-10 border-t border-white/10 pt-8">

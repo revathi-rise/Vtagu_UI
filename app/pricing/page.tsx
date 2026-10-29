@@ -65,8 +65,42 @@ const getCompatibilityLabel = (comp?: number) => {
   return "All Screens (Mobile, TV, Browser)";
 };
 
+const formatPlanDurationSuffix = (val?: string | null): string => {
+  if (!val) return 'mo';
+  const trimmed = val.trim();
+  const lower = trimmed.toLowerCase();
+
+  // Standard 1 month
+  if (lower === '1 month' || lower === 'month' || lower === 'monthly' || lower === '30 days') {
+    return 'mo';
+  }
+  // Standard 1 year
+  if (lower === '1 year' || lower === 'year' || lower === 'yearly' || lower === 'annual' || lower === '365 days') {
+    return 'yr';
+  }
+  // Standard 1 week
+  if (lower === '1 week' || lower === 'week' || lower === 'weekly') {
+    return 'wk';
+  }
+  // Standard 1 day
+  if (lower === '1 day' || lower === 'day' || lower === 'daily') {
+    return 'day';
+  }
+
+  // Multi-day/multi-month passes like "2 Days", "3 Months", "6 Months", "2 Years", etc.
+  return trimmed;
+};
+
+const getValidityAccessLabel = (validity?: string | null, planDuration?: string | null) => {
+  const val = (validity || planDuration || '').trim();
+  if (!val) return 'FULL ACCESS';
+  if (val.toLowerCase().includes('access')) return val;
+  return `${val} ACCESS`;
+};
+
 export default async function PricingPage() {
   const plans = await getPlans();
+  
   const cookieStore = await cookies();
   const isLoggedIn = cookieStore.has('token');
   const token = cookieStore.get('token')?.value;
@@ -201,7 +235,7 @@ export default async function PricingPage() {
                   </h2>
                   
                   <div className="text-[9px] sm:text-[10px] font-extrabold text-cyan-400/80 uppercase tracking-[0.2em] bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-0.5 rounded-full">
-                    {plan.validity} ACCESS
+                    {getValidityAccessLabel(plan.validity, plan.plan_duration)}
                   </div>
                   
                   {isInteractiveOnly && (
@@ -219,7 +253,7 @@ export default async function PricingPage() {
                       {plan.price}
                     </span>
                     <span className="text-white/40 text-xs font-semibold uppercase tracking-wider ml-0.5">
-                      / {plan.validity?.toLowerCase().includes('year') ? 'yr' : 'mo'}
+                      / {formatPlanDurationSuffix(plan.validity || plan.plan_duration)}
                     </span>
                   </div>
                   
@@ -231,7 +265,7 @@ export default async function PricingPage() {
                   
                   {isActivePlan && activeSubscription.timestamp_to && (
                     <div className="mt-2 text-emerald-400/80 text-[10px] font-semibold tracking-wider">
-                      Renews: {new Date(activeSubscription.timestamp_to * 1000).toLocaleDateString()}
+                      Valid till: {new Date(activeSubscription.timestamp_to * 1000).toLocaleDateString()}
                     </div>
                   )}
                 </div>
