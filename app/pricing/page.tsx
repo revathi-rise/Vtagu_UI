@@ -132,7 +132,7 @@ export default async function PricingPage() {
     <main className="min-h-screen bg-[#0a0a0c] text-white selection:bg-cyan-500/30 overflow-x-hidden">
       
       {/* SECTION 1: HERO */}
-      <section className="relative pt-20 pb-10 sm:pt-28 sm:pb-14 md:pt-36 md:pb-20 px-4 sm:px-6 text-center overflow-hidden">
+      <section className="relative pt-12 pb-6 sm:pt-24 sm:pb-12 md:pt-36 md:pb-20 px-4 sm:px-6 text-center overflow-hidden">
         {/* Cinematic Image Background */}
         <div className="absolute inset-0 z-0">
           <Image 
@@ -151,12 +151,12 @@ export default async function PricingPage() {
         <div className="absolute top-32 left-1/4 w-[200px] sm:w-[350px] h-[200px] sm:h-[350px] bg-[#9248ff]/10 blur-[120px] rounded-full pointer-events-none opacity-40" />
         
         <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-white/5 border border-cyan-500/20 rounded-full px-4 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-cyan-400 mb-4 sm:mb-6 backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 bg-white/5 border border-cyan-500/20 rounded-full px-4 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-cyan-400 mb-3 sm:mb-6 backdrop-blur-md">
             <Star size={13} fill="currentColor" className="animate-pulse text-cyan-400" />
             Vtagu Premium Experience
           </div>
           
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-3 sm:mb-4 leading-tight">
+          <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-3 sm:mb-4 leading-tight">
             Pick the Plan That 
             <span className="block sm:inline text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 sm:pl-2">
               Powers Your Entertainment
@@ -170,8 +170,8 @@ export default async function PricingPage() {
       </section>
 
       {/* SECTION 2: PRICING CARDS */}
-      <section className="px-4 sm:px-6 pb-20 md:pb-28 max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 items-stretch justify-center">
+      <section className="standard-container pb-24 sm:pb-28">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-8 items-stretch justify-center">
           {plans.map((plan, index) => {
             const style = getPlanStyle(plan.name, index);
             const Icon = style.icon;
@@ -185,7 +185,7 @@ export default async function PricingPage() {
               <div 
                 key={plan.planId}
                 className={`
-                  relative flex flex-col items-center text-center rounded-3xl border bg-gradient-to-b p-6 sm:p-7 md:p-8
+                  relative flex flex-col items-center text-center rounded-2xl sm:rounded-3xl border bg-gradient-to-b p-5 sm:p-7 md:p-8
                   transition-all duration-300 hover:-translate-y-2 group backdrop-blur-sm
                   ${isActivePlan ? 'from-emerald-500/15 via-emerald-500/5 to-transparent border-emerald-500/50 shadow-[0_0_35px_rgba(16,185,129,0.2)]' : style.color} 
                   ${isActivePlan ? 'border-emerald-500/50' : style.borderColor} 

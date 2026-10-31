@@ -8,8 +8,10 @@ export const metadata = {
 
 export default function SearchPage() {
   return (
-     <div className="min-h-screen bg-[#0f0a19] pt-24 px-6 md:px-12 lg:px-20 pb-20">
-        <SearchClient />
+     <div className="min-h-screen bg-[#0f0a19] pt-16 sm:pt-24 md:pt-28 pb-24 lg:pb-20">
+        <div className="standard-container">
+           <SearchClient />
+        </div>
      </div>
   );
 }

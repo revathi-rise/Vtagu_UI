@@ -40,9 +40,9 @@ export default function MyListClient() {
     const year = details.year || (item.createdAt ? new Date(item.createdAt).getFullYear() : '2025');
     const typeLabel = item.contentType === 'interactive_movie' ? 'Interactive' : item.contentType === 'series' ? 'Series' : item.contentType === 'short' ? 'Short' : 'Movie';
     const href = item.contentType === 'interactive_movie'
-      ? `/interactive-movies/${item.contentId}`
+      ? `/interactive/${item.contentId}`
       : item.contentType === 'series'
-      ? `/series/${item.contentId}`
+      ? `/episodes/${item.contentId}`
       : item.contentType === 'short'
       ? `/shorts`
       : `/movies/${item.contentId}`;
@@ -52,7 +52,7 @@ export default function MyListClient() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto w-full flex flex-col items-center justify-center py-32 text-gray-400">
+      <div className="w-full flex flex-col items-center justify-center py-32 text-gray-400">
         <Loader2 size={40} className="animate-spin mb-4 text-primary" />
         <p className="text-lg">Loading your watchlist...</p>
       </div>
@@ -60,12 +60,12 @@ export default function MyListClient() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto w-full">
-      <h1 className="text-4xl font-extrabold text-white mb-2 tracking-tight">My List</h1>
-      <p className="text-gray-400 mb-10">Titles you have saved to watch later.</p>
+    <div className="w-full">
+      <h1 className="text-2xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight">My List</h1>
+      <p className="text-gray-400 text-xs sm:text-sm mb-6 sm:mb-10">Titles you have saved to watch later.</p>
 
       {items.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-12">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
           {items.map((item) => {
             const { title, image, year, typeLabel, href } = getMediaInfo(item);
             return (

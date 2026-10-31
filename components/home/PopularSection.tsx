@@ -16,7 +16,7 @@ const mockPosters = [
 export default function PopularSection() {
   return (
     <section className="w-full py-16 md:py-24 relative z-20 bg-[#0f0a19]">
-      <div className="tv-container px-6 md:px-12 lg:px-24">
+      <div className="standard-container">
 
         <div className="mb-12 md:mb-16">
           <h2 

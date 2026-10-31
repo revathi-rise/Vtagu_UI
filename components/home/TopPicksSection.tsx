@@ -51,7 +51,7 @@ export default function TopPicksSection({ movies = [] }: TopPicksSectionProps) {
 
   return (
     <section className="w-full py-12 md:py-20 relative z-20 bg-[#0f0a19]">
-      <div className="max-w-[90%] mx-auto px-4">
+      <div className="standard-container">
 
         <div className="mb-10 md:mb-14">
           <SectionTitle

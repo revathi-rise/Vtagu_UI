@@ -265,20 +265,21 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
     const isPreviewLimitReached = isPreviewActive && currentPreviewStep >= 3;
 
     return (
-        <div className="space-y-8">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <h2 className="text-3xl font-bold flex items-center gap-3">
-                    <Target className="text-cyan-400" />
+        <div className="space-y-4 sm:space-y-6 w-full min-w-0">
+            {/* Header: Interactive Core & Scene Status Badge */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
+                <h2 className="text-xl sm:text-3xl font-extrabold flex items-center gap-2 sm:gap-3 shrink-0">
+                    <Target className="text-cyan-400 w-5 h-5 sm:w-7 sm:h-7 shrink-0" />
                     Interactive <span className="text-gradient">Core</span>
                 </h2>
                 {currentScene && (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-start sm:justify-end">
                         {!isAuthorized && isCurrentSceneFree ? (
-                            <div className="text-emerald-400 text-xs font-black uppercase tracking-widest bg-emerald-500/10 px-4 py-1.5 rounded-full border border-emerald-500/30 flex items-center gap-2 shadow-lg shadow-emerald-500/10 animate-pulse">
+                            <div className="text-emerald-400 text-[10px] sm:text-xs font-black uppercase tracking-wider bg-emerald-500/10 px-3 sm:px-4 py-1.5 rounded-full border border-emerald-500/30 flex items-center gap-1.5 sm:gap-2 shadow-lg shadow-emerald-500/10 animate-pulse">
                                 <span>🔓</span> FREE PREVIEW • SCENE {Math.min(currentPreviewStep, 3)} OF 3
                             </div>
                         ) : (
-                            <div className="text-cyan-400/80 text-xs font-black uppercase tracking-widest bg-cyan-400/5 px-3 py-1 rounded-full border border-cyan-400/20">
+                            <div className="text-cyan-400/80 text-[10px] sm:text-xs font-black uppercase tracking-wider bg-cyan-400/5 px-3 py-1.5 rounded-full border border-cyan-400/20 truncate max-w-[220px] sm:max-w-none">
                                 {currentScene.scene_text || `Scene: ${currentScene.title}`}
                             </div>
                         )}
@@ -286,40 +287,47 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                 )}
             </div>
 
+            {/* Free Preview Banner Card */}
             {!isAuthorized && isCurrentSceneFree && (
-                <div className="bg-gradient-to-r from-emerald-500/15 via-cyan-500/10 to-blue-500/15 border border-emerald-500/30 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 backdrop-blur-md">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg">
+                <div className="bg-gradient-to-r from-emerald-500/15 via-cyan-500/10 to-blue-500/15 border border-emerald-500/30 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 md:p-6 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 backdrop-blur-xl shadow-xl overflow-hidden">
+                    {/* Left: Icon, Title, Badge & Explanation */}
+                    <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+                        <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-base sm:text-xl shrink-0 shadow-inner">
                             🔓
                         </div>
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <h4 className="text-white font-bold text-sm">Free Preview Experience</h4>
-                                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 border border-cyan-400/30">
+                        <div className="min-w-0 flex-1 space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <h4 className="text-white font-extrabold text-sm sm:text-base tracking-wide">
+                                    Free Preview Experience
+                                </h4>
+                                <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 border border-cyan-400/30 shadow-sm shrink-0">
                                     Scene {Math.min(currentPreviewStep, 3)} of 3
                                 </span>
                             </div>
-                            <p className="text-white/60 text-xs mt-0.5">
+                            <p className="text-white/70 text-xs sm:text-sm leading-relaxed max-w-xl">
                                 {currentPreviewStep < 3
                                     ? `Scene ${currentPreviewStep} → Choose next path (${3 - currentPreviewStep} scene${3 - currentPreviewStep > 1 ? 's' : ''} remaining in preview)`
                                     : 'Final preview scene decision! Upgrade to unlock the full movie and all hidden endings.'}
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                        <button
-                            onClick={handleResetScene}
-                            className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider transition-all border border-white/20 hover:border-white/40 flex items-center gap-1.5 cursor-pointer active:scale-95"
-                            title="Replay this scene from 0:00"
-                        >
-                            <RotateCcw size={13} />
-                            <span>Reset Scene</span>
-                        </button>
+
+                    {/* Right: Reset Scene & Unlock Buttons */}
+                    <div className="flex flex-col min-[420px]:flex-row items-stretch min-[420px]:items-center gap-2 sm:gap-3 shrink-0 w-full lg:w-auto">
                         <button
                             onClick={() => onShowPaywall && onShowPaywall()}
-                            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 text-black font-black text-xs uppercase tracking-wider hover:brightness-110 transition-all shadow-md shrink-0 cursor-pointer active:scale-95"
+                            className="w-full min-[420px]:w-auto px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 text-black font-black text-xs sm:text-sm uppercase tracking-wider hover:brightness-110 transition-all shadow-lg shadow-cyan-500/25 shrink-0 cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap order-1 min-[420px]:order-2"
                         >
-                            Unlock Full Movie ✦
+                            <span>Unlock Full Movie</span>
+                            <span className="text-black">✦</span>
+                        </button>
+                        <button
+                            onClick={handleResetScene}
+                            className="w-full min-[420px]:w-auto px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm uppercase tracking-wider transition-all border border-white/20 hover:border-white/40 flex items-center justify-center gap-2 cursor-pointer active:scale-95 shadow-md whitespace-nowrap order-2 min-[420px]:order-1"
+                            title="Replay this scene from 0:00"
+                        >
+                            <RotateCcw size={14} className="sm:w-[15px] sm:h-[15px] shrink-0" />
+                            <span>Reset Scene</span>
                         </button>
                     </div>
                 </div>
@@ -331,7 +339,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                 className={`relative overflow-hidden group transition-all duration-200 ${
                     isFullscreen
                         ? 'w-screen h-screen max-w-none max-h-none rounded-none border-0 ring-0 shadow-none m-0 p-0 aspect-auto bg-black'
-                        : 'aspect-video rounded-[2.5rem] bg-black border border-white/5 shadow-2xl ring-1 ring-white/10'
+                        : 'aspect-video rounded-xl sm:rounded-[2rem] bg-black border border-white/5 shadow-2xl ring-1 ring-white/10 w-full'
                 }`}
             >
                 {currentScene ? (
@@ -495,7 +503,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                 ) : (
                                     <div className="absolute inset-0 pointer-events-none animate-in fade-in duration-700">
                                         {/* Top Navigation: Previous, Reset Scene, and Restart */}
-                                        <div className="absolute top-6 right-6 flex items-center gap-2.5 z-30 pointer-events-auto">
+                                        <div className="absolute top-3 right-3 sm:top-6 sm:right-6 flex flex-wrap items-center justify-end gap-1.5 sm:gap-2.5 z-30 pointer-events-auto max-w-[92vw]">
                                             <button 
                                                 onClick={(e) => {
                                                     if (!hasPrevious || !onPrevious) return;
@@ -505,7 +513,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                     onPrevious();
                                                 }}
                                                 disabled={!hasPrevious}
-                                                className={`flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 backdrop-blur-md rounded-full text-[11px] font-bold uppercase tracking-wider transition-all border ${
+                                                className={`flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-2 backdrop-blur-md rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-all border ${
                                                     hasPrevious
                                                         ? 'bg-black/70 hover:bg-cyan-500 hover:text-black text-white/90 border-white/25 hover:border-transparent cursor-pointer shadow-lg active:scale-95 group'
                                                         : 'bg-black/40 text-white/30 border-white/10 opacity-35 cursor-not-allowed pointer-events-none'
@@ -513,25 +521,25 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                 title={hasPrevious ? "Previous Scene (P)" : "No Previous Scene"}
                                                 aria-label="Previous Scene"
                                             >
-                                                <RotateCcw size={13} className={hasPrevious ? "group-hover:-rotate-45 transition-transform duration-300" : ""} /> 
+                                                <RotateCcw size={12} className={hasPrevious ? "group-hover:-rotate-45 transition-transform duration-300" : ""} /> 
                                                 <span>Previous</span>
                                             </button>
                                             <button 
                                                 onClick={handleResetScene}
-                                                className="flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-black/70 hover:bg-cyan-500 hover:text-black text-white/90 backdrop-blur-md border border-white/25 hover:border-transparent rounded-full transition-all text-[11px] font-bold uppercase tracking-wider shadow-lg active:scale-95 cursor-pointer group"
+                                                className="flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-2 bg-black/70 hover:bg-cyan-500 hover:text-black text-white/90 backdrop-blur-md border border-white/25 hover:border-transparent rounded-full transition-all text-[10px] sm:text-[11px] font-bold uppercase tracking-wider shadow-lg active:scale-95 cursor-pointer group"
                                                 title="Replay Current Scene from 0:00"
                                                 aria-label="Reset Scene"
                                             >
-                                                <RotateCcw size={13} className="group-hover:-rotate-90 transition-transform duration-300" /> 
+                                                <RotateCcw size={12} className="group-hover:-rotate-90 transition-transform duration-300" /> 
                                                 <span>Reset Scene</span>
                                             </button>
                                             <button 
                                                 onClick={handleRestartClick}
-                                                className="flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-black/70 hover:bg-white text-white/90 hover:text-black backdrop-blur-md border border-white/25 hover:border-transparent rounded-full transition-all text-[11px] font-bold uppercase tracking-wider shadow-lg active:scale-95 cursor-pointer group"
+                                                className="flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-2 bg-black/70 hover:bg-white text-white/90 hover:text-black backdrop-blur-md border border-white/25 hover:border-transparent rounded-full transition-all text-[10px] sm:text-[11px] font-bold uppercase tracking-wider shadow-lg active:scale-95 cursor-pointer group"
                                                 title="Restart Story from Beginning"
                                                 aria-label="Restart Story"
                                             >
-                                                <RotateCcw size={13} className="group-hover:-rotate-180 transition-transform duration-500" /> 
+                                                <RotateCcw size={12} className="group-hover:-rotate-180 transition-transform duration-500" /> 
                                                 <span>Restart</span>
                                             </button>
                                         </div>
@@ -561,9 +569,14 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
 
                                             const isSingle = choices.length === 1;
                                             const isChoiceA = index === 0;
+
+                                            // On mobile portrait: stack choices cleanly (Option A above Option B)
+                                            // On desktop/tablet (sm+): separate left and right
                                             const positionClass = isSingle 
-                                                ? 'left-1/2 -translate-x-1/2' 
-                                                : (isChoiceA ? 'left-[4%] sm:left-[8%] md:left-[10%]' : 'right-[4%] sm:right-[8%] md:right-[10%]');
+                                                ? 'left-1/2 -translate-x-1/2 bottom-[14%] sm:bottom-[18%]' 
+                                                : isChoiceA 
+                                                    ? 'left-1/2 -translate-x-1/2 bottom-[24%] sm:bottom-[18%] sm:left-[8%] sm:translate-x-0' 
+                                                    : 'left-1/2 -translate-x-1/2 bottom-[10%] sm:bottom-[18%] sm:right-[8%] sm:left-auto sm:translate-x-0';
                                             
                                             const rawBoxText = choice.choice_text || choice.button_text || (isChoiceA ? 'Option A' : 'Option B');
                                             const letter = isChoiceA ? 'A' : index === 1 ? 'B' : String.fromCharCode(65 + index);
@@ -592,10 +605,10 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                             }, 400);
                                                         }
                                                     }}
-                                                    className={`absolute bottom-[16%] md:bottom-[20%] ${positionClass} flex flex-col items-center pointer-events-auto cursor-pointer group hover:scale-105 active:scale-95 transition-all duration-300 z-30`}
+                                                    className={`absolute ${positionClass} w-[88%] sm:w-auto max-w-[360px] sm:max-w-none flex flex-col items-center pointer-events-auto cursor-pointer group hover:scale-105 active:scale-95 transition-all duration-300 z-30`}
                                                 >
                                                     <div
-                                                        className={`relative px-6 py-3 sm:px-10 sm:py-3.5 md:px-12 md:py-4 rounded-2xl md:rounded-3xl border transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-xl ${
+                                                        className={`relative w-full sm:w-auto px-5 py-3 sm:px-10 sm:py-3.5 md:px-12 md:py-4 rounded-2xl md:rounded-3xl border transition-all duration-300 flex items-center justify-between sm:justify-center gap-3 backdrop-blur-xl ${
                                                             isTargetLocked
                                                                 ? 'bg-gradient-to-r from-amber-950/90 via-amber-900/80 to-amber-950/90 border-amber-500/80 shadow-[0_0_25px_rgba(245,158,11,0.4)]'
                                                                 : isChoiceA
@@ -605,17 +618,17 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                     >
                                                         {/* Subtle sheen reflection overlay */}
                                                         <span className="absolute inset-0 rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
-                                                        <span className="font-black italic text-base sm:text-2xl md:text-3xl tracking-wide uppercase text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] flex items-center gap-2">
+                                                        <span className="font-black italic text-sm sm:text-2xl md:text-3xl tracking-wide uppercase text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] flex items-center gap-2 truncate">
                                                             {isTargetLocked && (
-                                                                <Lock size={20} className="text-amber-400 shrink-0 inline-block" />
+                                                                <Lock size={18} className="text-amber-400 shrink-0 inline-block" />
                                                             )}
-                                                            {boxText}
+                                                            <span className="truncate">{boxText}</span>
                                                         </span>
-                                                        <ChevronRight size={26} className="text-white shrink-0 group-hover:translate-x-1.5 transition-transform drop-shadow" />
+                                                        <ChevronRight size={22} className="text-white shrink-0 group-hover:translate-x-1.5 transition-transform drop-shadow" />
                                                     </div>
 
                                                     {isTargetLocked && (
-                                                        <span className="mt-2 text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-500/20 border border-amber-500/40 px-3 py-1 rounded-full backdrop-blur-md shadow-lg flex items-center gap-1">
+                                                        <span className="mt-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full backdrop-blur-md shadow-lg flex items-center gap-1">
                                                             <Lock size={10} /> {isPreviewLimitReached ? "Unlock Full Movie" : "Locked Choice (Upgrade Plan)"}
                                                         </span>
                                                     )}
@@ -683,19 +696,19 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                             </ul>
                         </div>
 
-                        <div className="flex flex-col gap-3 pt-2">
+                        <div className="flex flex-col gap-2.5 pt-2">
                             <button
                                 onClick={() => {
                                     setLockedChoiceModal(null);
                                     if (onShowPaywall) onShowPaywall();
                                 }}
-                                className="w-full bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 hover:brightness-110 text-white font-black py-4 rounded-2xl uppercase tracking-wider text-sm shadow-xl shadow-cyan-500/25 transition-all active:scale-95"
+                                className="w-full bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 hover:brightness-110 text-white font-bold py-3 sm:py-3.5 rounded-xl sm:rounded-2xl uppercase tracking-wider text-xs sm:text-sm shadow-lg shadow-cyan-500/25 transition-all active:scale-95 cursor-pointer"
                             >
                                 Unlock Full Access • Subscribe Plan
                             </button>
                             <button
                                 onClick={() => setLockedChoiceModal(null)}
-                                className="w-full bg-white/10 hover:bg-white/20 text-white/80 font-bold py-3 rounded-2xl text-xs uppercase tracking-wider transition-colors"
+                                className="w-full bg-white/10 hover:bg-white/20 text-white/80 font-bold py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs uppercase tracking-wider transition-colors cursor-pointer"
                             >
                                 Continue Free Preview
                             </button>

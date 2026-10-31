@@ -123,29 +123,29 @@ export default function ProfileSelector() {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] w-full min-h-screen bg-[#0f0a19] flex flex-col items-center justify-center overflow-y-auto">
+    <div className="fixed inset-0 z-[200] w-full min-h-[100dvh] bg-[#0f0a19] flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto">
       {/* Brand Logo Header */}
-      <Link href="/" className="absolute top-8 left-8 sm:left-12 flex items-center gap-2 hover:opacity-80 transition-opacity">
+      <Link href="/" className="absolute top-4 sm:top-8 left-4 sm:left-12 flex items-center gap-2 hover:opacity-80 transition-opacity">
          <img
             src="/vtagu_logo.png"
             alt="PrimeTime Logo"
-            className="h-10 sm:h-12 w-auto object-contain drop-shadow-md"
+            className="h-8 sm:h-12 w-auto object-contain drop-shadow-md"
          />
       </Link>
 
-      <div className="flex flex-col items-center mt-16 sm:mt-0 animate-in fade-in zoom-in duration-500">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-12 tracking-tight drop-shadow-xl text-center">
+      <div className="flex flex-col items-center mt-12 sm:mt-0 animate-in fade-in zoom-in duration-500">
+        <h1 className="text-2xl sm:text-5xl md:text-6xl font-extrabold text-white mb-8 sm:mb-12 tracking-tight drop-shadow-xl text-center">
           Who's watching?
         </h1>
         
-        <div className="flex flex-wrap justify-center gap-8 sm:gap-12">
+        <div className="flex flex-wrap justify-center gap-6 sm:gap-12 max-w-sm sm:max-w-none">
            {profiles.map(profile => (
              <button 
                key={profile.id} 
                onClick={(e) => handleProfileClick(e, profile)}
-               className="group flex flex-col items-center gap-4 text-left transition-all duration-300"
+               className="group flex flex-col items-center gap-3 sm:gap-4 text-left transition-all duration-300"
              >
-               <div className={`relative w-32 h-32 sm:w-40 sm:h-40 rounded-3xl overflow-hidden transition-all duration-300 group-hover:scale-110 border-4 border-transparent ${
+               <div className={`relative w-28 h-28 sm:w-40 sm:h-40 rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-300 group-hover:scale-105 sm:group-hover:scale-110 border-4 border-transparent ${
                  profile.isKids 
                    ? 'group-hover:border-amber-400 group-hover:shadow-[0_0_40px_rgba(251,191,36,0.6)] bg-gradient-to-tr from-amber-400 to-orange-500' 
                    : 'group-hover:border-[#b28cff] group-hover:shadow-[0_0_40px_rgba(178,140,255,0.6)] bg-gradient-to-tr from-purple-600 to-indigo-700'
@@ -159,12 +159,12 @@ export default function ProfileSelector() {
                       alt={profile.name} 
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center font-black text-white text-5xl uppercase tracking-tighter drop-shadow-md">
+                    <div className="w-full h-full flex items-center justify-center font-black text-white text-4xl sm:text-5xl uppercase tracking-tighter drop-shadow-md">
                       {profile.name.substring(0, 1)}
                     </div>
                   )}
                </div>
-               <span className="text-gray-400 font-bold group-hover:text-white transition-colors tracking-wide text-lg sm:text-xl text-center uppercase">
+               <span className="text-gray-400 font-bold group-hover:text-white transition-colors tracking-wide text-sm sm:text-xl text-center uppercase">
                  {profile.name}
                </span>
              </button>

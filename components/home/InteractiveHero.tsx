@@ -37,7 +37,7 @@ export default function InteractiveGridHero({ interactiveMovies }: InteractiveHe
 
     return (
         <section className="w-full py-10 sm:py-16 overflow-hidden">
-            <div className="max-w-[90%] mx-auto">
+            <div className="standard-container">
 
                 <div className="mb-12">
                     <SectionTitle

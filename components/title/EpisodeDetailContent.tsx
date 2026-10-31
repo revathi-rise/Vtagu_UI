@@ -70,12 +70,12 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
         />
       )}
 
-      <section className="py-20 tv-container px-6 md:px-12 lg:px-20">
-        <div className="skeuo-surface-high p-8 lg:p-16 relative overflow-visible space-y-12">
+      <section className="py-8 sm:py-14 md:py-20 tv-container px-3 sm:px-6 md:px-12 lg:px-20">
+        <div className="skeuo-surface-high p-4 sm:p-8 lg:p-16 rounded-[1.5rem] sm:rounded-[2rem] relative overflow-visible space-y-6 sm:space-y-12">
 
           {/* ── Inline Preview Player (Matching VideoPlayer UI) ── */}
           {displayIframeSrc && (
-            <div id="episode-player" className="relative w-full aspect-video rounded-[2rem] overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/10 bg-black">
+            <div id="episode-player" className="relative w-full aspect-video rounded-[1.2rem] sm:rounded-[2rem] overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/10 bg-black">
               <WatchTrackingVideoPlayer
                 src={displayIframeSrc}
                 title={episode.title}
@@ -94,10 +94,10 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
           )}
 
           {/* ── Episode Info ── */}
-          <div className="flex flex-col lg:flex-row gap-12">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-12">
 
             {/* Poster */}
-            <div className="relative w-full lg:w-[330px] flex-shrink-0 aspect-[4/3] rounded-[2rem] overflow-hidden skeuo-glass-specular shadow-[0_30px_60px_rgba(0,0,0,0.8)]">
+            <div className="relative w-full lg:w-[330px] flex-shrink-0 aspect-[16/9] sm:aspect-[4/3] rounded-[1.2rem] sm:rounded-[2rem] overflow-hidden skeuo-glass-specular shadow-[0_30px_60px_rgba(0,0,0,0.8)]">
               <Image
                 src={episode.media?.card_image?.url || "https://images.unsplash.com/photo-1542281286-9e0a16bb7366?auto=format&fit=crop&q=80&w=800"}
                 alt={episode.title}
@@ -109,7 +109,7 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
             </div>
 
             {/* Metadata */}
-            <div className="flex-1 flex flex-col justify-center gap-6">
+            <div className="flex-1 flex flex-col justify-center gap-4 sm:gap-6">
 
               {/* Season Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-400/10 border border-cyan-400/30 text-cyan-400 text-xs font-black tracking-[0.2em] uppercase w-fit">
@@ -118,7 +118,7 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
               </div>
 
               {/* Title */}
-              <h1 className="text-3xl md:text-5xl font-black text-white italic uppercase tracking-tighter skeuo-title-3d leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-white italic uppercase tracking-tighter skeuo-title-3d leading-tight">
                 {episode.title}
               </h1>
 
@@ -179,14 +179,14 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
               />
 
               {/* CTA Buttons */}
-              <div className="flex flex-wrap items-center gap-4 pt-2">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
                 {displayIframeSrc ? (
                   <button
                     onClick={() => setPlayerOpen(true)}
-                    className="bg-primary text-black px-8 py-[12px] rounded-2xl text-[18px] font-black font-inter uppercase tracking-tight flex items-center gap-3 hover:bg-primary/90 hover:shadow-[0_0_25px_rgba(50,153,255,0.4)] transition-all duration-300 group relative overflow-hidden active:scale-95 shadow-xl"
+                    className="bg-primary text-black h-11 sm:h-14 px-5 sm:px-8 rounded-full sm:rounded-2xl text-xs sm:text-base font-bold uppercase tracking-wider flex items-center gap-2 sm:gap-3 hover:bg-primary/90 hover:shadow-[0_0_25px_rgba(50,153,255,0.4)] transition-all duration-300 group relative overflow-hidden active:scale-95 shadow-xl cursor-pointer"
                   >
-                    <Play size={22} fill="black" className="group-hover:scale-110 transition-transform relative z-10" />
-                    <span className="relative z-10 font-inter font-black text-[18px]">Watch Fullscreen</span>
+                    <Play size={18} fill="black" className="group-hover:scale-110 transition-transform relative z-10 shrink-0" />
+                    <span className="relative z-10 font-bold tracking-wider whitespace-nowrap">Watch Fullscreen</span>
                   </button>
                 ) : (
                   <WatchNowButton
@@ -204,10 +204,10 @@ export default function EpisodeDetailContent({ episode: initialEpisode, iframeSr
                     onClick={() => {
                        window.open(episode.media?.trailer?.url, "_blank");
                     }}
-                    className="px-8 py-4 rounded-full text-sm font-black uppercase tracking-widest flex items-center gap-3 bg-white/10 text-white hover:bg-white/20 transition-all border border-white/10 active:scale-95"
+                    className="h-11 sm:h-14 px-5 sm:px-8 rounded-full sm:rounded-2xl text-xs sm:text-base font-bold uppercase tracking-wider flex items-center gap-2 sm:gap-3 bg-white/10 text-white hover:bg-white/20 transition-all border border-white/10 active:scale-95 shrink-0 cursor-pointer"
                   >
-                    <Play size={20} />
-                    Watch Trailer
+                    <Play size={16} className="shrink-0" />
+                    <span>Watch Trailer</span>
                   </button>
                 )}
               </div>

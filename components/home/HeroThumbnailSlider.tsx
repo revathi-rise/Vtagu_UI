@@ -13,7 +13,7 @@ interface HeroThumbnailSliderProps {
 
 export default function HeroThumbnailSlider({ items, activeIndex, onThumbClick }: HeroThumbnailSliderProps) {
   return (
-    <div className="flex gap-4 overflow-x-auto no-scrollbar max-w-[90vw] md:max-w-none px-4 hidden md:block">
+    <div className="hidden md:flex gap-4 overflow-x-auto no-scrollbar max-w-[90vw] md:max-w-none px-4">
       {items.map((item, index) => (
         <button
           key={item.id}

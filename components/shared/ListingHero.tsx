@@ -57,7 +57,7 @@ export default function ListingHero({ items, basePath }: ListingHeroProps) {
   const currentItem = items[activeIndex];
 
   return (
-    <section className="relative w-full h-[70vh] sm:h-[80vh] md:h-screen overflow-hidden bg-[#0f0a10]">
+    <section className="relative w-full h-[72vh] sm:h-[80vh] md:h-screen overflow-hidden bg-[#0f0a10]">
       {/* Background Image Layer */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -109,9 +109,9 @@ export default function ListingHero({ items, basePath }: ListingHeroProps) {
             nextSlide();
           }
         }}
-        className="relative z-20 h-full w-full max-w-[90%] mx-auto px-5 sm:px-8 md:px-12 lg:px-20 flex flex-col justify-center cursor-grab active:cursor-grabbing"
+        className="relative z-20 h-full w-full standard-container pt-20 sm:pt-0 pb-14 sm:pb-0 flex flex-col justify-end sm:justify-center cursor-grab active:cursor-grabbing"
       >
-        <div className="max-w-2xl space-y-6">
+        <div className="max-w-2xl space-y-3 sm:space-y-6 pb-2 sm:pb-0">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentItem.id}
@@ -141,7 +141,7 @@ export default function ListingHero({ items, basePath }: ListingHeroProps) {
               )}
 
               {/* Title */}
-              <h1 className="text-[20px] md:text-[40px] lg:text-[60px] font-black tracking-tighter uppercase leading-[0.9] text-white italic skeuo-title-3d drop-shadow-2xl">
+              <h1 className="text-[20px] sm:text-[36px] md:text-[48px] lg:text-[60px] font-black tracking-tighter uppercase leading-tight text-white italic skeuo-title-3d drop-shadow-2xl">
                 {currentItem.title}
               </h1>
 
@@ -184,17 +184,21 @@ export default function ListingHero({ items, basePath }: ListingHeroProps) {
               )}
 
               {/* Actions */}
-              <div className="flex flex-row items-center gap-3 pt-4">
+              <div className="flex flex-row items-center gap-2.5 sm:gap-3 pt-2 sm:pt-4 w-full sm:w-auto">
                 <Link
                   href={currentItem.link || `${basePath}/${currentItem.slug || ""}`}
-                  className="flex-1 sm:flex-none h-11 sm:h-14 px-6 sm:px-10 flex items-center justify-center gap-2 sm:gap-3 rounded-full bg-primary text-black font-bold uppercase tracking-widest transition-all hover:scale-105 hover:bg-primary/90 hover:shadow-[0_10px_20px_rgba(50,153,255,0.4)] active:scale-95 text-sm sm:text-base"
+                  className="flex-1 sm:flex-none h-11 sm:h-14 px-5 sm:px-10 flex items-center justify-center gap-2 sm:gap-3 rounded-full bg-primary text-black font-extrabold uppercase tracking-wider sm:tracking-widest transition-all hover:scale-105 hover:bg-primary/90 hover:shadow-[0_10px_20px_rgba(50,153,255,0.4)] active:scale-95 text-xs sm:text-base whitespace-nowrap shadow-[0_0_20px_rgba(50,153,255,0.35)]"
                 >
-                  <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-black" />
-                  Watch Now
+                  <Play className="w-3.5 h-3.5 sm:w-5 sm:h-5 fill-black shrink-0" />
+                  <span>Watch Now</span>
                 </Link>
-                <button className="flex-1 sm:flex-none h-11 sm:h-14 px-6 sm:px-10 flex items-center justify-center gap-2 sm:gap-3 rounded-full glass-panel text-white font-bold uppercase tracking-widest transition-all hover:bg-white/10 active:scale-95 border-white/20 text-sm sm:text-base bg-white/5 backdrop-blur-md">
-                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-                  Watchlist
+                <button 
+                  className="w-11 h-11 sm:w-auto sm:h-14 sm:px-8 flex items-center justify-center gap-2 rounded-full text-white font-extrabold uppercase tracking-wider sm:tracking-widest transition-all hover:bg-white/15 active:scale-95 text-xs sm:text-base bg-white/8 backdrop-blur-md shrink-0 border border-white/20"
+                  title="Add to Watchlist"
+                  aria-label="Add to Watchlist"
+                >
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                  <span className="hidden sm:inline">Watchlist</span>
                 </button>
               </div>
             </motion.div>
@@ -202,8 +206,24 @@ export default function ListingHero({ items, basePath }: ListingHeroProps) {
         </div>
       </motion.div>
 
-      {/* Navigation Controls */}
-      <div className="absolute bottom-6 right-4 sm:bottom-8 sm:right-8 z-40 flex flex-col items-end gap-4 sm:gap-6">
+      {/* Mobile Dot Indicators - above the bottom nav bar */}
+      <div className="sm:hidden absolute bottom-5 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5">
+        {items.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setActiveIndex(idx)}
+            aria-label={`Go to slide ${idx + 1}`}
+            className={`transition-all duration-300 rounded-full ${
+              idx === activeIndex
+                ? "w-6 h-1.5 bg-gradient-to-r from-primary to-accent shadow-[0_0_8px_rgba(50,153,255,0.8)]"
+                : "w-1.5 h-1.5 bg-white/30 hover:bg-white/50"
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Desktop Navigation Controls */}
+      <div className="hidden sm:flex absolute bottom-6 right-4 sm:bottom-8 sm:right-8 z-40 flex-col items-end gap-4 sm:gap-6">
         <div className="flex gap-2 sm:gap-3 items-center">
           {currentItem.trailerUrl && (
             <button

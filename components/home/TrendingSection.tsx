@@ -31,10 +31,10 @@ export default function TrendingLandscape({ seriesData }: TrendingSectionProps) 
 
   return (
     <section className="w-full py-12 bg-[#0f0a19]">
-      <div className="max-w-[90%] mx-auto">
+      <div className="standard-container">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-10">
+        <div className="flex items-center justify-between mb-6 sm:mb-10">
           <SectionTitle
             title="SOON TO "
             subtitle="Coming Soon"

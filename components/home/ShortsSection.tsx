@@ -249,18 +249,18 @@ export default function ShortsSection({ shorts }: ShortsSectionProps) {
   };
 
   return (
-    <section className='max-w-[90%] mx-auto' style={{ padding: '40px 0 32px', position: 'relative' }}>
+    <section className='standard-container' style={{ padding: '40px 0 32px', position: 'relative' }}>
       {/* Section header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-5 pb-6">
+      <div className="flex flex-row items-center justify-between gap-3 pb-5 sm:pb-6">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
             <div style={{
-              width: 10, height: 10, borderRadius: '50%',
+              width: 8, height: 8, borderRadius: '50%',
               background: 'linear-gradient(135deg, #3299ff, #9248ff)',
               animation: 'pulse-short 2s ease-in-out infinite',
             }} />
             <span style={{
-              fontSize: 12, fontWeight: 700, letterSpacing: 3,
+              fontSize: 11, fontWeight: 700, letterSpacing: 2.5,
               textTransform: 'uppercase',
               background: 'linear-gradient(135deg, #3299ff, #9248ff)',
               WebkitBackgroundClip: 'text',
@@ -279,7 +279,7 @@ export default function ShortsSection({ shorts }: ShortsSectionProps) {
               Clips
             </span>
           </h2>
-          <p className="title-desc" style={{ marginTop: 6 }}>
+          <p className="title-desc hidden sm:block" style={{ marginTop: 6 }}>
             Quick vertical videos — hover to preview, click to watch
           </p>
         </div>
@@ -287,14 +287,14 @@ export default function ShortsSection({ shorts }: ShortsSectionProps) {
         <Link
           href="/shorts"
           prefetch={false}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 sm:px-6 sm:py-3 rounded-full text-white text-sm font-bold no-underline shrink-0 w-full sm:w-auto transition-transform hover:scale-105"
+          className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 py-1.5 sm:px-6 sm:py-2.5 rounded-full text-white text-xs sm:text-sm font-bold no-underline shrink-0 w-auto transition-transform hover:scale-105 active:scale-95 shadow-md"
           style={{
             background: 'linear-gradient(135deg, #3299ff 0%, #9248ff 100%)',
-            boxShadow: '0 4px 20px rgba(50,153,255,0.3)',
+            boxShadow: '0 4px 15px rgba(50,153,255,0.3)',
           }}
         >
-          Watch All
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <span>Watch All</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </Link>

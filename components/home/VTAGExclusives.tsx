@@ -43,10 +43,10 @@ export default function VTAGExclusives() {
 
   return (
     <section className="w-full py-16 bg-[#0f0a19] overflow-visible">
-      <div className="max-w-[95%] lg:max-w-[90%] mx-auto overflow-visible">
+      <div className="standard-container overflow-visible">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-10 px-4">
+        <div className="flex items-center justify-between mb-8 sm:mb-10">
           <SectionTitle
             title="VTAG "
             subtitle="Only on PrimeTime"

@@ -28,7 +28,7 @@ export default function TitleHero({ title, year, rating, seasons, description, b
   const episodeNumber = isEpisode ? title.match(/EPISODE\s*(\d+)/i)?.[0] : null;
 
   return (
-    <section className="relative w-full h-[80vh] md:h-[90vh] min-h-[500px] md:min-h-[800px] overflow-hidden bg-[#0B0A10]">
+    <section className="relative w-full h-[70vh] sm:h-[80vh] md:h-[90vh] min-h-[460px] md:min-h-[700px] overflow-hidden bg-[#0B0A10]">
       {/* Background with Ken Burns & Enhanced Gradients */}
       <div className="absolute inset-0">
         <Image 
@@ -43,8 +43,8 @@ export default function TitleHero({ title, year, rating, seasons, description, b
       </div>
 
       {/* Content Layer */}
-      <div className="relative z-20 h-full tv-container px-6 md:px-12 lg:px-20 pt-32 md:pt-44 pb-12 md:pb-20 flex flex-col justify-start md:justify-center">
-        <div className="max-w-4xl space-y-8 reveal-visible">
+      <div className="relative z-20 h-full tv-container px-4 sm:px-8 md:px-12 lg:px-20 pt-20 sm:pt-32 md:pt-44 pb-8 sm:pb-12 md:pb-20 flex flex-col justify-end md:justify-center">
+        <div className="max-w-4xl space-y-4 sm:space-y-8 reveal-visible">
           
           {/* Subtitle / Episode Badge */}
           {episodeNumber && (
@@ -56,7 +56,7 @@ export default function TitleHero({ title, year, rating, seasons, description, b
 
           {/* Main Title - Skeuomorphic 3D Look */}
           <div className="space-y-2">
-            <h1 className="text-[24px] sm:text-[28px] md:text-[35px] font-black text-white leading-[0.9] tracking-tighter uppercase italic skeuo-title-3d">
+            <h1 className="text-[22px] sm:text-[28px] md:text-[35px] font-black text-white leading-tight tracking-tighter uppercase italic skeuo-title-3d">
               {mainTitle}
             </h1>
           </div>
@@ -117,30 +117,29 @@ export default function TitleHero({ title, year, rating, seasons, description, b
 
           {/* Description */}
           <div 
-            className="text-base sm:text-lg md:text-[24px] text-white/70 max-w-2xl leading-relaxed font-semibold drop-shadow-lg [&_p]:inline [&_p]:m-0 [&_p]:p-0"
+            className="text-sm sm:text-base md:text-[20px] text-white/70 max-w-2xl leading-relaxed font-medium drop-shadow-lg [&_p]:inline [&_p]:m-0 [&_p]:p-0"
             dangerouslySetInnerHTML={{ __html: description }}
           />
 
           {/* Action Buttons - Premium Tactile Design */}
-          <div className="flex items-center gap-6 pt-6">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-3 sm:pt-6">
             <button
               onClick={() => {
                 const player = document.getElementById('episode-player');
                 if (player) player.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }}
-              className="bg-primary text-black h-14 sm:h-16 px-8 rounded-full font-black text-sm sm:text-base hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(50,153,255,0.5)] transition-all duration-300 group flex items-center gap-3 active:scale-95 shadow-xl"
+              className="bg-primary text-black h-11 sm:h-14 px-5 sm:px-8 rounded-full font-bold text-xs sm:text-base hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(50,153,255,0.5)] transition-all duration-300 group flex items-center gap-2 sm:gap-3 active:scale-95 shadow-xl uppercase tracking-wider"
             >
-              <Play size={20} fill="black" className="group-hover:scale-110 transition-transform" />
+              <Play size={16} fill="black" className="sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
               <span>WATCH NOW</span>
             </button>
 
-            
-            <button className="skeuo-icon-btn w-14 h-14 sm:w-16 sm:h-16 rounded-full active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparent flex justify-center items-center">
-              <Plus size={20} className="sm:w-6 sm:h-6" />
+            <button aria-label="Add to list" className="skeuo-icon-btn w-11 h-11 sm:w-14 sm:h-14 rounded-full active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparent flex justify-center items-center shrink-0">
+              <Plus size={18} className="sm:w-6 sm:h-6" />
             </button>
             
-            <button className="skeuo-icon-btn w-14 h-14 sm:w-16 sm:h-16 rounded-full active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparent flex justify-center items-center">
-              <Share2 size={20} className="sm:w-6 sm:h-6" />
+            <button aria-label="Share episode" className="skeuo-icon-btn w-11 h-11 sm:w-14 sm:h-14 rounded-full active:skeuo-pressed shadow-[0_15px_30px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 bg-gradient-to-b from-white/10 to-transparent flex justify-center items-center shrink-0">
+              <Share2 size={16} className="sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>

@@ -8,8 +8,10 @@ export const metadata = {
 
 export default function MyListPage() {
   return (
-     <div className="min-h-screen bg-[#0f0a19] pt-24 px-6 md:px-12 lg:px-20 pb-20">
-        <MyListClient />
+     <div className="min-h-screen bg-[#0f0a19] pt-20 sm:pt-24 pb-24 lg:pb-20">
+        <div className="standard-container">
+           <MyListClient />
+        </div>
      </div>
   );
 }

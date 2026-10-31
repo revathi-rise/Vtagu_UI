@@ -17,7 +17,7 @@ export default function SectionTitle({ title, subtitle, Icon, gradientText, view
   const parts = gradientText ? title.split(gradientText) : [title, ""];
 
   return (
-    <div className="flex flex-col gap-2 select-none overflow-visible w-full group/title">
+    <div className="flex flex-col gap-1.5 sm:gap-2 select-none overflow-visible w-full group/title">
 
       {/* 1. Sub-Header Row: Cinematic Reveal */}
       <div className="flex items-center gap-3">

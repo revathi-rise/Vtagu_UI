@@ -38,10 +38,10 @@ export default function MovieSection({ movies }: MovieSectionProps) {
 
   return (
     <section className="w-full py-10 sm:py-16 overflow-hidden">
-      <div className="max-w-[90%] mx-auto">
+      <div className="standard-container">
 
         {/* Section Header */}
-        <div className="flex items-center justify-between mb-8 sm:mb-10 px-4 sm:px-0">
+        <div className="flex items-center justify-between mb-6 sm:mb-10">
           <SectionTitle
             title={isKids ? "KIDS " : "CINEMATIC "}
             subtitle={isKids ? "Fun & Animated Adventures" : "Trending Feature Films"}
@@ -84,11 +84,11 @@ export default function MovieSection({ movies }: MovieSectionProps) {
           <div className="relative group/slider -mx-4 sm:mx-0">
             <Swiper
               modules={[Autoplay, FreeMode]}
-              spaceBetween={20}
-              slidesPerView={1.5}
+              spaceBetween={16}
+              slidesPerView={1.6}
               freeMode={true}
               breakpoints={{
-                480: { slidesPerView: 2.2, spaceBetween: 20 },
+                480: { slidesPerView: 2.2, spaceBetween: 18 },
                 640: { slidesPerView: 2.5, spaceBetween: 24 },
                 1024: { slidesPerView: 3.5, spaceBetween: 28 },
                 1440: { slidesPerView: 4.2, spaceBetween: 30 },

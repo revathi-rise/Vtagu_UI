@@ -61,13 +61,13 @@ export default async function MoviesPage() {
 
       {/* 2. Top 10 Grid (Our Collection) */}
       {movies.length > 0 ? (
-        <section className="py-24 max-w-[90%] mx-auto">
-          <div className="flex flex-col gap-12">
+        <section className="py-8 sm:py-16 md:py-24 standard-container">
+          <div className="flex flex-col gap-6 sm:gap-10">
             <div className="flex flex-col gap-2">
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase">
+              <h2 className="text-[22px] sm:text-4xl md:text-5xl font-bold tracking-tighter uppercase">
                 Our <span className="text-gradient">Collection</span>
               </h2>
-              <div className="w-20 h-1 bg-brand-gradient rounded-full" />
+              <div className="w-14 sm:w-20 h-1 bg-brand-gradient rounded-full" />
             </div>
             <ResponsiveGrid gridCols={{ desktop: 5 }}>
               {movies.map((movie, index) => (
@@ -97,7 +97,7 @@ export default async function MoviesPage() {
           </div>
         </section>
       ) : (
-        <section className="py-24 max-w-[90%] mx-auto min-h-[50vh] flex flex-col items-center justify-center text-center">
+        <section className="py-24 standard-container min-h-[50vh] flex flex-col items-center justify-center text-center">
           <div className="bg-white/5 border border-white/10 rounded-2xl p-12 max-w-lg mx-auto flex flex-col items-center gap-6 backdrop-blur-md">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
               <span className="text-primary text-4xl">🎬</span>

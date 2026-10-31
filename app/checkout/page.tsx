@@ -373,84 +373,84 @@ function CheckoutContent() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0c] flex flex-col">
-      <header className="p-6 md:p-10">
+      <header className="p-4 sm:p-6 md:p-10">
         <Link href="/" className="inline-block hover:scale-105 transition-transform duration-300">
-          <Image src="/vtagu_logo.png" alt="PrimeTime Logo" width={140} height={60} className="h-10 w-auto object-contain" />
+          <Image src="/vtagu_logo.png" alt="PrimeTime Logo" width={140} height={60} className="h-8 sm:h-10 w-auto object-contain" />
         </Link>
       </header>
 
-      <main className="flex-1 flex items-center justify-center p-6 pb-20">
-        <div className="w-full max-w-4xl grid md:grid-cols-2 gap-10 md:gap-0 items-stretch bg-[#161224]/50 border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl backdrop-blur-sm">
+      <main className="flex-1 flex items-center justify-center p-3 sm:p-6 pb-24">
+        <div className="w-full max-w-4xl grid md:grid-cols-2 gap-6 md:gap-0 items-stretch bg-[#161224]/50 border border-white/5 rounded-[1.75rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl backdrop-blur-sm">
 
           {/* Left Side: Summary */}
-          <div className="p-8 md:p-12 bg-gradient-to-br from-white/5 to-transparent flex flex-col justify-between relative overflow-hidden">
+          <div className="p-5 sm:p-8 md:p-12 bg-gradient-to-br from-white/5 to-transparent flex flex-col justify-between relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#b28cff]/10 blur-[100px] rounded-full pointer-events-none" />
 
             <div className="relative z-10">
-              <div className="inline-flex items-center gap-2 bg-[#b28cff]/10 text-[#b28cff] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-8 border border-[#b28cff]/20">
-                <Crown size={14} />
+              <div className="inline-flex items-center gap-2 bg-[#b28cff]/10 text-[#b28cff] px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] mb-4 sm:mb-8 border border-[#b28cff]/20">
+                <Crown size={13} />
                 Order Summary
               </div>
 
               {checkoutType === 'movie' && movie ? (
                 <>
-                  <h2 className="text-4xl font-black text-white mb-2 uppercase italic tracking-tighter">
+                  <h2 className="text-2xl sm:text-4xl font-black text-white mb-1.5 sm:mb-2 uppercase italic tracking-tighter">
                     {movie.title}
                   </h2>
-                  <p className="text-gray-400 text-sm mb-10 font-medium">
+                  <p className="text-gray-400 text-xs sm:text-sm mb-6 sm:mb-10 font-medium">
                     Lifetime Interactive Experience
                   </p>
 
-                  <div className="space-y-6 mb-10 border-t border-white/10 pt-8">
-                    <div className="flex justify-between items-center text-sm">
+                  <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-10 border-t border-white/10 pt-5 sm:pt-8">
+                    <div className="flex justify-between items-center text-xs sm:text-sm">
                       <span className="text-gray-400 font-bold">Experience Price</span>
                       <span className="text-white font-bold">₹{movie.price}</span>
                     </div>
-                    <div className="flex justify-between items-center text-sm">
+                    <div className="flex justify-between items-center text-xs sm:text-sm">
                       <span className="text-gray-400 font-bold">Tax & Fees</span>
                       <span className="text-white font-bold">Included</span>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-end border-t border-white/10 pt-8">
-                    <span className="text-gray-400 text-sm font-bold uppercase tracking-widest">Total</span>
+                  <div className="flex justify-between items-end border-t border-white/10 pt-5 sm:pt-8">
+                    <span className="text-gray-400 text-xs sm:text-sm font-bold uppercase tracking-widest">Total</span>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-white/50 text-xl font-bold italic">₹</span>
-                      <span className="text-5xl font-black text-white tracking-tighter">{movie.price}</span>
+                      <span className="text-white/50 text-base sm:text-xl font-bold italic">₹</span>
+                      <span className="text-3xl sm:text-5xl font-black text-white tracking-tighter">{movie.price}</span>
                     </div>
                   </div>
                 </>
               ) : checkoutType === 'plan' && plan ? (
                 <>
-                  <h2 className="text-4xl font-black text-white mb-2 uppercase italic tracking-tighter">
+                  <h2 className="text-2xl sm:text-4xl font-black text-white mb-1.5 sm:mb-2 uppercase italic tracking-tighter">
                     {plan.name}
                   </h2>
-                  <p className="text-gray-400 text-sm mb-10 font-medium">
+                  <p className="text-gray-400 text-xs sm:text-sm mb-6 sm:mb-10 font-medium">
                     {plan.validity || (plan as any).plan_duration || 'Standard'} of {(plan.isStandardIncluded === 0 || (plan as any).is_standard_included === 0) ? 'interactive streaming' : 'unlimited streaming'}
                   </p>
 
-                  <div className="space-y-6 mb-10 border-t border-white/10 pt-8">
-                    <div className="flex justify-between items-center text-sm">
+                  <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-10 border-t border-white/10 pt-5 sm:pt-8">
+                    <div className="flex justify-between items-center text-xs sm:text-sm">
                       <span className="text-gray-400 font-bold">Plan Price</span>
                       <span className="text-white font-bold">₹{plan.price}</span>
                     </div>
                     {plan.discount > 0 && (
-                      <div className="flex justify-between items-center text-sm">
+                      <div className="flex justify-between items-center text-xs sm:text-sm">
                         <span className="text-cyan-400 font-bold">Discount Applied</span>
                         <span className="text-cyan-400 font-bold">-{plan.discount}%</span>
                       </div>
                     )}
-                    <div className="flex justify-between items-center text-sm">
+                    <div className="flex justify-between items-center text-xs sm:text-sm">
                       <span className="text-gray-400 font-bold">Tax & Fees</span>
                       <span className="text-white font-bold">Included</span>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-end border-t border-white/10 pt-8">
-                    <span className="text-gray-400 text-sm font-bold uppercase tracking-widest">Total</span>
+                  <div className="flex justify-between items-end border-t border-white/10 pt-5 sm:pt-8">
+                    <span className="text-gray-400 text-xs sm:text-sm font-bold uppercase tracking-widest">Total</span>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-white/50 text-xl font-bold italic">₹</span>
-                      <span className="text-5xl font-black text-white tracking-tighter">{plan.price}</span>
+                      <span className="text-white/50 text-base sm:text-xl font-bold italic">₹</span>
+                      <span className="text-3xl sm:text-5xl font-black text-white tracking-tighter">{plan.price}</span>
                     </div>
                   </div>
                 </>
@@ -459,20 +459,20 @@ function CheckoutContent() {
               )}
             </div>
 
-            <div className="mt-12 text-gray-500 text-[10px] font-bold uppercase tracking-widest relative z-10">
+            <div className="mt-8 sm:mt-12 text-gray-500 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest relative z-10">
               Secure Encrypted Checkout
             </div>
           </div>
 
           {/* Right Side: Payment Action */}
-          <div className="p-8 md:p-12 flex flex-col justify-center relative">
-            <h3 className="text-2xl font-bold text-white mb-6">Complete your payment</h3>
-            <p className="text-gray-400 text-sm leading-relaxed mb-8">
+          <div className="p-5 sm:p-8 md:p-12 flex flex-col justify-center relative">
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-6">Complete your payment</h3>
+            <p className="text-gray-400 text-xs sm:text-sm leading-relaxed mb-6 sm:mb-8">
               You will be securely redirected to Razorpay to complete your payment. All major credit cards, UPI, and net banking options are supported.
             </p>
 
             {error && (
-              <div className="mb-8 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+              <div className="mb-6 sm:mb-8 p-3.5 sm:p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs sm:text-sm">
                 {error}
               </div>
             )}
@@ -480,7 +480,7 @@ function CheckoutContent() {
             <button
               onClick={handlePayment}
               disabled={isProcessing || (checkoutType === 'plan' ? !plan : !movie)}
-              className="w-full bg-gradient-to-r from-[#b28cff] to-[#9248ff] text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform duration-300 shadow-[0_10px_30px_rgba(146,72,255,0.3)] disabled:opacity-70 disabled:hover:scale-100 group relative overflow-hidden"
+              className="w-full bg-gradient-to-r from-[#b28cff] to-[#9248ff] text-white font-bold py-4 sm:py-5 rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform duration-300 shadow-[0_10px_30px_rgba(146,72,255,0.3)] disabled:opacity-70 disabled:hover:scale-100 group relative overflow-hidden text-sm sm:text-base active:scale-95"
             >
               <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
               {isProcessing ? (

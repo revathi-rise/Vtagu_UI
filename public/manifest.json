@@ -1,0 +1,22 @@
+{
+  "name": "VTAGU PrimeTime",
+  "short_name": "PrimeTime",
+  "description": "Premium streaming entertainment platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0c",
+  "theme_color": "#0a0a0c",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/vtagu_primetime_logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/vtagu_logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

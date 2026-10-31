@@ -15,7 +15,7 @@ export default function Footer() {
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 blur-[150px] pointer-events-none opacity-50" />
       <div className="absolute bottom-0 right-1/4 w-[600px] h-[300px] bg-accent/5 blur-[120px] pointer-events-none opacity-50" />
 
-      <div className="max-w-[90%] mx-auto relative z-10">
+      <div className="standard-container relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-12 gap-8 lg:gap-6 mb-10 lg:mb-12">
 
           {/* Brand Column */}

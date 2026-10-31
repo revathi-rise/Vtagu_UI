@@ -11,10 +11,10 @@ export const metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="fixed inset-0 z-[200] w-full min-h-screen flex bg-[#0B0914] overflow-hidden">
+    <div className="relative min-h-screen w-full flex bg-[#0B0914] overflow-x-hidden">
 
       {/* Left Column (Form) */}
-      <div className="w-full lg:w-[45%] flex flex-col justify-between px-8 sm:px-16 xl:px-24 py-10 min-h-screen overflow-y-auto custom-scrollbar">
+      <div className="w-full lg:w-[45%] flex flex-col justify-between px-5 sm:px-12 xl:px-24 py-6 sm:py-10 min-h-screen">
         <div>
           <div className='flex  justify-between items-center pb-4'>
             <Link href="/" className="flex items-center hover:scale-105 transition-transform duration-300">

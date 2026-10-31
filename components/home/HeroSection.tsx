@@ -375,7 +375,7 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
   }
 
   return (
-    <section className="relative w-full h-[70vh] sm:h-[80vh] md:h-screen overflow-hidden bg-[#0f0a10]">
+    <section className="relative w-full min-h-[560px] h-[80vh] sm:h-[82vh] md:h-screen overflow-hidden bg-[#0f0a10]">
       {/* 1. Background Image Slider with Smooth Motion Transition */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -414,9 +414,9 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
             nextSlide();
           }
         }}
-        className="relative z-20 h-full w-full max-w-[90%] mx-auto px-5 sm:px-8 md:px-12 lg:px-20 flex flex-col justify-center cursor-grab active:cursor-grabbing"
+        className="relative z-20 h-full w-full standard-container pt-20 sm:pt-0 pb-14 sm:pb-0 flex flex-col justify-end sm:justify-center cursor-grab active:cursor-grabbing"
       >
-        <div className="max-w-2xl space-y-6">
+        <div className="max-w-2xl space-y-3 sm:space-y-6 pb-2 sm:pb-0">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentItem.id}
@@ -424,14 +424,14 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="flex flex-col gap-6"
+              className="flex flex-col gap-3 sm:gap-6"
             >
               {/* Badge System */}
               {(currentItem.category || currentItem.rating || currentItem.certificate) && (
-                <div className="flex items-center gap-3 md:gap-4 flex-wrap">
+                <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-wrap">
                   {currentItem.category && (
-                    <div className="glass-panel px-4 py-1.5 rounded-full border-white/20 flex items-center gap-2">
-                      <span className="text-[10px] md:text-[12px] font-bold text-primary tracking-[0.2em] uppercase">
+                    <div className="glass-panel px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border-white/20 flex items-center gap-2">
+                      <span className="text-[9px] sm:text-[10px] md:text-[12px] font-bold text-primary tracking-[0.2em] uppercase">
                         {currentItem.category}
                       </span>
                     </div>
@@ -447,20 +447,20 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
                             } 
                           : undefined
                       }
-                      className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md py-1.5 px-3.5 rounded-full border border-white/10 text-[11px] md:text-[13px] font-extrabold tracking-wider uppercase"
+                      className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md py-1 sm:py-1.5 px-3 sm:px-3.5 rounded-full border border-white/10 text-[10px] sm:text-[11px] md:text-[13px] font-extrabold tracking-wider uppercase"
                     >
                       <span>{currentItem.certificate.code}</span>
                       {Boolean(currentItem.certificate.certification_system) && (
-                        <span className="text-[9px] px-1 py-0.2 rounded font-bold bg-white/15 text-white/80">
+                        <span className="text-[8px] sm:text-[9px] px-1 py-0.2 rounded font-bold bg-white/15 text-white/80">
                           {currentItem.certificate.certification_system}
                         </span>
                       )}
                     </div>
                   )}
                   {currentItem.rating && (
-                    <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md py-1.5 px-4 rounded-full border border-white/10">
-                      <Star className="w-4 h-4 text-[#FACC15] fill-[#FACC15]" />
-                      <span className="font-bold text-white text-[12px] md:text-[14px]">{currentItem.rating}</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2 bg-black/40 backdrop-blur-md py-1 sm:py-1.5 px-3 sm:px-4 rounded-full border border-white/10">
+                      <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FACC15] fill-[#FACC15]" />
+                      <span className="font-bold text-white text-[11px] sm:text-[12px] md:text-[14px]">{currentItem.rating}</span>
                     </div>
                   )}
                 </div>
@@ -468,14 +468,14 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
 
               {/* Title */}
               {currentItem.title && (
-                <h1 className="title-h2 lg:text-[64px] xl:text-[80px] drop-shadow-2xl">
+                <h1 className="title-h2 text-[22px] sm:text-4xl md:text-5xl lg:text-[64px] xl:text-[80px] drop-shadow-2xl font-black leading-tight">
                   {currentItem.title}
                 </h1>
               )}
 
-              {/* Description */}
+              {/* Description - Clamped to 2-3 lines on mobile for native app cleanliness */}
               {currentItem.description && (
-                <p className="title-desc max-w-xl text-white/70">
+                <p className="title-desc max-w-xl text-white/70 line-clamp-2 sm:line-clamp-3 md:line-clamp-none text-xs sm:text-base leading-relaxed">
                   {currentItem.description}
                 </p>
               )}
@@ -483,13 +483,13 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
               {/* Languages Row */}
               {currentItem.languages && currentItem.languages.trim() !== "" && (
                 <div className="flex flex-wrap items-center gap-2 text-white/70 text-xs md:text-sm font-medium">
-                  <span className="text-white/40 uppercase tracking-[0.15em] text-[10px] md:text-[11px] font-bold flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-primary" /> Languages:
+                  <span className="text-white/40 uppercase tracking-[0.15em] text-[9px] sm:text-[10px] md:text-[11px] font-bold flex items-center gap-1.5">
+                    <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" /> Languages:
                   </span>
                   {currentItem.languages.split(',').map((lang) => (
                     <span 
                       key={lang} 
-                      className="px-2.5 py-0.5 rounded-full bg-white/10 text-white/90 text-[11px] font-bold border border-white/5 shadow-sm uppercase tracking-wider"
+                      className="px-2 sm:px-2.5 py-0.5 rounded-full bg-white/10 text-white/90 text-[10px] sm:text-[11px] font-bold border border-white/5 shadow-sm uppercase tracking-wider"
                     >
                       {lang.trim()}
                     </span>
@@ -497,33 +497,35 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
                 </div>
               )}
 
-              {/* Actions */}
-              <div className="flex flex-row items-center gap-3 pt-4">
+              {/* Actions - WATCH NOW fills width on mobile; Watchlist stays as clean icon */}
+              <div className="flex flex-row items-center gap-2.5 sm:gap-3 pt-2 sm:pt-4 w-full sm:w-auto">
                 <Link
                   href={currentItem.link}
-                  className="flex-1 sm:flex-none h-11 sm:h-14 px-6 sm:px-10 flex items-center justify-center gap-2 sm:gap-3 rounded-full bg-primary text-black font-bold uppercase tracking-widest transition-all hover:scale-105 hover:bg-primary/90 hover:shadow-[0_10px_20px_rgba(50,153,255,0.4)] active:scale-95 text-sm sm:text-base"
+                  className="flex-1 sm:flex-none h-11 sm:h-14 px-5 sm:px-10 flex items-center justify-center gap-2 sm:gap-3 rounded-full bg-primary text-black font-extrabold uppercase tracking-wider sm:tracking-widest transition-all hover:scale-105 hover:bg-primary/90 hover:shadow-[0_10px_20px_rgba(50,153,255,0.4)] active:scale-95 text-xs sm:text-base whitespace-nowrap shadow-[0_0_20px_rgba(50,153,255,0.35)]"
                 >
-                  <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-black" />
-                  Watch Now
+                  <Play className="w-3.5 h-3.5 sm:w-5 sm:h-5 fill-black shrink-0" />
+                  <span>Watch Now</span>
                 </Link>
                 <button
                   onClick={handleWatchlistToggle}
+                  aria-label={inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
+                  title={inWatchlist ? "In Watchlist" : "Add to Watchlist"}
                   className={cn(
-                    "flex-1 sm:flex-none h-11 sm:h-14 px-6 sm:px-10 flex items-center justify-center gap-2 sm:gap-3 rounded-full text-white font-bold uppercase tracking-widest transition-all active:scale-95 text-sm sm:text-base",
+                    "w-11 h-11 sm:w-auto sm:h-14 sm:px-8 flex items-center justify-center gap-2 rounded-full text-white font-extrabold uppercase tracking-wider sm:tracking-widest transition-all active:scale-95 text-xs sm:text-base shrink-0 border",
                     inWatchlist
-                      ? "bg-green-600/80 hover:bg-green-600 border border-green-400/30"
-                      : "glass-panel hover:bg-white/10 border-white/20"
+                      ? "bg-green-600/80 hover:bg-green-600 border-green-400/30"
+                      : "bg-white/8 backdrop-blur-md border-white/20 hover:bg-white/15"
                   )}
                 >
                   {inWatchlist ? (
                     <>
-                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                      In List
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white shrink-0" />
+                      <span className="hidden sm:inline">In List</span>
                     </>
                   ) : (
                     <>
-                      <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-                      Watchlist
+                      <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                      <span className="hidden sm:inline">Watchlist</span>
                     </>
                   )}
                 </button>
@@ -534,12 +536,30 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
       </motion.div>
 
       {/* 3. Navigation Controls & Thumbnails */}
-      <div className="absolute bottom-6 right-4 sm:bottom-8 sm:right-8 z-40 flex flex-col items-end gap-4 sm:gap-6">
+      {/* Mobile Dot Indicators - positioned above bottom nav bar */}
+      <div className="sm:hidden absolute bottom-5 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5">
+        {items.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => handleThumbClick(idx)}
+            aria-label={`Go to slide ${idx + 1}`}
+            className={`transition-all duration-300 rounded-full ${
+              idx === safeActiveIndex
+                ? "w-6 h-1.5 bg-gradient-to-r from-primary to-accent shadow-[0_0_8px_rgba(50,153,255,0.8)]"
+                : "w-1.5 h-1.5 bg-white/30 hover:bg-white/50"
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Desktop/Tablet Controls */}
+      <div className="hidden sm:flex absolute bottom-6 right-4 sm:bottom-8 sm:right-8 z-40 flex-col items-end gap-4 sm:gap-6">
         <div className="flex gap-2 sm:gap-3 items-center">
           <button 
             onClick={prevSlide}
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass-morphism flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all border border-white/10 shadow-xl"
             title="Previous"
+            aria-label="Previous slide"
           >
             <ChevronLeft size={20} />
           </button>
@@ -547,6 +567,7 @@ export default function HeroSection({ posters = [], movies = [], episodes = [] }
             onClick={nextSlide}
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass-morphism flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all border border-white/10 shadow-xl"
             title="Next"
+            aria-label="Next slide"
           >
             <ChevronRight size={20} />
           </button>

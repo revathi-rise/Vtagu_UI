@@ -247,7 +247,8 @@ function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: Sh
       {/* Right-side action buttons */}
       <div style={{
         position: 'absolute',
-        right: 16, bottom: 100,
+        right: 16,
+        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)',
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24,
       }}>
         {/* Mute / Unmute */}
@@ -317,7 +318,7 @@ function ShortCard({ short, isActive, isMuted, onToggleMute, onViewCounted }: Sh
       <div style={{
         position: 'absolute',
         bottom: 0, left: 0, right: 72,
-        padding: '0 20px 24px',
+        padding: '0 20px calc(env(safe-area-inset-bottom, 0px) + 20px)',
       }}>
         <h2 style={{
           color: '#fff', fontSize: 17, fontWeight: 700,
@@ -612,7 +613,7 @@ export default function ShortsPage() {
             key={short.id}
             style={{
               width: '100%',
-              height: '100vh',
+              height: '100dvh',
               scrollSnapAlign: 'start',
               flexShrink: 0,
             }}

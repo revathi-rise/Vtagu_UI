@@ -344,11 +344,11 @@ export default function ProfileTab({ profile, activeTab }: { profile: any; activ
   }
 
   return (
-    <section className="bg-[#1a1329]/80 backdrop-blur-xl border border-white/5 rounded-2xl p-6 lg:p-8 flex items-center justify-between shadow-2xl overflow-hidden relative group">
-      <div className="flex items-center gap-6">
+    <section className="bg-[#1a1329]/80 backdrop-blur-xl border border-white/5 rounded-2xl p-5 sm:p-6 lg:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-2xl overflow-hidden relative group">
+      <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6 w-full sm:w-auto">
         {/* Avatar */}
         <div className="relative shrink-0">
-          <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border-2 border-[#b28cff]/50 shadow-[0_0_30px_rgba(146,72,255,0.2)] bg-[#2a2438]">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border-2 border-[#b28cff]/50 shadow-[0_0_30px_rgba(146,72,255,0.2)] bg-[#2a2438]">
             <img 
               src={currentProfile.avatarUrl} 
               alt={currentProfile.name} 
@@ -358,21 +358,22 @@ export default function ProfileTab({ profile, activeTab }: { profile: any; activ
           {!currentProfile.isGuest && (
             <button 
               onClick={() => setIsEditing(true)}
-              className="absolute -bottom-2 -right-2 bg-[#d1aaff] hover:bg-white text-black p-2 rounded-lg shadow-lg transition-colors border border-black/10"
+              className="absolute -bottom-2 -right-2 bg-[#d1aaff] hover:bg-white text-black p-1.5 sm:p-2 rounded-lg shadow-lg transition-colors border border-black/10"
+              aria-label="Edit Profile"
             >
-              <PenSquare size={16} strokeWidth={2.5} />
+              <PenSquare size={14} className="sm:w-4 sm:h-4" strokeWidth={2.5} />
             </button>
           )}
         </div>
 
         {/* Info */}
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-1 drop-shadow-sm">{currentProfile.name}</h2>
-          <p className="text-gray-400 text-sm md:text-base mb-4 font-medium">{currentProfile.email}</p>
+        <div className="flex flex-col items-center sm:items-start">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 drop-shadow-sm">{currentProfile.name}</h2>
+          <p className="text-gray-400 text-xs sm:text-sm md:text-base mb-3 font-medium">{currentProfile.email}</p>
           
-          <div className="flex items-center gap-3 text-[10px] md:text-xs font-bold tracking-widest text-white/80">
+          <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2 text-[10px] md:text-xs font-bold tracking-widest text-white/80">
             {currentProfile.badges.map((badge: string) => (
-              <span key={badge} className="bg-[#2a2438] border border-white/10 px-3 py-1.5 rounded-full uppercase shadow-inner">
+              <span key={badge} className="bg-[#2a2438] border border-white/10 px-2.5 sm:px-3 py-1 rounded-full uppercase shadow-inner">
                 {badge}
               </span>
             ))}
@@ -381,10 +382,10 @@ export default function ProfileTab({ profile, activeTab }: { profile: any; activ
       </div>
 
       {!currentProfile.isGuest && (
-        <div className="hidden sm:block">
+        <div className="w-full sm:w-auto mt-2 sm:mt-0">
           <button 
             onClick={() => setIsEditing(true)}
-            className="bg-[#cca8ff] hover:bg-white text-[#1a1329] px-6 py-2.5 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(146,72,255,0.4)] hover:shadow-[0_0_30px_rgba(255,255,255,0.6)]"
+            className="w-full sm:w-auto bg-[#cca8ff] hover:bg-white text-[#1a1329] px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-[0_0_20px_rgba(146,72,255,0.4)] hover:shadow-[0_0_30px_rgba(255,255,255,0.6)]"
           >
             Edit Profile
           </button>

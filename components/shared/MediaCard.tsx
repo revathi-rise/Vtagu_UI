@@ -197,9 +197,9 @@ export const MediaCard = ({
           <div className="absolute inset-x-0 bottom-0 h-[65%] bg-gradient-to-t from-[#090513] via-[#090513]/85 to-transparent z-20 pointer-events-none" />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-300 z-10 pointer-events-none" />
 
-          {/* Top Badges Bar */}
-          <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-30 pointer-events-none gap-2">
-            <div className="flex items-center gap-1.5 flex-wrap">
+          {/* Top Badges Bar: On desktop shows badge + rating; on mobile badge is repositioned below title to avoid cluttering poster & rating */}
+          <div className="absolute top-2.5 sm:top-3 left-2.5 sm:left-3 right-2.5 sm:right-3 flex items-center justify-between z-30 pointer-events-none gap-2">
+            <div className="hidden sm:flex items-center gap-1.5 flex-wrap">
               {isComingSoon ? (
                 <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full text-white tracking-widest bg-gradient-to-r from-amber-500 to-rose-600 shadow-[0_0_12px_rgba(245,158,11,0.6)] animate-pulse">
                   Coming Soon
@@ -224,7 +224,7 @@ export const MediaCard = ({
             </div>
 
             {rating && (
-              <div className="flex items-center gap-1 bg-black/70 backdrop-blur-md border border-white/15 px-2.5 py-1 rounded-full text-[11px] font-black text-amber-300 shadow-lg ml-auto">
+              <div className="flex items-center gap-1 bg-black/70 backdrop-blur-md border border-white/15 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-black text-amber-300 shadow-lg ml-auto">
                 <Star size={11} className="fill-amber-400 text-amber-400" />
                 <span>{rating}</span>
               </div>
@@ -239,19 +239,46 @@ export const MediaCard = ({
           </div>
 
           {/* Bottom Content Overlay (Single Clean Info Row) */}
-          <div className="relative z-30 p-4 sm:p-5 flex flex-col gap-1.5 pointer-events-none">
+          <div className="relative z-30 p-2.5 sm:p-5 flex flex-col gap-1 sm:gap-1.5 pointer-events-none">
             {subtitle && (
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#b28cff] line-clamp-1 drop-shadow-sm">
+              <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-[#b28cff] line-clamp-1 drop-shadow-sm">
                 {subtitle}
               </span>
             )}
 
-            <h3 className="text-white font-black text-base sm:text-lg leading-tight line-clamp-1 group-hover:text-white transition-colors drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+            <h3 className="text-white font-black text-xs sm:text-base md:text-lg leading-tight line-clamp-1 group-hover:text-white transition-colors drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
               {title}
             </h3>
 
+            {/* Mobile: Repositioned badge below result heading for clean, uncluttered presentation */}
+            {(isComingSoon || badge || isFree !== undefined) && (
+              <div className="sm:hidden flex items-center pt-0.5">
+                {isComingSoon ? (
+                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full text-white tracking-widest bg-gradient-to-r from-amber-500 to-rose-600 shadow-sm animate-pulse">
+                    Coming Soon
+                  </span>
+                ) : badge ? (
+                  <span className={cn(
+                    "text-[9px] font-black uppercase px-2 py-0.5 rounded-full text-white tracking-wider backdrop-blur-md border inline-flex items-center",
+                    badgeColors[badgeColor] || "bg-primary shadow-sm border-primary/40"
+                  )}>
+                    {badge}
+                  </span>
+                ) : isFree !== undefined ? (
+                  <span className={cn(
+                    "text-[9px] font-black uppercase px-2 py-0.5 rounded-full text-white tracking-wider backdrop-blur-md border inline-flex items-center",
+                    isFree 
+                      ? "bg-emerald-600 border-emerald-400/40" 
+                      : "bg-gradient-to-r from-amber-500 to-orange-600 border-amber-400/40"
+                  )}>
+                    {isFree ? 'FREE' : 'PAID'}
+                  </span>
+                ) : null}
+              </div>
+            )}
+
             {/* Clean Single Metadata Row (NO duplicate year) */}
-            <div className="flex items-center gap-2 text-[11px] text-white/80 font-bold flex-wrap pt-0.5">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-white/80 font-bold flex-wrap pt-0.5">
               {year && <span>{year}</span>}
               {year && duration && <span className="w-1 h-1 rounded-full bg-white/40" />}
               {duration && (

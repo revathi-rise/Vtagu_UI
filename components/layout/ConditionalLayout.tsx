@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import { Genre, Language } from '@/lib/vtagu.api';
 
 // Routes that should have NO navbar/footer (immersive full-screen pages)
@@ -30,10 +31,11 @@ export default function ConditionalLayout({ genres, languages, children }: Condi
   return (
     <>
       <Navbar genres={genres} languages={languages} />
-      <div className="md:pt-24 pt-16 min-h-screen">
+      <div className="md:pt-24 pt-16 pb-20 lg:pb-0 min-h-screen">
         {children}
       </div>
       <Footer />
+      <MobileBottomNav />
     </>
   );
 }

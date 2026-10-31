@@ -44,10 +44,10 @@ export default function EpisodicVanguard({ episodes }: EpisodicVanguardProps) {
 
   return (
     <section className="w-full py-10 sm:py-16 overflow-hidden">
-      <div className="max-w-[90%] mx-auto">
+      <div className="standard-container">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-10 px-4">
+        <div className="flex items-center justify-between mb-6 sm:mb-10">
           <SectionTitle
             title="WEB "
             subtitle="Premium Collection"

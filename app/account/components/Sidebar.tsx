@@ -31,8 +31,8 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
   return (
     <aside className="w-full lg:w-64 shrink-0 flex flex-col gap-2">
-      {/* Nav Items */}
-      <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
+      {/* Nav Items - horizontal smooth scroll on mobile */}
+      <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -40,25 +40,33 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex items-center gap-3 px-4 lg:px-5 py-3 lg:py-4 rounded-xl font-semibold transition-all w-auto lg:w-full shrink-0 text-left whitespace-nowrap ${
+              className={`flex items-center gap-2 sm:gap-3 px-3.5 sm:px-5 py-2.5 sm:py-3.5 rounded-xl text-xs sm:text-sm font-semibold transition-all w-auto lg:w-full shrink-0 text-left whitespace-nowrap ${
                 isActive 
-                  ? "bg-[#25183d] text-[#b28cff] shadow-sm" 
-                  : "text-gray-400 hover:text-white hover:bg-white/5"
+                  ? "bg-gradient-to-r from-[#25183d] to-[#3a2260] text-[#cca8ff] shadow-sm border border-[#9248FF]/30" 
+                  : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"
               }`}
             >
-              <Icon size={18} className={isActive ? "text-[#b28cff]" : "text-gray-400"} />
+              <Icon size={16} className={isActive ? "text-[#cca8ff]" : "text-gray-400"} />
               {item.label}
             </button>
           );
         })}
+        {/* Mobile-only compact logout in horizontal row */}
+        <button 
+          onClick={handleLogout}
+          className="lg:hidden flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 whitespace-nowrap text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20"
+        >
+          <LogOut size={16} />
+          Log Out
+        </button>
       </div>
 
-      {/* Separator */}
+      {/* Desktop Separator & Logout */}
       <div className="hidden lg:block h-px w-full bg-white/10 my-4" />
 
       <button 
         onClick={handleLogout}
-        className="flex items-center gap-3 px-4 lg:px-5 py-3 lg:py-4 rounded-xl font-semibold transition-all w-full text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 mt-2 lg:mt-auto"
+        className="hidden lg:flex items-center gap-3 px-5 py-4 rounded-xl font-semibold transition-all w-full text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 mt-auto"
       >
         <LogOut size={18} />
         Log Out

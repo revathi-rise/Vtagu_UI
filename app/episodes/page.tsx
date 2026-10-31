@@ -75,13 +75,13 @@ export default async function EpisodesPage() {
       <ListingHero items={carouselItems} basePath="/episodes" />
 
       {/* 2. Episodes Grid */}
-      <section className="py-24 max-w-[90%] mx-auto">
-        <div className="flex flex-col gap-12">
+      <section className="py-8 sm:py-16 md:py-24 standard-container">
+        <div className="flex flex-col gap-6 sm:gap-12">
           <div className="flex flex-col gap-2">
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tighter uppercase">
               Latest <span className="text-gradient">Web Series</span>
             </h2>
-            <div className="w-20 h-1 bg-brand-gradient rounded-full" />
+            <div className="w-14 sm:w-20 h-1 bg-brand-gradient rounded-full" />
           </div>
           <ResponsiveGrid gridCols={{ desktop: 5 }}>
             {episodes.map((episode, index) => {

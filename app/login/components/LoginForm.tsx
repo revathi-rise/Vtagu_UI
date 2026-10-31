@@ -158,9 +158,9 @@ export default function LoginForm() {
   });
 
   return (
-    <div className="w-full]">
-      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-3">Welcome Back</p>
-      <h1 className="text-4xl font-bold text-white mb-10 tracking-tight drop-shadow-sm">
+    <div className="w-full max-w-md">
+      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-2 sm:mb-3">Welcome Back</p>
+      <h1 className="text-2xl sm:text-4xl font-bold text-white mb-6 sm:mb-10 tracking-tight drop-shadow-sm">
         Resume the Experience
       </h1>
       {apiError && (

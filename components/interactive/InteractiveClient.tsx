@@ -467,7 +467,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                 )}
             </AnimatePresence>
 
-            <main className="min-h-screen bg-[#070913] text-white overflow-x-hidden font-inter selection:bg-cyan-500/30">
+            <main className="min-h-screen bg-[#070913] text-white overflow-x-hidden font-inter selection:bg-cyan-500/30 pb-28 lg:pb-16">
                 {/* Hero Header Section */}
                 <div className="relative w-full h-[520px] md:h-[660px] lg:h-[760px] overflow-hidden">
                     <div className="absolute inset-0 z-0">
@@ -483,7 +483,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                         <div className="absolute inset-0 bg-gradient-to-r from-[#070913] via-[#070913]/80 to-transparent" />
                     </div>
 
-                    <div className="relative z-10 max-w-[92%] 2xl:max-w-7xl mx-auto h-full flex flex-col justify-end pb-12 md:pb-16">
+                    <div className="relative z-10 standard-container h-full flex flex-col justify-end pb-12 md:pb-16">
                         {/* Interactive Original Badge */}
                         <motion.div
                             initial={{ opacity: 0, y: 15 }}
@@ -589,27 +589,27 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.35 }}
-                            className="flex flex-wrap items-center gap-4"
+                            className="flex flex-wrap items-center gap-3 sm:gap-4"
                         >
                             {isAuthorized || scenes.some(s => Number(s.is_free) === 1 || Boolean(s.is_free) === true || (!!s.scene_url && s.scene_url.length > 0)) ? (
                                 <button
                                     onClick={handleBeginNarrative}
-                                    className="flex items-center gap-3 bg-gradient-to-r from-cyan-400 via-cyan-300 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black px-8 py-3.5 rounded-full font-black text-sm md:text-base uppercase tracking-wider transition-all duration-300 shadow-[0_0_30px_rgba(34,211,238,0.5)] hover:shadow-[0_0_45px_rgba(34,211,238,0.8)] active:scale-95 group cursor-pointer"
+                                    className="flex items-center gap-2 sm:gap-3 bg-gradient-to-r from-cyan-400 via-cyan-300 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black h-11 sm:h-14 px-5 sm:px-8 rounded-full font-bold text-xs sm:text-base uppercase tracking-wider transition-all duration-300 shadow-[0_0_25px_rgba(34,211,238,0.5)] hover:shadow-[0_0_35px_rgba(34,211,238,0.7)] active:scale-95 group cursor-pointer"
                                 >
-                                    <div className="w-6 h-6 rounded-full bg-black/15 flex items-center justify-center">
-                                        <Play size={15} fill="black" className="ml-0.5" />
+                                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-black/15 flex items-center justify-center shrink-0">
+                                        <Play size={13} fill="black" className="ml-0.5" />
                                     </div>
-                                    <span className="font-black">START INTERACTIVE</span>
-                                    <ChevronRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
+                                    <span className="font-bold whitespace-nowrap">START INTERACTIVE</span>
+                                    <ChevronRight size={16} className="group-hover:translate-x-1.5 transition-transform shrink-0" />
                                 </button>
                             ) : (
                                 <button
                                     onClick={() => setShowPaywallModal(true)}
-                                    className="flex items-center gap-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 text-white px-8 py-3.5 rounded-full font-black text-sm md:text-base uppercase tracking-wider transition-all duration-300 shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-95 group cursor-pointer"
+                                    className="flex items-center gap-2 sm:gap-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 text-white h-11 sm:h-14 px-5 sm:px-8 rounded-full font-bold text-xs sm:text-base uppercase tracking-wider transition-all duration-300 shadow-[0_0_25px_rgba(59,130,246,0.5)] active:scale-95 group cursor-pointer"
                                 >
-                                    <Lock size={18} className="group-hover:scale-110 transition-transform" />
-                                    <span>Subscribe to Watch</span>
-                                    <ChevronRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
+                                    <Lock size={16} className="group-hover:scale-110 transition-transform shrink-0" />
+                                    <span className="whitespace-nowrap">Subscribe to Watch</span>
+                                    <ChevronRight size={16} className="group-hover:translate-x-1.5 transition-transform shrink-0" />
                                 </button>
                             )}
                         </motion.div>
@@ -617,7 +617,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                 </div>
 
                 {/* Content Section with Original Full-width Player */}
-                <section className="max-w-[94%] 2xl:max-w-7xl mx-auto py-10 md:py-16 space-y-16">
+                <section className="standard-container py-6 sm:py-10 md:py-16 space-y-8 sm:space-y-16 overflow-x-hidden">
                     {/* Scene Manager / Free Preview Player (Full-Width Cinematic Placement) */}
                     <div id="interactive-player-section" className="animate-in fade-in zoom-in duration-1000">
                         {(isAuthorized || (scenes.some(s => Number(s.is_free) === 1 || Boolean(s.is_free) === true || s.is_locked === false || (!!s.scene_url && s.scene_url.length > 0)))) ? (
@@ -638,21 +638,21 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                                 previewStep={sceneHistory.length + 1}
                             />
                         ) : (
-                            <div className="p-12 md:p-16 rounded-[2.5rem] bg-white/5 border border-white/10 flex flex-col items-center justify-center text-center gap-6 backdrop-blur-xl">
-                                <div className="w-16 h-16 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
-                                    <Lock size={32} />
+                            <div className="p-8 sm:p-12 md:p-16 rounded-2xl sm:rounded-[2.5rem] bg-white/5 border border-white/10 flex flex-col items-center justify-center text-center gap-5 sm:gap-6 backdrop-blur-xl">
+                                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                                    <Lock size={28} />
                                 </div>
                                 <div className="space-y-2 max-w-md">
-                                    <h3 className="text-2xl font-black text-white uppercase tracking-tight">Premium Interactive Experience</h3>
-                                    <p className="text-white/60 text-base leading-relaxed">
+                                    <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">Premium Interactive Experience</h3>
+                                    <p className="text-white/60 text-xs sm:text-base leading-relaxed">
                                         Unlock full interactive choices and shape the outcome of {movie.title} with a PrimeTime subscription.
                                     </p>
                                 </div>
                                 <button
                                     onClick={() => setShowPaywallModal(true)}
-                                    className="flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3.5 rounded-2xl font-black text-base uppercase tracking-tight transition-all duration-300 shadow-[0_20px_50px_rgba(59,130,246,0.3)] active:scale-95"
+                                    className="flex items-center justify-center gap-2 sm:gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white h-11 sm:h-14 px-6 sm:px-8 rounded-full sm:rounded-2xl font-bold text-xs sm:text-base uppercase tracking-wider transition-all duration-300 shadow-[0_10px_25px_rgba(59,130,246,0.3)] active:scale-95 cursor-pointer"
                                 >
-                                    <Lock size={22} />
+                                    <Lock size={18} />
                                     <span>Subscribe to Watch</span>
                                 </button>
                             </div>
@@ -660,82 +660,10 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                     </div>
 
                     {/* Movie Information & Interactive Details Section (Cleanly Placed Below Player) */}
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-4">
-                        {/* Left: 3 Feature Highlights (lg:col-span-7) */}
-                        <div className="lg:col-span-7 space-y-4">
-                            <div className="flex items-center gap-3 pb-1">
-                                <div className="w-8 h-8 rounded-lg bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.3)]">
-                                    <Sparkles size={18} />
-                                </div>
-                                <h3 className="text-base sm:text-lg font-black uppercase tracking-wider text-cyan-400">
-                                    Interactive Highlights
-                                </h3>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                {/* Card 1: Multiple Endings */}
-                                <div className="p-6 rounded-2xl bg-[#0a0d1a]/85 border border-white/10 hover:border-cyan-500/40 transition-all duration-300 space-y-3 group backdrop-blur-xl">
-                                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
-                                        <Target size={20} />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <h4 className="text-xs font-black uppercase tracking-wider text-white">Multiple Endings</h4>
-                                        <p className="text-white/50 text-[11px] leading-relaxed">
-                                            Your choices define the outcome. Explore unique narrative conclusions based on your decisions.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Card 2: Real-Time Choices */}
-                                <div className="p-6 rounded-2xl bg-[#0a0d1a]/85 border border-white/10 hover:border-cyan-500/40 transition-all duration-300 space-y-3 group backdrop-blur-xl">
-                                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
-                                        <Zap size={20} />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <h4 className="text-xs font-black uppercase tracking-wider text-white">Real-Time Choices</h4>
-                                        <p className="text-white/50 text-[11px] leading-relaxed">
-                                            Experience zero-latency transitions between scenes. The story unfolds seamlessly as you interact.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Card 3: Premium Audio */}
-                                <div className="p-6 rounded-2xl bg-[#0a0d1a]/85 border border-white/10 hover:border-cyan-500/40 transition-all duration-300 space-y-3 group backdrop-blur-xl">
-                                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
-                                        <Volume2 size={20} />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <h4 className="text-xs font-black uppercase tracking-wider text-white">Premium Audio</h4>
-                                        <p className="text-white/50 text-[11px] leading-relaxed">
-                                            Optimized for binaural spatial sound cues. Best experienced with headphones.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <section className="py-16 md:py-24">
-                                <div className="max-w-[90%] 2xl:max-w-7xl mx-auto text-center space-y-6">
-                                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white">
-                                        The <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Future</span> of Cinema
-                                    </h2>
-                                    <p className="text-white/50 max-w-xl mx-auto text-xs sm:text-sm md:text-base leading-relaxed">
-                                        No longer just a spectator. Step into the director's chair and guide the fate of the characters in this next-generation interactive epic.
-                                    </p>
-                                    <div className="pt-4">
-                                        <a
-                                            href="/interactive"
-                                            className="inline-flex items-center gap-3 text-cyan-400 hover:text-white font-black text-xs uppercase tracking-[0.25em] transition-colors group"
-                                        >
-                                            <span>View More Interactive Originals</span>
-                                            <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
-                                        </a>
-                                    </div>
-                                </div>
-                            </section>
-                        </div>
-
-                        {/* Right: Interactive Details Card (lg:col-span-5) */}
-                        <div className="lg:col-span-5">
-                            <div className="rounded-2xl md:rounded-3xl bg-[#0e1224]/90 border border-cyan-500/30 p-6 md:p-7 shadow-[0_15px_40px_rgba(0,0,0,0.6)] space-y-6">
+                    <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:gap-8 items-start pt-2 sm:pt-4">
+                        {/* Right / Top on mobile: Interactive Details Card (Immediately visible below player) */}
+                        <div className="order-1 lg:order-2 lg:col-span-5 w-full">
+                            <div className="rounded-2xl md:rounded-3xl bg-[#0e1224]/90 border border-cyan-500/30 p-3.5 sm:p-6 md:p-7 shadow-[0_15px_40px_rgba(0,0,0,0.6)] space-y-4 sm:space-y-6">
                                 {/* Header */}
                                 <div className="flex items-center gap-2.5 pb-4 border-b border-white/10">
                                     <Info size={18} className="text-cyan-400" />
@@ -830,6 +758,77 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                                             style={{ width: `${totalEndings > 0 ? Math.min(100, (unlockedEndings / totalEndings) * 100) : 0}%` }}
                                         />
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Left on desktop / Below details on mobile: 3 Feature Highlights (lg:col-span-7) */}
+                        <div className="order-2 lg:order-1 lg:col-span-7 w-full space-y-4">
+                            <div className="flex items-center gap-3 pb-1">
+                                <div className="w-8 h-8 rounded-lg bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.3)]">
+                                    <Sparkles size={18} />
+                                </div>
+                                <h3 className="text-base sm:text-lg font-black uppercase tracking-wider text-cyan-400">
+                                    Interactive Highlights
+                                </h3>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
+                                {/* Card 1: Multiple Endings */}
+                                <div className="p-5 sm:p-6 rounded-2xl bg-[#0a0d1a]/85 border border-white/10 hover:border-cyan-500/40 transition-all duration-300 space-y-2.5 sm:space-y-3 group backdrop-blur-xl">
+                                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                                        <Target size={18} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <h4 className="text-xs font-black uppercase tracking-wider text-white">Multiple Endings</h4>
+                                        <p className="text-white/50 text-[11px] leading-relaxed">
+                                            Your choices define the outcome. Explore unique narrative conclusions based on your decisions.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Card 2: Real-Time Choices */}
+                                <div className="p-5 sm:p-6 rounded-2xl bg-[#0a0d1a]/85 border border-white/10 hover:border-cyan-500/40 transition-all duration-300 space-y-2.5 sm:space-y-3 group backdrop-blur-xl">
+                                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                                        <Zap size={18} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <h4 className="text-xs font-black uppercase tracking-wider text-white">Real-Time Choices</h4>
+                                        <p className="text-white/50 text-[11px] leading-relaxed">
+                                            Experience zero-latency transitions between scenes. The story unfolds seamlessly as you interact.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Card 3: Premium Audio */}
+                                <div className="p-5 sm:p-6 rounded-2xl bg-[#0a0d1a]/85 border border-white/10 hover:border-cyan-500/40 transition-all duration-300 space-y-2.5 sm:space-y-3 group backdrop-blur-xl">
+                                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                                        <Volume2 size={18} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <h4 className="text-xs font-black uppercase tracking-wider text-white">Premium Audio</h4>
+                                        <p className="text-white/50 text-[11px] leading-relaxed">
+                                            Optimized for binaural spatial sound cues. Best experienced with headphones.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="pt-6 sm:pt-10 text-center space-y-4">
+                                <h3 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
+                                    The <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Future</span> of Cinema
+                                </h3>
+                                <p className="text-white/50 max-w-lg mx-auto text-xs sm:text-sm leading-relaxed">
+                                    No longer just a spectator. Step into the director's chair and guide the fate of the characters in this next-generation interactive epic.
+                                </p>
+                                <div className="pt-2">
+                                    <a
+                                        href="/interactive"
+                                        className="inline-flex items-center gap-2.5 text-cyan-400 hover:text-white font-black text-xs uppercase tracking-[0.2em] transition-colors group"
+                                    >
+                                        <span>View More Interactive Originals</span>
+                                        <ArrowRight size={15} className="group-hover:translate-x-1.5 transition-transform" />
+                                    </a>
                                 </div>
                             </div>
                         </div>

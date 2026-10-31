@@ -75,7 +75,7 @@ export default function ContinueWatching() {
 
     return (
         <section className="w-full py-10 sm:py-16 overflow-hidden">
-            <div className="max-w-[90%] mx-auto">
+            <div className="standard-container">
                 <div className="flex items-center justify-between mb-10 px-4">
                     <SectionTitle
                         title="Continue "

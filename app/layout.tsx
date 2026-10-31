@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Montserrat, Inter } from 'next/font/google';
 import './globals.css';
 import { getGenres, Genre, getLanguages, Language } from '@/lib/vtagu.api';
@@ -18,9 +18,24 @@ const inter = Inter({
   variable: '--font-inter'
 });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#0a0a0c',
+};
+
 export const metadata: Metadata = {
   title: 'VTAGU Primetime | TV Optimized',
   description: 'Premium streaming entertainment platform.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'PrimeTime',
+  },
 };
 
 export default async function RootLayout({

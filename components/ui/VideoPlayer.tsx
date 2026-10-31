@@ -1547,29 +1547,29 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             {/* Top Overlay Bar (Matching Reference Image) */}
             {showControls && (
               <div
-                className={`video-top-overlay absolute top-0 left-0 right-0 z-30 p-4 sm:p-6 bg-gradient-to-b from-black/90 via-black/50 to-transparent flex items-center justify-between gap-3 transition-opacity duration-300 ${
+                className={`video-top-overlay absolute top-0 left-0 right-0 z-30 p-2 sm:p-4 md:p-6 bg-gradient-to-b from-black/90 via-black/50 to-transparent flex items-center justify-between gap-1.5 sm:gap-3 transition-opacity duration-300 ${
                   showUI || activeMenu !== 'none'
                     ? 'opacity-100'
                     : 'opacity-0 pointer-events-none'
                 }`}
               >
                 {/* Top Left: Glassmorphic Capsule Card (Reference Image match) */}
-                <div className="bg-black/60 backdrop-blur-md border border-white/15 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl flex items-center gap-2.5 sm:gap-3.5 shadow-2xl max-w-[70%] sm:max-w-md">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 flex items-center justify-center text-white shrink-0 shadow-inner">
-                    <Play size={13} fill="white" className="ml-0.5 text-white" />
+                <div className="bg-black/60 backdrop-blur-md border border-white/15 px-2 sm:px-4 py-1 sm:py-2.5 rounded-xl sm:rounded-2xl flex items-center gap-1.5 sm:gap-3.5 shadow-2xl max-w-[55%] sm:max-w-md min-w-0">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white/10 flex items-center justify-center text-white shrink-0 shadow-inner">
+                    <Play size={11} fill="white" className="ml-0.5 text-white sm:w-3.5 sm:h-3.5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-white font-bold text-xs sm:text-sm tracking-wide leading-tight truncate">
+                    <h3 className="text-white font-bold text-[11px] sm:text-sm tracking-wide leading-tight truncate">
                       {title || 'Vtagu Prime'}
                     </h3>
-                    <p className="text-white/60 text-[10px] sm:text-[11px] font-medium leading-tight truncate mt-0.5">
+                    <p className="text-white/60 text-[9px] sm:text-[11px] font-medium leading-tight truncate mt-0.5">
                       {metadata || 'Streaming in HD • Premium'}
                     </p>
                   </div>
                 </div>
 
                 {/* Top Right: Glassmorphic Pills (Quality + PiP + Settings/Close) */}
-                <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+                <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
                   {/* Quality Pill Badge */}
                   <button
                     onClick={(e) => {
@@ -1577,17 +1577,17 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                       playClickSound();
                       setActiveMenu(activeMenu === 'quality' ? 'none' : 'quality');
                     }}
-                    className={`bg-black/60 hover:bg-black/80 backdrop-blur-md border px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-xs transition-all cursor-pointer shadow-lg ${
+                    className={`bg-black/60 hover:bg-black/80 backdrop-blur-md border px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl flex items-center gap-1 text-[10px] sm:text-xs transition-all cursor-pointer shadow-lg ${
                       activeMenu === 'quality'
                         ? 'border-cyan-500/50 text-cyan-400 bg-cyan-500/10'
                         : 'border-white/15 hover:border-cyan-500/40 text-white/90 hover:text-cyan-400'
                     }`}
                     title="Video Quality"
                   >
-                    <span className="px-1 py-0.2 rounded bg-white/20 text-[9px] font-black tracking-wider text-white">
+                    <span className="px-1 py-0.2 rounded bg-white/20 text-[8px] sm:text-[9px] font-black tracking-wider text-white">
                       HD
                     </span>
-                    <span className="font-semibold text-xs">
+                    <span className="font-semibold text-[10px] sm:text-xs">
                       {currentQualityLabel}
                     </span>
                   </button>
@@ -1595,7 +1595,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                   {/* Cast / PictureInPicture Pill */}
                   <button
                     onClick={togglePictureInPicture}
-                    className="bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/15 hover:border-cyan-500/40 p-2 sm:p-2.5 rounded-xl text-white/80 hover:text-cyan-400 transition-all cursor-pointer shadow-lg hidden sm:flex items-center justify-center"
+                    className="bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/15 hover:border-cyan-500/40 p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl text-white/80 hover:text-cyan-400 transition-all cursor-pointer shadow-lg hidden sm:flex items-center justify-center"
                     title="Picture-in-Picture"
                   >
                     <PipRectanglesIcon size={17} />
@@ -1608,14 +1608,14 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                       playClickSound();
                       setActiveMenu(activeMenu === 'settings' ? 'none' : 'settings');
                     }}
-                    className={`bg-black/60 hover:bg-black/80 backdrop-blur-md border p-2 sm:p-2.5 rounded-xl transition-all cursor-pointer shadow-lg flex items-center justify-center ${
+                    className={`bg-black/60 hover:bg-black/80 backdrop-blur-md border p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl transition-all cursor-pointer shadow-lg flex items-center justify-center ${
                       activeMenu === 'settings'
                         ? 'border-cyan-500/50 text-cyan-400 bg-cyan-500/10'
                         : 'border-white/15 hover:border-cyan-500/40 text-white/80 hover:text-cyan-400'
                     }`}
                     title="Settings & Options"
                   >
-                    <MoreVertical size={17} />
+                    <MoreVertical size={14} className="sm:w-[17px] sm:h-[17px]" />
                   </button>
 
                   {/* Close Modal Button if onClose is passed */}
@@ -1626,10 +1626,10 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                         playClickSound();
                         onClose();
                       }}
-                      className="bg-black/60 hover:bg-rose-500/20 backdrop-blur-md border border-white/15 hover:border-rose-500/40 p-2 sm:p-2.5 rounded-xl text-white/80 hover:text-rose-400 transition-all cursor-pointer shadow-lg flex items-center justify-center"
+                      className="bg-black/60 hover:bg-rose-500/20 backdrop-blur-md border border-white/15 hover:border-rose-500/40 p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl text-white/80 hover:text-rose-400 transition-all cursor-pointer shadow-lg flex items-center justify-center"
                       title="Close Player"
                     >
-                      <X size={17} />
+                      <X size={14} className="sm:w-[17px] sm:h-[17px]" />
                     </button>
                   )}
                 </div>
@@ -1639,14 +1639,14 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             {/* Bottom Controls Bar (Inside video, bottom edge, single aligned row across all viewports) */}
             {showControls && (
               <div
-                className={`video-controls-container absolute bottom-0 left-0 right-0 z-30 px-3 py-2.5 sm:px-5 sm:py-3.5 md:px-6 md:py-4 bg-gradient-to-t from-black/95 via-black/75 to-transparent transition-opacity duration-300 pointer-events-auto ${
+                className={`video-controls-container absolute bottom-0 left-0 right-0 z-30 px-1.5 py-1.5 sm:px-5 sm:py-3.5 md:px-6 md:py-4 bg-gradient-to-t from-black/95 via-black/75 to-transparent transition-opacity duration-300 pointer-events-auto ${
                   showUI || activeMenu !== 'none'
                     ? 'opacity-100'
                     : 'opacity-0 pointer-events-none'
                 }`}
               >
                 {/* Single Unified Aligned Row for Desktop, Tablet, and Mobile */}
-                <div className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3 lg:gap-3.5 w-full flex-nowrap min-w-0">
+                <div className="flex items-center gap-1 sm:gap-2 md:gap-3 lg:gap-3.5 w-full flex-nowrap min-w-0">
                   {/* Previous Scene Button (Interactive mode only) */}
                   {isInteractive && (
                     <button
@@ -1660,7 +1660,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                       title={canGoPrevious ? 'Previous Scene (P)' : 'No Previous Scene'}
                       aria-label="Previous Scene"
                     >
-                      <SkipBack size={18} className="sm:w-[19px] sm:h-[19px]" />
+                      <SkipBack size={15} className="sm:w-[19px] sm:h-[19px]" />
                     </button>
                   )}
 
@@ -1671,7 +1671,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                     title="Rewind 10s (Left Arrow)"
                     aria-label="Rewind 10 seconds"
                   >
-                    <Rewind10Icon size={18} className="sm:w-[19px] sm:h-[19px]" />
+                    <Rewind10Icon size={16} className="sm:w-[19px] sm:h-[19px]" />
                   </button>
 
                   {/* 2. Play / Pause Button */}
@@ -1682,9 +1682,9 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                     aria-label={isPlaying ? 'Pause' : 'Play'}
                   >
                     {isPlaying ? (
-                      <Pause size={19} fill="white" className="text-white sm:w-5 sm:h-5" />
+                      <Pause size={17} fill="white" className="text-white sm:w-5 sm:h-5" />
                     ) : (
-                      <Play size={19} fill="white" className="text-white ml-0.5 sm:w-5 sm:h-5" />
+                      <Play size={17} fill="white" className="text-white ml-0.5 sm:w-5 sm:h-5" />
                     )}
                   </button>
 
@@ -1695,7 +1695,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                     title="Forward 10s (Right Arrow)"
                     aria-label="Forward 10 seconds"
                   >
-                    <Forward10Icon size={18} className="sm:w-[19px] sm:h-[19px]" />
+                    <Forward10Icon size={16} className="sm:w-[19px] sm:h-[19px]" />
                   </button>
 
                   {/* Next Scene / Skip Button (Interactive mode only) */}
@@ -1711,7 +1711,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                       title={canGoNext ? 'Next Scene / Skip to Decision (N)' : 'No Next Scene (Story Ended)'}
                       aria-label="Next Scene"
                     >
-                      <SkipForward size={18} className="sm:w-[19px] sm:h-[19px]" />
+                      <SkipForward size={15} className="sm:w-[19px] sm:h-[19px]" />
                     </button>
                   )}
 
@@ -1720,7 +1720,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                     ref={progressTrackRef}
                     onMouseMove={handleTimelineMouseMove}
                     onMouseLeave={handleTimelineMouseLeave}
-                    className="relative flex-1 min-w-[50px] sm:min-w-[80px] md:min-w-[120px] h-6 sm:h-7 flex items-center cursor-pointer group/progress mx-0.5 sm:mx-1"
+                    className="relative flex-1 min-w-[28px] sm:min-w-[80px] md:min-w-[120px] h-6 sm:h-7 flex items-center cursor-pointer group/progress mx-0.5 sm:mx-1"
                   >
                     {/* Base Track */}
                     <div className="absolute left-0 right-0 h-1 sm:h-1.5 group-hover/progress:h-2 bg-white/20 rounded-full overflow-hidden transition-all pointer-events-none">
@@ -1743,7 +1743,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
                     {/* Scrubber Thumb (Solid Pure White Circle) */}
                     <div
-                      className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 sm:w-3.5 sm:h-3.5 bg-white rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.6)] pointer-events-none transition-transform group-hover/progress:scale-125"
+                      className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 bg-white rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.6)] pointer-events-none transition-transform group-hover/progress:scale-125"
                       style={{
                         left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
                       }}
@@ -1773,14 +1773,14 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                   </div>
 
                   {/* 5. Timestamp (00:25 / 05:42) */}
-                  <div className="text-white/90 text-[10px] sm:text-xs font-mono font-bold tracking-tight shrink-0 select-none whitespace-nowrap flex items-center">
+                  <div className="text-white/90 text-[9px] sm:text-xs font-mono font-bold tracking-tight shrink-0 select-none whitespace-nowrap flex items-center">
                     <span>{formatTime(currentTime, duration >= 3600)}</span>
-                    <span className="text-white/40 mx-0.5 sm:mx-1">/</span>
-                    <span className="text-white/70">{formatTime(duration, duration >= 3600)}</span>
+                    <span className="hidden min-[420px]:inline text-white/40 mx-0.5 sm:mx-1">/</span>
+                    <span className="hidden min-[420px]:inline text-white/70">{formatTime(duration, duration >= 3600)}</span>
                   </div>
 
-                  {/* 6. Volume Control (Speaker icon + responsive slider) */}
-                  <div className="flex items-center gap-1 group/volume relative shrink-0">
+                  {/* 6. Volume Control (Speaker icon + slider - desktop & tablet) */}
+                  <div className="hidden sm:flex items-center gap-1 group/volume relative shrink-0">
                     <button
                       onClick={toggleMute}
                       className="text-white/80 hover:text-cyan-400 transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/10 active:scale-95 flex items-center justify-center cursor-pointer"
@@ -1796,7 +1796,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                       )}
                     </button>
 
-                    {/* Volume Slider Track (visible on sm: screens and up, keeps mobile clean and uncrowded) */}
+                    {/* Volume Slider Track */}
                     <div className="hidden sm:flex relative items-center w-12 md:w-16 lg:w-20 h-6">
                       <div className="absolute left-0 right-0 h-1 bg-white/20 rounded-full overflow-hidden pointer-events-none">
                         <div
@@ -1822,14 +1822,14 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                     </div>
                   </div>
 
-                  {/* 7. Subtitles [CC] Button */}
+                  {/* 7. Subtitles [CC] Button (Desktop/Tablet, available in Settings on mobile) */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       playClickSound();
                       setActiveMenu(activeMenu === 'subtitles' ? 'none' : 'subtitles');
                     }}
-                    className={`p-1 sm:p-1.5 rounded-lg border transition-all active:scale-95 shrink-0 flex items-center justify-center cursor-pointer relative ${
+                    className={`hidden md:flex p-1 sm:p-1.5 rounded-lg border transition-all active:scale-95 shrink-0 items-center justify-center cursor-pointer relative ${
                       activeMenu === 'subtitles' || subtitlesEnabled
                         ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)]'
                         : 'border-transparent text-white/80 hover:text-cyan-400 hover:bg-white/10'
@@ -1858,41 +1858,41 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                     title="Settings (Quality, Audio, Speed)"
                     aria-label="Settings"
                   >
-                    <Settings size={17} className="sm:w-[18px] sm:h-[18px]" />
+                    <Settings size={15} className="sm:w-[17px] sm:h-[17px]" />
                   </button>
 
-                  {/* 9. Picture-in-Picture / Minimize Button */}
+                  {/* 9. Picture-in-Picture / Minimize Button (Desktop/Tablet) */}
                   {showMinimize ? (
                     <button
                       onClick={handleMinimizeClick}
-                      className="text-white/80 hover:text-cyan-400 transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/10 active:scale-95 shrink-0 flex items-center justify-center cursor-pointer"
+                      className="hidden md:flex text-white/80 hover:text-cyan-400 transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/10 active:scale-95 shrink-0 items-center justify-center cursor-pointer"
                       title="Minimize Player"
                       aria-label="Minimize Player"
                     >
-                      <PipRectanglesIcon size={17} className="sm:w-[18px] sm:h-[18px]" />
+                      <PipRectanglesIcon size={17} className="sm:w-[19px] sm:h-[19px]" />
                     </button>
                   ) : (
                     <button
                       onClick={togglePictureInPicture}
-                      className="text-white/80 hover:text-cyan-400 transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/10 active:scale-95 shrink-0 flex items-center justify-center cursor-pointer"
+                      className="hidden md:flex text-white/80 hover:text-cyan-400 transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/10 active:scale-95 shrink-0 items-center justify-center cursor-pointer"
                       title="Picture in Picture"
                       aria-label="Picture in Picture"
                     >
-                      <PipRectanglesIcon size={17} className="sm:w-[18px] sm:h-[18px]" />
+                      <PipRectanglesIcon size={17} className="sm:w-[19px] sm:h-[19px]" />
                     </button>
                   )}
 
-                  {/* 10. Fullscreen Button */}
+                  {/* 10. Fullscreen Button - ALWAYS PROMINENT ON MOBILE AND DESKTOP */}
                   <button
                     onClick={handleFullscreen}
-                    className="text-white/80 hover:text-cyan-400 transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/10 active:scale-95 shrink-0 flex items-center justify-center cursor-pointer"
+                    className="text-white hover:text-cyan-400 bg-white/10 hover:bg-white/20 border border-white/20 p-1 sm:p-1.5 rounded-lg active:scale-95 shrink-0 flex items-center justify-center cursor-pointer shadow-md transition-all"
                     title={isFullscreen ? 'Exit Fullscreen (F)' : 'Enter Fullscreen (F)'}
                     aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
                   >
                     {isFullscreen ? (
-                      <ExitFullscreenCornersIcon size={17} className="sm:w-[18px] sm:h-[18px]" />
+                      <ExitFullscreenCornersIcon size={16} className="sm:w-[19px] sm:h-[19px] text-cyan-400" />
                     ) : (
-                      <FullscreenCornersIcon size={17} className="sm:w-[18px] sm:h-[18px]" />
+                      <FullscreenCornersIcon size={16} className="sm:w-[19px] sm:h-[19px] text-white" />
                     )}
                   </button>
                 </div>
@@ -1902,7 +1902,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             {/* UNIFIED SETTINGS & POPUP MENUS (Glassmorphic) */}
             {activeMenu !== 'none' && (
               <div
-                className="absolute bottom-16 sm:bottom-20 right-4 sm:right-6 bg-[#0c0d14]/95 backdrop-blur-2xl border border-white/15 rounded-2xl overflow-hidden min-w-[260px] max-w-[320px] z-50 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_30px_rgba(34,211,238,0.2)] animate-scale-up-fade-in"
+                className="absolute bottom-12 sm:bottom-20 right-2 sm:right-6 bg-[#0c0d14]/95 backdrop-blur-2xl border border-white/15 rounded-2xl overflow-hidden min-w-[240px] max-w-[calc(100%-1rem)] sm:max-w-[320px] z-50 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_30px_rgba(34,211,238,0.2)] animate-scale-up-fade-in"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* 1. Main Settings Menu */}

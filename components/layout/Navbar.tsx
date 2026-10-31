@@ -159,16 +159,16 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
   };
 
   return (
-    <header className={`fixed top-0 left-0 w-full z-50 flex justify-center transition-all duration-500 ${scrolled ? 'px-4' : 'px-0'}`}>
+    <header className={`fixed top-0 left-0 w-full z-50 flex justify-center transition-all duration-500 pt-[max(env(safe-area-inset-top,0px),10px)] sm:pt-0 ${scrolled ? 'px-4' : 'px-0'}`}>
       {/* Top Gradient Overlay for readability against bright images */}
-      <div className={`absolute top-0 left-0 w-full bg-gradient-to-b from-background/90 to-transparent pointer-events-none transition-all duration-500 ${scrolled ? 'h-[100px] opacity-0' : 'h-[140px] opacity-100'}`} />
+      <div className={`absolute top-0 left-0 w-full bg-gradient-to-b from-background/95 via-background/60 to-transparent pointer-events-none transition-all duration-500 ${scrolled ? 'h-[100px] opacity-0' : 'h-[150px] opacity-100'}`} />
 
       <div
         className={`
           flex items-center justify-between gap-2 sm:gap-6 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]
           ${scrolled
-            ? "relative mt-2 sm:mt-6 px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-full bg-secondary/85 backdrop-blur-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.15),0_0_0_1px_rgba(255,255,255,0.05)] w-[94%] lg:w-full max-w-[1440px]"
-            : "relative mt-0 px-4 sm:px-18 py-1.5 sm:py-2.5 rounded-none bg-transparent w-full border-b border-white/5"
+            ? "relative mt-1 sm:mt-6 px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-full bg-secondary/85 backdrop-blur-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.15),0_0_0_1px_rgba(255,255,255,0.05)] w-[96%] lg:w-full max-w-[1440px]"
+            : "relative mt-0 px-3 sm:px-18 py-1.5 sm:py-2.5 rounded-none bg-transparent w-full border-b border-white/5"
           }
         `}
       >
@@ -179,7 +179,7 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
             alt="PrimeTime Logo"
             width={160}
             height={80}
-            className={`object-contain transition-all duration-300 ${scrolled ? 'h-[36px] sm:h-[48px] lg:h-[60px] w-auto' : 'h-[44px] sm:h-[58px] lg:h-[72px] w-auto'}`}
+            className={`object-contain transition-all duration-300 ${scrolled ? 'h-[28px] sm:h-[42px] lg:h-[60px] w-auto' : 'h-[34px] sm:h-[50px] lg:h-[72px] w-auto'}`}
             priority
           />
         </Link>
@@ -228,9 +228,13 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
         {/* Right Actions */}
         <div className="flex items-center gap-1.5 sm:gap-3">
           {/* Search */}
-          <button suppressHydrationWarning className={`flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/80 hover:text-white transition-all border border-white/10 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.3)] group active:scale-95 active:shadow-inner ${scrolled ? 'w-8 h-8 sm:w-9 sm:h-9' : 'w-10 h-10 sm:w-11 sm:h-11'}`}>
-            <Search className={`group-hover:scale-110 transition-transform ${scrolled ? 'w-3.5 h-3.5 sm:w-4 sm:h-4' : 'w-4.5 h-4.5 sm:w-5 sm:h-5'}`} />
-          </button>
+          <Link
+            href="/search"
+            aria-label="Search movies and series"
+            className={`flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/80 hover:text-white transition-all border border-white/10 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.3)] group active:scale-95 active:shadow-inner ${scrolled ? 'w-8 h-8 sm:w-9 sm:h-9' : 'w-8 h-8 sm:w-11 sm:h-11'}`}
+          >
+            <Search className={`group-hover:scale-110 transition-transform ${scrolled ? 'w-3.5 h-3.5 sm:w-4 sm:h-4' : 'w-4 h-4 sm:w-5 sm:h-5'}`} />
+          </Link>
 
           {/* Profile / Login */}
           {mounted && userName ? (
@@ -240,9 +244,9 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
               onMouseLeave={() => setIsProfileDropdownOpen(false)}
             >
               {/* Profile Pill Trigger */}
-              <div suppressHydrationWarning className="flex items-center gap-2 bg-[#161026]/90 hover:bg-[#211738] border border-white/15 hover:border-white/30 rounded-full p-1 sm:pr-4 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer group">
+              <div suppressHydrationWarning className="flex items-center gap-2 bg-[#161026]/90 hover:bg-[#211738] border border-white/15 hover:border-white/30 rounded-full p-0.5 sm:p-1 sm:pr-4 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer group">
                 {/* Avatar Badge */}
-                <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full ${currentProfile?.isKids ? 'bg-gradient-to-r from-amber-400 to-orange-500 shadow-[0_0_12px_rgba(251,191,36,0.5)]' : 'bg-brand-gradient shadow-[0_0_12px_rgba(178,140,255,0.4)]'} border border-white/30 flex items-center justify-center font-black text-white text-xs uppercase shrink-0 transition-transform group-hover:scale-105 overflow-hidden p-0.5`}>
+                <div className={`w-7 h-7 sm:w-9 sm:h-9 rounded-full ${currentProfile?.isKids ? 'bg-gradient-to-r from-amber-400 to-orange-500 shadow-[0_0_12px_rgba(251,191,36,0.5)]' : 'bg-brand-gradient shadow-[0_0_12px_rgba(178,140,255,0.4)]'} border border-white/30 flex items-center justify-center font-black text-white text-[11px] sm:text-xs uppercase shrink-0 transition-transform group-hover:scale-105 overflow-hidden p-0.5`}>
                   {currentProfile?.isKids ? <KidsIcon className="w-full h-full" /> : userName.substring(0, 2)}
                 </div>
 
@@ -361,14 +365,17 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
             </Link>
           )}
 
-          {/* Mobile Menu Button */}
-          <button
-            suppressHydrationWarning
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden relative z-[70] w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 shadow-lg active:scale-90 transition-all hover:bg-white/20"
-          >
-            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          {/* Mobile Menu Button - only visible when menu is closed */}
+          {!isMobileMenuOpen && (
+            <button
+              suppressHydrationWarning
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="lg:hidden relative z-40 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 shadow-lg active:scale-90 transition-all hover:bg-white/20"
+              aria-label="Open menu"
+            >
+              <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -380,23 +387,23 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-2xl lg:hidden flex flex-col"
+            className="fixed inset-0 z-[60] bg-background/98 backdrop-blur-2xl lg:hidden flex flex-col pt-[max(env(safe-area-inset-top,0px),12px)]"
           >
             {/* Mobile Menu Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/5">
               <Image
                 src="/vtagu_logo.png"
                 alt="PrimeTime Logo"
                 width={160}
                 height={80}
-                className="h-[40px] sm:h-[48px] w-auto object-contain"
+                className="h-[34px] sm:h-[48px] w-auto object-contain"
               />
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 shadow-lg active:scale-90 transition-all hover:bg-white/20"
+                className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/20 shadow-lg active:scale-90 transition-all hover:bg-white/20 cursor-pointer"
                 aria-label="Close menu"
               >
-                <X className="w-5 h-5 text-white" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </button>
             </div>
 

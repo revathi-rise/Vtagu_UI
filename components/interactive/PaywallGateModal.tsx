@@ -58,25 +58,25 @@ export const PaywallGateModal = ({ isOpen, price, currency, movieId, movieTitle,
               </p>
             </div>
 
-            <div className="w-full space-y-4 pt-4">
+            <div className="w-full space-y-3 pt-3">
               {/* Option 1: Buy Movie Separately (Only if price > 0) */}
               {price > 0 && (
                 <Link
                   href={`/checkout?type=${contentType}&id=${movieId}`}
-                  className="flex items-center justify-center gap-3 w-full bg-white hover:bg-white/90 text-black font-black py-4.5 rounded-2xl transition-all duration-300 shadow-lg text-sm uppercase tracking-[0.15em] active:scale-95"
+                  className="flex items-center justify-center gap-2 sm:gap-3 w-full bg-white hover:bg-white/90 text-black font-bold py-3 sm:py-3.5 rounded-xl sm:rounded-2xl transition-all duration-300 shadow-lg text-xs sm:text-sm uppercase tracking-wider active:scale-95"
                 >
-                  <CreditCard size={18} />
-                  Unlock {contentType === 'episode' ? 'Episode' : 'Movie'} Separately • {currency} {price}
+                  <CreditCard size={16} />
+                  <span>Unlock {contentType === 'episode' ? 'Episode' : 'Movie'} Separately • {currency} {price}</span>
                 </Link>
               )}
 
               {/* Option 2: Subscribe to Interactive Plan */}
               <Link
                 href="/pricing"
-                className="flex items-center justify-center gap-3 w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-95 text-white font-black py-4.5 rounded-2xl transition-all duration-300 shadow-lg text-sm uppercase tracking-[0.15em] active:scale-95"
+                className="flex items-center justify-center gap-2 sm:gap-3 w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-95 text-white font-bold py-3 sm:py-3.5 rounded-xl sm:rounded-2xl transition-all duration-300 shadow-lg text-xs sm:text-sm uppercase tracking-wider active:scale-95"
               >
-                <Sparkles size={18} />
-                Get Premium Pass (All {contentType === 'episode' ? 'Series' : 'Movies'})
+                <Sparkles size={16} />
+                <span>Get Premium Pass (All {contentType === 'episode' ? 'Series' : 'Movies'})</span>
               </Link>
             </div>
 
