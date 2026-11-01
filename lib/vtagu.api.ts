@@ -1381,3 +1381,95 @@ export async function removeFromWatchlist(
   }
 }
 
+export interface SearchResultItem {
+  id: number | string;
+  title: string;
+  type: 'movie' | 'series' | 'episode' | 'interactive' | 'short';
+  slug?: string;
+  image: string;
+  card_image?: string;
+  description?: string;
+  year?: number | string | null;
+  rating?: number | null;
+  duration?: string | null;
+  languages?: string | null;
+  director?: string | null;
+  actors?: string | null;
+  genres?: string[];
+  genreIds?: string | null;
+  isFree?: boolean;
+  isComingSoon?: boolean;
+  quality?: string | null;
+  certificate?: {
+    id?: number;
+    code: string;
+    name?: string;
+    certification_system?: string;
+    badge_color?: string;
+  } | null;
+  href: string;
+  viewCount?: number;
+}
+
+export interface SearchResponseData {
+  results: SearchResultItem[];
+  meta: {
+    total: number;
+    query: string;
+    category: string;
+    counts: {
+      all: number;
+      movie: number;
+      series: number;
+      interactive: number;
+      short: number;
+    };
+  };
+  trendingSearches: string[];
+  recommended: SearchResultItem[];
+  categories: string[];
+}
+
+export interface SearchQueryParams {
+  q?: string;
+  category?: string;
+  limit?: number;
+  userId?: string | null;
+}
+
+export async function searchGlobal(params?: SearchQueryParams): Promise<SearchResponseData> {
+  const queryParts: string[] = [];
+  if (params?.q) queryParts.push(`q=${encodeURIComponent(params.q)}`);
+  if (params?.category && params.category !== 'All') queryParts.push(`category=${encodeURIComponent(params.category)}`);
+  if (params?.limit) queryParts.push(`limit=${encodeURIComponent(params.limit)}`);
+  if (params?.userId) queryParts.push(`userId=${encodeURIComponent(params.userId)}`);
+
+  const qs = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
+  const url = `${API_BASE}/search${qs}`;
+
+  try {
+    const res = await fetchWithRetry(url, { method: 'GET' });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch search results: ${res.status}`);
+    }
+    const json = await res.json();
+    return json?.data || {
+      results: [],
+      meta: { total: 0, query: params?.q || '', category: params?.category || 'All', counts: { all: 0, movie: 0, series: 0, interactive: 0, short: 0 } },
+      trendingSearches: [],
+      recommended: [],
+      categories: ['All', 'Action', 'Sci-Fi', 'Interactive', 'Shorts', 'Drama', 'Comedy']
+    };
+  } catch (err) {
+    console.error('searchGlobal error:', err);
+    return {
+      results: [],
+      meta: { total: 0, query: params?.q || '', category: params?.category || 'All', counts: { all: 0, movie: 0, series: 0, interactive: 0, short: 0 } },
+      trendingSearches: [],
+      recommended: [],
+      categories: ['All', 'Action', 'Sci-Fi', 'Interactive', 'Shorts', 'Drama', 'Comedy']
+    };
+  }
+}
+
+
