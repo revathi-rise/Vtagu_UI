@@ -247,7 +247,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
         if (sceneId === undefined) return;
         const scene = scenes.find(s => s.scene_id === sceneId);
         if (scene) {
-            const isMovieFree = Number(movie.is_free) === 1 || Number(movie.price) === 0;
+            const isMovieFree = Number(movie.is_free) === 1 || Boolean(movie.is_free) === true || String(movie.is_free) === '1';
             const isSceneFree =
                 Number(scene.is_free) === 1 ||
                 Boolean(scene.is_free) === true ||
@@ -632,7 +632,7 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                                 hasPrevious={sceneHistory.length > 0}
                                 movieId={movie.interactive_movie_id}
                                 movieTitle={movie.title}
-                                isAuthorized={isAuthorized || Number(movie.is_free) === 1 || Number(movie.price) === 0}
+                                isAuthorized={isAuthorized || Number(movie.is_free) === 1 || Boolean(movie.is_free) === true || String(movie.is_free) === '1'}
                                 scenes={scenes}
                                 onShowPaywall={() => setShowPaywallModal(true)}
                                 previewStep={sceneHistory.length + 1}
