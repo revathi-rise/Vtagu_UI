@@ -723,21 +723,21 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                                 </div>
 
                                 {/* Action Buttons: View Cast & Crew, Contact / More Info */}
-                                <div className="space-y-3 pt-2">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5 pt-2">
                                     <button
                                         onClick={() => setShowCastModal(true)}
-                                        className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-black text-xs uppercase tracking-wider transition-all duration-300 shadow-[0_0_20px_rgba(34,211,238,0.25)] active:scale-95 cursor-pointer"
+                                        className="w-full flex items-center justify-center gap-2 py-3 px-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-black text-xs uppercase tracking-wider transition-all duration-300 shadow-[0_0_20px_rgba(34,211,238,0.25)] active:scale-95 cursor-pointer"
                                     >
                                         <Users size={15} fill="black" />
-                                        <span>View Cast & Crew</span>
+                                        <span className="truncate">View Cast & Crew</span>
                                     </button>
 
                                     <button
                                         onClick={() => setShowInfoModal(true)}
-                                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 hover:border-white/25 text-white/80 hover:text-white font-bold text-xs uppercase tracking-wider transition-all duration-300 active:scale-95 cursor-pointer"
+                                        className="w-full flex items-center justify-center gap-2 py-3 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 hover:border-white/25 text-white/80 hover:text-white font-bold text-xs uppercase tracking-wider transition-all duration-300 active:scale-95 cursor-pointer"
                                     >
                                         <Mail size={15} className="text-cyan-400" />
-                                        <span>Contact / More Info</span>
+                                        <span className="truncate">Contact / More Info</span>
                                     </button>
                                 </div>
 

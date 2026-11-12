@@ -313,17 +313,17 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                     </div>
 
                     {/* Right: Reset Scene & Unlock Buttons */}
-                    <div className="flex flex-col min-[420px]:flex-row items-stretch min-[420px]:items-center gap-2 sm:gap-3 shrink-0 w-full lg:w-auto">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:items-center gap-2 sm:gap-3 shrink-0 w-full lg:w-auto">
                         <button
                             onClick={() => onShowPaywall && onShowPaywall()}
-                            className="w-full min-[420px]:w-auto px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 text-black font-black text-xs sm:text-sm uppercase tracking-wider hover:brightness-110 transition-all shadow-lg shadow-cyan-500/25 shrink-0 cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap order-1 min-[420px]:order-2"
+                            className="w-full lg:w-auto px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-600 text-black font-black text-xs sm:text-sm uppercase tracking-wider hover:brightness-110 transition-all shadow-lg shadow-cyan-500/25 shrink-0 cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap"
                         >
                             <span>Unlock Full Movie</span>
                             <span className="text-black">✦</span>
                         </button>
                         <button
                             onClick={handleResetScene}
-                            className="w-full min-[420px]:w-auto px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm uppercase tracking-wider transition-all border border-white/20 hover:border-white/40 flex items-center justify-center gap-2 cursor-pointer active:scale-95 shadow-md whitespace-nowrap order-2 min-[420px]:order-1"
+                            className="w-full lg:w-auto px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm uppercase tracking-wider transition-all border border-white/20 hover:border-white/40 flex items-center justify-center gap-2 cursor-pointer active:scale-95 shadow-md whitespace-nowrap"
                             title="Replay this scene from 0:00"
                         >
                             <RotateCcw size={14} className="sm:w-[15px] sm:h-[15px] shrink-0" />
@@ -428,28 +428,28 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                         <span className="text-xs font-black uppercase tracking-widest text-cyan-300/80">Loading Narrative Choices...</span>
                                     </div>
                                 ) : isEndingScene ? (
-                                    <div className="relative z-30 max-w-2xl w-full mx-4 p-8 sm:p-10 rounded-[2.5rem] bg-[#0c0d14]/90 backdrop-blur-2xl border border-white/15 shadow-[0_25px_60px_rgba(0,0,0,0.9),0_0_40px_rgba(34,211,238,0.15)] text-center space-y-6 animate-in fade-in zoom-in-95 duration-500 overflow-hidden">
+                                    <div className="relative z-30 max-w-2xl w-full mx-4 p-4 sm:p-8 md:p-10 max-h-[92%] overflow-y-auto custom-scrollbar rounded-2xl sm:rounded-[2.5rem] bg-[#0c0d14]/90 backdrop-blur-2xl border border-white/15 shadow-[0_25px_60px_rgba(0,0,0,0.9),0_0_40px_rgba(34,211,238,0.15)] text-center space-y-3 sm:space-y-6 animate-in fade-in zoom-in-95 duration-500">
                                         {/* Ambient radial glow inside card */}
                                         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-b from-cyan-500/20 via-blue-600/10 to-transparent rounded-full blur-3xl pointer-events-none" />
 
                                         {/* Top Badge */}
-                                        <div className="relative z-10 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 border border-cyan-400/40 text-cyan-300 text-xs font-black uppercase tracking-widest shadow-lg shadow-cyan-500/10">
-                                            <Sparkles size={14} className="text-cyan-400 animate-pulse" />
+                                        <div className="relative z-10 inline-flex items-center gap-2 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 border border-cyan-400/40 text-cyan-300 text-[10px] sm:text-xs font-black uppercase tracking-widest shadow-lg shadow-cyan-500/10">
+                                            <Sparkles size={13} className="text-cyan-400 animate-pulse" />
                                             <span>Story Path Concluded</span>
                                         </div>
 
                                         {/* Cinematic Title & Narrative */}
-                                        <div className="relative z-10 space-y-2">
-                                            <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight uppercase drop-shadow-lg">
+                                        <div className="relative z-10 space-y-1.5 sm:space-y-2">
+                                            <h3 className="text-xl sm:text-3xl md:text-5xl font-black text-white tracking-tight uppercase drop-shadow-lg">
                                                 {currentScene.end_text || currentScene.title || "The End"}
                                             </h3>
-                                            <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-lg mx-auto">
+                                            <p className="text-white/70 text-xs sm:text-sm md:text-base leading-relaxed max-w-lg mx-auto">
                                                 {currentScene.description || "You have reached the culmination of this story path. Step back to your previous decision to explore an alternative destiny, or restart the adventure from the beginning."}
                                             </p>
                                         </div>
 
                                         {/* Action Buttons */}
-                                        <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
+                                        <div className="relative z-10 grid grid-cols-1 min-[440px]:grid-cols-2 md:flex md:flex-row items-center justify-center gap-2 sm:gap-3.5 pt-1 sm:pt-2 w-full">
                                             {/* Rewind to Previous Decision */}
                                             <button
                                                 onClick={() => {
@@ -459,33 +459,33 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                     onPrevious();
                                                 }}
                                                 disabled={!hasPrevious}
-                                                className={`flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 w-full sm:w-auto shadow-xl active:scale-95 ${
+                                                className={`flex items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3.5 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 w-full md:w-auto shadow-xl active:scale-95 ${
                                                     hasPrevious
                                                         ? 'bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black shadow-cyan-500/25 hover:shadow-cyan-500/40 cursor-pointer'
                                                         : 'bg-white/5 border border-white/10 text-white/30 opacity-40 cursor-not-allowed select-none pointer-events-none'
                                                 }`}
                                                 title={hasPrevious ? "Go back to your previous choice" : "No previous choice available"}
                                             >
-                                                <RotateCcw size={16} className={hasPrevious ? "group-hover:-rotate-45 transition-transform" : ""} />
+                                                <RotateCcw size={15} className={hasPrevious ? "group-hover:-rotate-45 transition-transform" : ""} />
                                                 <span>Rewind Decision</span>
                                             </button>
 
                                             {/* Reset Scene */}
                                             <button
                                                 onClick={handleResetScene}
-                                                className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-white/10 hover:bg-cyan-500 hover:text-black text-white border border-white/20 hover:border-transparent rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 w-full sm:w-auto backdrop-blur-md active:scale-95 cursor-pointer shadow-lg"
+                                                className="flex items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3.5 bg-white/10 hover:bg-cyan-500 hover:text-black text-white border border-white/20 hover:border-transparent rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 w-full md:w-auto backdrop-blur-md active:scale-95 cursor-pointer shadow-lg"
                                                 title="Replay Ending Scene from 0:00"
                                             >
-                                                <RotateCcw size={16} />
+                                                <RotateCcw size={15} />
                                                 <span>Reset Scene</span>
                                             </button>
 
                                             {/* Restart Story */}
                                             <button
                                                 onClick={handleRestartClick}
-                                                className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 w-full sm:w-auto backdrop-blur-md active:scale-95 cursor-pointer shadow-lg"
+                                                className="flex items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 w-full md:w-auto backdrop-blur-md active:scale-95 cursor-pointer shadow-lg"
                                             >
-                                                <RotateCcw size={16} />
+                                                <RotateCcw size={15} />
                                                 <span>Restart Story</span>
                                             </button>
 
@@ -493,9 +493,9 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                             <a
                                                 href="/interactive"
                                                 onClick={() => playClickSound()}
-                                                className="flex items-center justify-center gap-2 px-5 py-3.5 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white border border-white/10 hover:border-white/20 rounded-2xl font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 w-full sm:w-auto active:scale-95"
+                                                className="flex items-center justify-center gap-2 px-4 py-2.5 sm:px-5 sm:py-3.5 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white border border-white/10 hover:border-white/20 rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 w-full md:w-auto active:scale-95"
                                             >
-                                                <Compass size={16} className="text-cyan-400" />
+                                                <Compass size={15} className="text-cyan-400" />
                                                 <span>Explore Library</span>
                                             </a>
                                         </div>
@@ -503,7 +503,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                 ) : (
                                     <div className="absolute inset-0 pointer-events-none animate-in fade-in duration-700">
                                         {/* Top Navigation: Previous, Reset Scene, and Restart */}
-                                        <div className="absolute top-3 right-3 sm:top-6 sm:right-6 flex flex-wrap items-center justify-end gap-1.5 sm:gap-2.5 z-30 pointer-events-auto max-w-[92vw]">
+                                        <div className="absolute top-2 right-2 sm:top-5 sm:right-6 flex flex-wrap items-center justify-end gap-1.5 sm:gap-2.5 z-30 pointer-events-auto max-w-[94vw]">
                                             <button 
                                                 onClick={(e) => {
                                                     if (!hasPrevious || !onPrevious) return;
@@ -513,128 +513,134 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                     onPrevious();
                                                 }}
                                                 disabled={!hasPrevious}
-                                                className={`flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-2 backdrop-blur-md rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-all border ${
+                                                className={`flex items-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-1.5 backdrop-blur-md rounded-full text-[9px] sm:text-[11px] font-bold uppercase tracking-wider transition-all border ${
                                                     hasPrevious
-                                                        ? 'bg-black/70 hover:bg-cyan-500 hover:text-black text-white/90 border-white/25 hover:border-transparent cursor-pointer shadow-lg active:scale-95 group'
+                                                        ? 'bg-black/75 hover:bg-cyan-500 hover:text-black text-white/90 border-white/25 hover:border-transparent cursor-pointer shadow-lg active:scale-95 group'
                                                         : 'bg-black/40 text-white/30 border-white/10 opacity-35 cursor-not-allowed pointer-events-none'
                                                 }`}
                                                 title={hasPrevious ? "Previous Scene (P)" : "No Previous Scene"}
                                                 aria-label="Previous Scene"
                                             >
-                                                <RotateCcw size={12} className={hasPrevious ? "group-hover:-rotate-45 transition-transform duration-300" : ""} /> 
+                                                <RotateCcw size={11} className={hasPrevious ? "group-hover:-rotate-45 transition-transform duration-300" : ""} /> 
                                                 <span>Previous</span>
                                             </button>
                                             <button 
                                                 onClick={handleResetScene}
-                                                className="flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-2 bg-black/70 hover:bg-cyan-500 hover:text-black text-white/90 backdrop-blur-md border border-white/25 hover:border-transparent rounded-full transition-all text-[10px] sm:text-[11px] font-bold uppercase tracking-wider shadow-lg active:scale-95 cursor-pointer group"
+                                                className="flex items-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-1.5 bg-black/75 hover:bg-cyan-500 hover:text-black text-white/90 backdrop-blur-md border border-white/25 hover:border-transparent rounded-full transition-all text-[9px] sm:text-[11px] font-bold uppercase tracking-wider shadow-lg active:scale-95 cursor-pointer group"
                                                 title="Replay Current Scene from 0:00"
                                                 aria-label="Reset Scene"
                                             >
-                                                <RotateCcw size={12} className="group-hover:-rotate-90 transition-transform duration-300" /> 
+                                                <RotateCcw size={11} className="group-hover:-rotate-90 transition-transform duration-300" /> 
                                                 <span>Reset Scene</span>
                                             </button>
                                             <button 
                                                 onClick={handleRestartClick}
-                                                className="flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-2 bg-black/70 hover:bg-white text-white/90 hover:text-black backdrop-blur-md border border-white/25 hover:border-transparent rounded-full transition-all text-[10px] sm:text-[11px] font-bold uppercase tracking-wider shadow-lg active:scale-95 cursor-pointer group"
+                                                className="flex items-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-1.5 bg-black/75 hover:bg-white text-white/90 hover:text-black backdrop-blur-md border border-white/25 hover:border-transparent rounded-full transition-all text-[9px] sm:text-[11px] font-bold uppercase tracking-wider shadow-lg active:scale-95 cursor-pointer group"
                                                 title="Restart Story from Beginning"
                                                 aria-label="Restart Story"
                                             >
-                                                <RotateCcw size={12} className="group-hover:-rotate-180 transition-transform duration-500" /> 
+                                                <RotateCcw size={11} className="group-hover:-rotate-180 transition-transform duration-500" /> 
                                                 <span>Restart</span>
                                             </button>
                                         </div>
                                         
-                                        {choices.map((choice, index) => {
-                                            const nextId = choice.next_scene_id || choice.target_scene;
-                                            const targetScene = scenes.find(s => s.scene_id === nextId);
+                                        {/* Interactive Choices Container (Two Action Choice Buttons) */}
+                                        <div className="absolute inset-x-0 bottom-2.5 min-[400px]:bottom-3.5 sm:bottom-6 md:bottom-8 px-3 sm:px-6 md:px-10 z-30 pointer-events-auto">
+                                            <div className={`mx-auto w-full flex flex-col sm:flex-row items-center gap-2 sm:gap-4 md:gap-6 ${
+                                                choices.length === 1 
+                                                    ? 'justify-center max-w-sm sm:max-w-md' 
+                                                    : 'justify-center sm:justify-between max-w-4xl'
+                                            }`}>
+                                                {choices.map((choice, index) => {
+                                                    const nextId = choice.next_scene_id || choice.target_scene;
+                                                    const targetScene = scenes.find(s => s.scene_id === nextId);
 
-                                            // Determine if target scene choice is locked for non-subscribed users
-                                            const isTargetSceneFree =
-                                                targetScene?.is_free === true ||
-                                                Number(targetScene?.is_free) === 1 ||
-                                                String(targetScene?.is_free) === '1' ||
-                                                String(targetScene?.is_free).toLowerCase() === 'true';
+                                                    // Determine if target scene choice is locked for non-subscribed users
+                                                    const isTargetSceneFree =
+                                                        targetScene?.is_free === true ||
+                                                        Number(targetScene?.is_free) === 1 ||
+                                                        String(targetScene?.is_free) === '1' ||
+                                                        String(targetScene?.is_free).toLowerCase() === 'true';
 
-                                            const isTargetPlayable = Boolean(
-                                                targetScene?.scene_url && targetScene.scene_url.trim().length > 0
-                                            );
+                                                    const isTargetPlayable = Boolean(
+                                                        targetScene?.scene_url && targetScene.scene_url.trim().length > 0
+                                                    );
 
-                                            // If next scene has no playable stream or is locked, open recommended unlock modal instead of broken black screen
-                                            const isTargetLocked = !isAuthorized && (
-                                                isPreviewLimitReached ||
-                                                targetScene?.is_locked === true ||
-                                                !isTargetSceneFree ||
-                                                !isTargetPlayable
-                                            );
+                                                    // If next scene has no playable stream or is locked, open recommended unlock modal instead of broken black screen
+                                                    const isTargetLocked = !isAuthorized && (
+                                                        isPreviewLimitReached ||
+                                                        targetScene?.is_locked === true ||
+                                                        !isTargetSceneFree ||
+                                                        !isTargetPlayable
+                                                    );
 
-                                            const isSingle = choices.length === 1;
-                                            const isChoiceA = index === 0;
+                                                    const isSingle = choices.length === 1;
+                                                    const isChoiceA = index === 0;
 
-                                            // On mobile portrait: stack choices cleanly (Option A above Option B)
-                                            // On desktop/tablet (sm+): separate left and right
-                                            const positionClass = isSingle 
-                                                ? 'left-1/2 -translate-x-1/2 bottom-[14%] sm:bottom-[18%]' 
-                                                : isChoiceA 
-                                                    ? 'left-1/2 -translate-x-1/2 bottom-[24%] sm:bottom-[18%] sm:left-[8%] sm:translate-x-0' 
-                                                    : 'left-1/2 -translate-x-1/2 bottom-[10%] sm:bottom-[18%] sm:right-[8%] sm:left-auto sm:translate-x-0';
-                                            
-                                            const rawBoxText = choice.choice_text || choice.button_text || (isChoiceA ? 'Option A' : 'Option B');
-                                            const letter = isChoiceA ? 'A' : index === 1 ? 'B' : String.fromCharCode(65 + index);
-                                            const boxText = rawBoxText.toUpperCase().startsWith(`${letter}:`) || rawBoxText.toUpperCase().startsWith(`${letter} :`)
-                                                ? rawBoxText
-                                                : `${letter}: ${rawBoxText}`;
+                                                    const rawBoxText = choice.choice_text || choice.button_text || (isChoiceA ? 'Option A' : 'Option B');
+                                                    const letter = isChoiceA ? 'A' : index === 1 ? 'B' : String.fromCharCode(65 + index);
+                                                    const boxText = rawBoxText.toUpperCase().startsWith(`${letter}:`) || rawBoxText.toUpperCase().startsWith(`${letter} :`)
+                                                        ? rawBoxText
+                                                        : `${letter}: ${rawBoxText}`;
 
-                                            return (
-                                                <div 
-                                                    key={choice.choice_id}
-                                                    onClick={() => {
-                                                        if (isTargetLocked) {
-                                                            playClickSound();
-                                                            exitFullscreenIfActive();
-                                                            setLockedChoiceModal({
-                                                                isOpen: true,
-                                                                choiceText: boxText,
-                                                                targetSceneId: nextId || null,
-                                                            });
-                                                        } else {
-                                                            playClickSound();
-                                                            setShowChoices(false);
-                                                            setHasUserStarted(true);
-                                                            setTimeout(() => {
-                                                                onChoiceSelect(nextId!);
-                                                            }, 400);
-                                                        }
-                                                    }}
-                                                    className={`absolute ${positionClass} w-[88%] sm:w-auto max-w-[360px] sm:max-w-none flex flex-col items-center pointer-events-auto cursor-pointer group hover:scale-105 active:scale-95 transition-all duration-300 z-30`}
-                                                >
-                                                    <div
-                                                        className={`relative w-full sm:w-auto px-5 py-3 sm:px-10 sm:py-3.5 md:px-12 md:py-4 rounded-2xl md:rounded-3xl border transition-all duration-300 flex items-center justify-between sm:justify-center gap-3 backdrop-blur-xl ${
-                                                            isTargetLocked
-                                                                ? 'bg-gradient-to-r from-amber-950/90 via-amber-900/80 to-amber-950/90 border-amber-500/80 shadow-[0_0_25px_rgba(245,158,11,0.4)]'
-                                                                : isChoiceA
-                                                                    ? 'bg-gradient-to-r from-[#0055ff] via-[#0088ff] to-[#00d4ff] border-cyan-300/80 shadow-[0_0_35px_rgba(0,180,255,0.65)] hover:shadow-[0_0_50px_rgba(0,212,255,0.95)]'
-                                                                    : 'bg-gradient-to-r from-[#7900c4] via-[#bd00b8] to-[#ff0099] border-pink-300/80 shadow-[0_0_35px_rgba(236,72,153,0.65)] hover:shadow-[0_0_50px_rgba(255,0,153,0.95)]'
-                                                        }`}
-                                                    >
-                                                        {/* Subtle sheen reflection overlay */}
-                                                        <span className="absolute inset-0 rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
-                                                        <span className="font-black italic text-sm sm:text-2xl md:text-3xl tracking-wide uppercase text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] flex items-center gap-2 truncate">
+                                                    return (
+                                                        <div 
+                                                            key={choice.choice_id || index}
+                                                            onClick={() => {
+                                                                if (isTargetLocked) {
+                                                                    playClickSound();
+                                                                    exitFullscreenIfActive();
+                                                                    setLockedChoiceModal({
+                                                                        isOpen: true,
+                                                                        choiceText: boxText,
+                                                                        targetSceneId: nextId || null,
+                                                                    });
+                                                                } else {
+                                                                    playClickSound();
+                                                                    setShowChoices(false);
+                                                                    setHasUserStarted(true);
+                                                                    setTimeout(() => {
+                                                                        onChoiceSelect(nextId!);
+                                                                    }, 400);
+                                                                }
+                                                            }}
+                                                            className={`w-full ${isSingle ? 'max-w-sm sm:max-w-md' : 'sm:flex-1 sm:max-w-[48%]'} flex flex-col items-center cursor-pointer group hover:scale-[1.02] sm:hover:scale-105 active:scale-95 transition-all duration-300`}
+                                                        >
+                                                            <div
+                                                                className={`relative w-full px-3 py-2 min-[380px]:px-4 min-[380px]:py-2.5 sm:px-6 sm:py-3.5 md:px-8 md:py-4 rounded-xl sm:rounded-2xl md:rounded-3xl border transition-all duration-300 flex items-center justify-between gap-2.5 sm:gap-3 backdrop-blur-xl shadow-xl overflow-hidden ${
+                                                                    isTargetLocked
+                                                                        ? 'bg-gradient-to-r from-amber-950/90 via-amber-900/85 to-amber-950/90 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.35)]'
+                                                                        : isChoiceA
+                                                                            ? 'bg-gradient-to-r from-[#0055ff] via-[#0088ff] to-[#00d4ff] border-cyan-300/80 shadow-[0_0_25px_rgba(0,180,255,0.55)] hover:shadow-[0_0_40px_rgba(0,212,255,0.85)]'
+                                                                            : 'bg-gradient-to-r from-[#7900c4] via-[#bd00b8] to-[#ff0099] border-pink-300/80 shadow-[0_0_25px_rgba(236,72,153,0.55)] hover:shadow-[0_0_40px_rgba(255,0,153,0.85)]'
+                                                                }`}
+                                                            >
+                                                                {/* Subtle sheen reflection overlay */}
+                                                                <span className="absolute inset-0 rounded-xl sm:rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+                                                                
+                                                                <div className="flex items-center gap-2 min-w-0 flex-1 z-10">
+                                                                    {isTargetLocked && (
+                                                                        <Lock size={15} className="text-amber-400 shrink-0 sm:w-5 sm:h-5" />
+                                                                    )}
+                                                                    <span className="font-black italic text-xs min-[360px]:text-sm sm:text-lg md:text-2xl tracking-wide uppercase text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] truncate">
+                                                                        {boxText}
+                                                                    </span>
+                                                                </div>
+                                                                
+                                                                <ChevronRight size={18} className="text-white shrink-0 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform drop-shadow z-10" />
+                                                            </div>
+
                                                             {isTargetLocked && (
-                                                                <Lock size={18} className="text-amber-400 shrink-0 inline-block" />
+                                                                <span className="mt-1 text-[8px] min-[360px]:text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-950/85 border border-amber-500/40 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full backdrop-blur-md shadow-md flex items-center gap-1 shrink-0">
+                                                                    <Lock size={9} />
+                                                                    <span>{isPreviewLimitReached ? "Unlock Full Movie" : "Locked Choice"}</span>
+                                                                </span>
                                                             )}
-                                                            <span className="truncate">{boxText}</span>
-                                                        </span>
-                                                        <ChevronRight size={22} className="text-white shrink-0 group-hover:translate-x-1.5 transition-transform drop-shadow" />
-                                                    </div>
-
-                                                    {isTargetLocked && (
-                                                        <span className="mt-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full backdrop-blur-md shadow-lg flex items-center gap-1">
-                                                            <Lock size={10} /> {isPreviewLimitReached ? "Unlock Full Movie" : "Locked Choice (Upgrade Plan)"}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
                                     </div>
                                 )
                             )}
