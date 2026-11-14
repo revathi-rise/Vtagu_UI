@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { Target, ChevronRight, RotateCcw, CheckCircle2, Lock, Sparkles, Compass, Film } from 'lucide-react';
+import { Target, ChevronRight, RotateCcw, CheckCircle2, Lock, Sparkles, Compass, Film, Maximize2, Minimize2 } from 'lucide-react';
 import { Scene, Choice } from '@/lib/vtagu.api';
 import WatchTrackingVideoPlayer, { VideoPlayerHandle } from '@/components/ui/WatchTrackingVideoPlayer';
 import {
@@ -72,22 +72,29 @@ function getButtonStyles(color: string | undefined) {
 
 const parseTimeToSeconds = (timeVal: string | number | undefined | null): number => {
   if (timeVal === undefined || timeVal === null) return 0;
-  if (typeof timeVal === 'number') return timeVal;
+  if (typeof timeVal === 'number') return Math.max(0, timeVal);
   
-  const parts = String(timeVal).split(':');
+  const rawStr = String(timeVal).trim();
+  if (!rawStr || rawStr === 'null' || rawStr === 'undefined') return 0;
+
+  // Check if string is only zeros: "00:00", "00:00:00", "0000", "0", "00"
+  const digitsOnly = rawStr.replace(/[:.\s]/g, '');
+  if (/^0+$/.test(digitsOnly)) return 0;
+  
+  const parts = rawStr.split(':');
   if (parts.length === 3) {
     const hours = parseInt(parts[0], 10) || 0;
     const minutes = parseInt(parts[1], 10) || 0;
     const seconds = parseFloat(parts[2]) || 0;
-    return hours * 3600 + minutes * 60 + seconds;
+    return Math.max(0, hours * 3600 + minutes * 60 + seconds);
   } else if (parts.length === 2) {
     const minutes = parseInt(parts[0], 10) || 0;
     const seconds = parseFloat(parts[1]) || 0;
-    return minutes * 60 + seconds;
+    return Math.max(0, minutes * 60 + seconds);
   }
   
-  const parsed = parseFloat(String(timeVal));
-  return isNaN(parsed) ? 0 : parsed;
+  const parsed = parseFloat(rawStr);
+  return isNaN(parsed) ? 0 : Math.max(0, parsed);
 };
 
 const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
@@ -230,9 +237,16 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
         }
         if (currentScene?.is_ending) return;
 
-        if (currentScene?.show_choices_on) {
-            const showChoicesSeconds = parseTimeToSeconds(currentScene.show_choices_on);
-            if (showChoicesSeconds > 0 && currentTime >= showChoicesSeconds && currentTime > 0.5 && !showChoices) {
+        const showChoicesSeconds = parseTimeToSeconds(currentScene?.show_choices_on);
+        if (showChoicesSeconds > 0) {
+            // Dynamic mid-scene playback trigger when a positive timestamp is configured
+            if (currentTime >= showChoicesSeconds && currentTime > 0.5 && !showChoices) {
+                setShowChoices(true);
+            }
+        } else {
+            // When show_choices_on is null, undefined, "00:00", "0000", or 0:
+            // The choices layout shows at the end of the scene
+            if (duration > 0 && currentTime >= duration - 0.25 && !showChoices) {
                 setShowChoices(true);
             }
         }
@@ -339,7 +353,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                 className={`relative overflow-hidden group transition-all duration-200 ${
                     isFullscreen
                         ? 'w-screen h-screen max-w-none max-h-none rounded-none border-0 ring-0 shadow-none m-0 p-0 aspect-auto bg-black'
-                        : 'aspect-video rounded-xl sm:rounded-[2rem] bg-black border border-white/5 shadow-2xl ring-1 ring-white/10 w-full'
+                        : 'interactive-player-frame rounded-xl sm:rounded-[2rem] bg-black border border-white/5 shadow-2xl ring-1 ring-white/10'
                 }`}
             >
                 {currentScene ? (
@@ -359,11 +373,8 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                 onPlay={() => setHasUserStarted(true)}
                                 onTimeUpdate={handleTimeUpdate}
                                 onEnded={() => {
-                                    if (hasUserStarted) {
-                                        setShowChoices(true);
-                                        // Free Scene completed in Full Screen -> return back to actual place
-                                        exitFullscreenIfActive();
-                                    }
+                                    setHasUserStarted(true);
+                                    setShowChoices(true);
                                 }}
                                 className="w-full h-full"
                                 showSkip={hasNextVideo}
@@ -420,7 +431,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                         )}
 
                         {/* Choice & Scene End Overlay - Only shown when user has started and choices time reached/ended */}
-                        <div className={`absolute inset-0 z-20 flex flex-col items-center justify-center transition-opacity duration-500 ${showChoices && hasUserStarted ? 'opacity-100' : 'opacity-0 pointer-events-none'} ${hasShowOnTime && !isEndingScene ? '' : 'bg-black/60 backdrop-blur-md'}`}>
+                        <div className={`absolute inset-0 z-30 flex flex-col items-center justify-center transition-opacity duration-500 ${showChoices && hasUserStarted ? 'opacity-100' : 'opacity-0 pointer-events-none'} ${isEndingScene ? 'bg-black/60 backdrop-blur-md' : ''}`}>
                             {showChoices && hasUserStarted && (
                                 loadingChoices ? (
                                     <div className="flex flex-col items-center justify-center gap-3 p-8 animate-in fade-in duration-300">
@@ -542,20 +553,56 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                 <RotateCcw size={11} className="group-hover:-rotate-180 transition-transform duration-500" /> 
                                                 <span>Restart</span>
                                             </button>
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    playClickSound();
+                                                    handleFullscreenRequest();
+                                                }}
+                                                className="flex items-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-1.5 bg-black/75 hover:bg-cyan-500 hover:text-black text-white/90 backdrop-blur-md border border-white/25 hover:border-transparent rounded-full transition-all text-[9px] sm:text-[11px] font-bold uppercase tracking-wider shadow-lg active:scale-95 cursor-pointer group"
+                                                title={isFullscreen ? "Exit Fullscreen (F)" : "Enter Fullscreen (F)"}
+                                                aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                                            >
+                                                {isFullscreen ? <Minimize2 size={11} /> : <Maximize2 size={11} />}
+                                                <span>{isFullscreen ? "Exit" : "Full"}</span>
+                                            </button>
                                         </div>
                                         
-                                        {/* Interactive Choices Container (Two Action Choice Buttons) */}
-                                        <div className="absolute inset-x-0 bottom-2.5 min-[400px]:bottom-3.5 sm:bottom-6 md:bottom-8 px-3 sm:px-6 md:px-10 z-30 pointer-events-auto">
-                                            <div className={`mx-auto w-full flex flex-col sm:flex-row items-center gap-2 sm:gap-4 md:gap-6 ${
-                                                choices.length === 1 
-                                                    ? 'justify-center max-w-sm sm:max-w-md' 
-                                                    : 'justify-center sm:justify-between max-w-4xl'
+                                        {/* Cinematic Multi-Stop Smooth Vignette (Seamlessly Blends with Video) */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-[#060814]/90 via-[#060814]/50 via-black/20 to-transparent pointer-events-none" />
+
+                                        {/* Interactive Decision Console (Compact, Cinematic & Focused) */}
+                                        <div className="absolute inset-x-0 bottom-2.5 sm:bottom-4 md:bottom-5 z-30 pointer-events-auto px-3 sm:px-6 md:px-8 flex flex-col items-center text-center">
+                                            {/* Glowing Diamond Star with Horizontal Lines */}
+                                            <div className="flex items-center justify-center gap-2 mb-1">
+                                                <div className="w-8 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-cyan-400/70" />
+                                                <span className="text-cyan-300 drop-shadow-[0_0_12px_rgba(34,211,238,0.9)] text-[11px] sm:text-xs select-none animate-pulse">✦</span>
+                                                <div className="w-8 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-cyan-400/70" />
+                                            </div>
+
+                                            {/* Title: Choose Your Scene */}
+                                            <h3 className="text-lg min-[380px]:text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] leading-tight">
+                                                Choose Your{' '}
+                                                <span className="bg-gradient-to-r from-[#00d4ff] via-[#38bdf8] to-[#ff0099] bg-clip-text text-transparent font-black">
+                                                    Scene
+                                                </span>
+                                            </h3>
+
+                                            {/* High-Readability Subtitle Pill */}
+                                            <div className="inline-flex items-center px-2.5 py-0.5 sm:px-3 sm:py-0.5 rounded-full bg-black/45 border border-white/10 backdrop-blur-md mt-1 mb-2.5 sm:mb-3.5 shadow-sm">
+                                                <p className="text-[10px] min-[380px]:text-[11px] sm:text-xs text-white/90 font-medium tracking-wide drop-shadow">
+                                                    Select the scene you want to continue with
+                                                </p>
+                                            </div>
+
+                                            {/* Buttons Container (Clean, Non-Competing, Perfectly Proportionate) */}
+                                            <div className={`w-full flex flex-row items-center justify-center gap-2.5 sm:gap-4 md:gap-5 ${
+                                                choices.length === 1 ? 'max-w-xs' : 'max-w-md sm:max-w-lg md:max-w-xl'
                                             }`}>
                                                 {choices.map((choice, index) => {
                                                     const nextId = choice.next_scene_id || choice.target_scene;
                                                     const targetScene = scenes.find(s => s.scene_id === nextId);
 
-                                                    // Determine if target scene choice is locked for non-subscribed users
                                                     const isTargetSceneFree =
                                                         targetScene?.is_free === true ||
                                                         Number(targetScene?.is_free) === 1 ||
@@ -566,7 +613,6 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                         targetScene?.scene_url && targetScene.scene_url.trim().length > 0
                                                     );
 
-                                                    // If next scene has no playable stream or is locked, open recommended unlock modal instead of broken black screen
                                                     const isTargetLocked = !isAuthorized && (
                                                         isPreviewLimitReached ||
                                                         targetScene?.is_locked === true ||
@@ -574,17 +620,11 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                         !isTargetPlayable
                                                     );
 
-                                                    const isSingle = choices.length === 1;
                                                     const isChoiceA = index === 0;
-
-                                                    const rawBoxText = choice.choice_text || choice.button_text || (isChoiceA ? 'Option A' : 'Option B');
-                                                    const letter = isChoiceA ? 'A' : index === 1 ? 'B' : String.fromCharCode(65 + index);
-                                                    const boxText = rawBoxText.toUpperCase().startsWith(`${letter}:`) || rawBoxText.toUpperCase().startsWith(`${letter} :`)
-                                                        ? rawBoxText
-                                                        : `${letter}: ${rawBoxText}`;
+                                                    const buttonText = choice.button_text || choice.choice_text || '';
 
                                                     return (
-                                                        <div 
+                                                        <div
                                                             key={choice.choice_id || index}
                                                             onClick={() => {
                                                                 if (isTargetLocked) {
@@ -592,7 +632,7 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                                     exitFullscreenIfActive();
                                                                     setLockedChoiceModal({
                                                                         isOpen: true,
-                                                                        choiceText: boxText,
+                                                                        choiceText: buttonText,
                                                                         targetSceneId: nextId || null,
                                                                     });
                                                                 } else {
@@ -604,41 +644,59 @@ const SceneManager = forwardRef<SceneManagerHandle, SceneManagerProps>(
                                                                     }, 400);
                                                                 }
                                                             }}
-                                                            className={`w-full ${isSingle ? 'max-w-sm sm:max-w-md' : 'sm:flex-1 sm:max-w-[48%]'} flex flex-col items-center cursor-pointer group hover:scale-[1.02] sm:hover:scale-105 active:scale-95 transition-all duration-300`}
+                                                            className="flex-1 max-w-[150px] min-[380px]:max-w-[170px] sm:max-w-[210px] md:max-w-[230px] flex flex-col items-center group cursor-pointer active:scale-95 transition-all duration-200"
                                                         >
+                                                            {/* Sleek, Proportional Pill Button */}
                                                             <div
-                                                                className={`relative w-full px-3 py-2 min-[380px]:px-4 min-[380px]:py-2.5 sm:px-6 sm:py-3.5 md:px-8 md:py-4 rounded-xl sm:rounded-2xl md:rounded-3xl border transition-all duration-300 flex items-center justify-between gap-2.5 sm:gap-3 backdrop-blur-xl shadow-xl overflow-hidden ${
+                                                                className={`relative w-full h-9 min-[380px]:h-10 sm:h-11 md:h-11 rounded-full flex items-center justify-center px-3 sm:px-5 backdrop-blur-xl transition-all duration-300 border ${
                                                                     isTargetLocked
-                                                                        ? 'bg-gradient-to-r from-amber-950/90 via-amber-900/85 to-amber-950/90 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.35)]'
+                                                                        ? 'bg-gradient-to-r from-amber-950/90 via-amber-900/80 to-amber-950/90 border-amber-400/80 shadow-[0_0_20px_rgba(245,158,11,0.5)]'
                                                                         : isChoiceA
-                                                                            ? 'bg-gradient-to-r from-[#0055ff] via-[#0088ff] to-[#00d4ff] border-cyan-300/80 shadow-[0_0_25px_rgba(0,180,255,0.55)] hover:shadow-[0_0_40px_rgba(0,212,255,0.85)]'
-                                                                            : 'bg-gradient-to-r from-[#7900c4] via-[#bd00b8] to-[#ff0099] border-pink-300/80 shadow-[0_0_25px_rgba(236,72,153,0.55)] hover:shadow-[0_0_40px_rgba(255,0,153,0.85)]'
+                                                                            ? 'bg-gradient-to-r from-[#0055ff] via-[#007bff] to-[#00c6ff] border-cyan-400/80 shadow-[0_0_20px_rgba(0,140,255,0.6),inset_0_0_10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(0,180,255,0.9)]'
+                                                                            : 'bg-gradient-to-r from-[#b5007d] via-[#e6007e] to-[#ff0099] border-pink-400/80 shadow-[0_0_20px_rgba(255,0,128,0.6),inset_0_0_10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,0,153,0.9)]'
                                                                 }`}
                                                             >
-                                                                {/* Subtle sheen reflection overlay */}
-                                                                <span className="absolute inset-0 rounded-xl sm:rounded-2xl md:rounded-3xl bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
-                                                                
-                                                                <div className="flex items-center gap-2 min-w-0 flex-1 z-10">
-                                                                    {isTargetLocked && (
-                                                                        <Lock size={15} className="text-amber-400 shrink-0 sm:w-5 sm:h-5" />
-                                                                    )}
-                                                                    <span className="font-black italic text-xs min-[360px]:text-sm sm:text-lg md:text-2xl tracking-wide uppercase text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] truncate">
-                                                                        {boxText}
-                                                                    </span>
-                                                                </div>
-                                                                
-                                                                <ChevronRight size={18} className="text-white shrink-0 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform drop-shadow z-10" />
+                                                                {/* Glossy top reflection highlight */}
+                                                                <span className="absolute inset-x-2.5 top-0.5 h-[40%] rounded-full bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
+
+                                                                {/* Choice Text (Centered, crisp, proportional) */}
+                                                                <span className="font-bold text-[11px] min-[380px]:text-xs sm:text-sm tracking-wider uppercase text-white truncate text-center z-10 drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]">
+                                                                    {buttonText}
+                                                                </span>
                                                             </div>
 
+                                                            {/* Refined Neon Slit / Glow Dash */}
+                                                            <div
+                                                                className={`mt-1 sm:mt-1.5 h-[2px] rounded-full transition-all duration-300 ${
+                                                                    isTargetLocked
+                                                                        ? 'w-10 sm:w-14 bg-amber-400 shadow-[0_0_8px_#f59e0b]'
+                                                                        : isChoiceA
+                                                                            ? 'w-12 sm:w-16 md:w-20 bg-cyan-400 shadow-[0_0_10px_#22d3ee] group-hover:w-24'
+                                                                            : 'w-12 sm:w-16 md:w-20 bg-pink-500 shadow-[0_0_10px_#ec4899] group-hover:w-24'
+                                                                }`}
+                                                            />
+
+                                                            {/* Locked Choice Badge */}
                                                             {isTargetLocked && (
-                                                                <span className="mt-1 text-[8px] min-[360px]:text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-950/85 border border-amber-500/40 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full backdrop-blur-md shadow-md flex items-center gap-1 shrink-0">
-                                                                    <Lock size={9} />
-                                                                    <span>{isPreviewLimitReached ? "Unlock Full Movie" : "Locked Choice"}</span>
+                                                                <span className="mt-1 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-amber-300 bg-amber-950/80 border border-amber-500/40 px-2 py-0.5 rounded-full backdrop-blur-md">
+                                                                    Locked
                                                                 </span>
                                                             )}
                                                         </div>
                                                     );
                                                 })}
+                                            </div>
+
+                                            {/* Bottom Accent & Tagline */}
+                                            <div className="mt-2 sm:mt-2.5 md:mt-3 flex flex-col items-center justify-center">
+                                                <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                                                    <div className="w-6 sm:w-12 h-[1px] bg-gradient-to-r from-transparent to-white/20" />
+                                                    <span className="text-white/40 text-[7px] sm:text-[8px]">❖</span>
+                                                    <div className="w-6 sm:w-12 h-[1px] bg-gradient-to-l from-transparent to-white/20" />
+                                                </div>
+                                                <span className="text-[7px] min-[360px]:text-[8px] sm:text-[9px] tracking-[0.25em] text-white/40 uppercase font-semibold text-center mt-0.5">
+                                                    YOUR CHOICE. YOUR STORY.
+                                                </span>
                                             </div>
                                         </div>
                                     </div>

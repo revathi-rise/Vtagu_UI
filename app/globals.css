@@ -263,3 +263,27 @@ body {
 .btn-cta-icon {
   @apply w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 active:scale-95;
 }
+
+/* Interactive Page Player Dynamic Frame - Ensures player & choices fit cleanly in viewport without bottom cutoff */
+.interactive-player-frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: min(74vh, calc(100dvh - 120px));
+  max-width: calc(min(74vh, calc(100dvh - 120px)) * 16 / 9);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 640px) {
+  .interactive-player-frame {
+    max-height: none;
+    max-width: 100%;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .interactive-player-frame {
+    max-height: calc(100dvh - 45px);
+    max-width: calc((100dvh - 45px) * 16 / 9);
+  }
+}

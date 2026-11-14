@@ -617,9 +617,9 @@ export default function InteractiveClient({ movie, initialScenes }: InteractiveC
                 </div>
 
                 {/* Content Section with Original Full-width Player */}
-                <section className="standard-container py-6 sm:py-10 md:py-16 space-y-8 sm:space-y-16 overflow-x-hidden">
+                <section className="standard-container pt-3 sm:pt-6 pb-12 sm:pb-20 space-y-6 sm:space-y-10 overflow-x-hidden">
                     {/* Scene Manager / Free Preview Player (Full-Width Cinematic Placement) */}
-                    <div id="interactive-player-section" className="animate-in fade-in zoom-in duration-1000">
+                    <div id="interactive-player-section" className="scroll-mt-20 sm:scroll-mt-24 animate-in fade-in zoom-in duration-1000">
                         {(isAuthorized || (scenes.some(s => Number(s.is_free) === 1 || Boolean(s.is_free) === true || s.is_locked === false || (!!s.scene_url && s.scene_url.length > 0)))) ? (
                             <SceneManager
                                 ref={managerRef}
