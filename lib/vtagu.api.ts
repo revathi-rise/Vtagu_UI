@@ -1433,16 +1433,32 @@ export interface SearchResponseData {
 export interface SearchQueryParams {
   q?: string;
   category?: string;
+  genre?: string;
   limit?: number;
   userId?: string | null;
+  kidsMode?: boolean | string;
 }
 
 export async function searchGlobal(params?: SearchQueryParams): Promise<SearchResponseData> {
   const queryParts: string[] = [];
-  if (params?.q) queryParts.push(`q=${encodeURIComponent(params.q)}`);
-  if (params?.category && params.category !== 'All') queryParts.push(`category=${encodeURIComponent(params.category)}`);
-  if (params?.limit) queryParts.push(`limit=${encodeURIComponent(params.limit)}`);
-  if (params?.userId) queryParts.push(`userId=${encodeURIComponent(params.userId)}`);
+  if (params?.q !== undefined && params?.q !== null && params.q.trim().length > 0) {
+    queryParts.push(`q=${encodeURIComponent(params.q.trim())}`);
+  }
+  if (params?.category && params.category !== 'All') {
+    queryParts.push(`category=${encodeURIComponent(params.category)}`);
+  }
+  if (params?.genre && params.genre.trim().length > 0) {
+    queryParts.push(`genre=${encodeURIComponent(params.genre.trim())}`);
+  }
+  if (params?.limit) {
+    queryParts.push(`limit=${encodeURIComponent(params.limit)}`);
+  }
+  if (params?.userId) {
+    queryParts.push(`userId=${encodeURIComponent(params.userId)}`);
+  }
+  if (params?.kidsMode !== undefined) {
+    queryParts.push(`kidsMode=${encodeURIComponent(String(params.kidsMode))}`);
+  }
 
   const qs = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
   const url = `${API_BASE}/search${qs}`;
