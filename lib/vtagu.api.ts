@@ -332,11 +332,19 @@ export interface Series {
   country_id: number;
   rating: number;
   featured: number;
+  free?: string;
+  duration?: string;
+  trailer_url?: string;
+  series_image?: string;
   certificate_id?: number | null;
   certificateId?: number | null;
   quality?: string;
   video_quality?: string;
   play_quality?: string;
+  total_episodes?: number;
+  episodes_count?: number;
+  seasons?: any[];
+  episodes?: Episode[];
   certificate?: {
     id?: number;
     certificate_id?: number;
@@ -361,6 +369,49 @@ export async function getSeries(userId?: string | null): Promise<Series[]> {
     const result = await res.json();
     const arr = Array.isArray(result) ? result : (result.data || []);
     return await filterForProfileAsync(arr);
+  } catch (err: any) {
+    return [];
+  }
+}
+
+export async function getSeriesById(id: string | number, userId?: string | null): Promise<Series | null> {
+  const url = appendUserId(`${API_BASE}/series/${encodeURIComponent(id)}`, userId);
+  try {
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
+    if (!res.ok) {
+      if (res.status === 404) return null;
+      throw new Error(`Failed to fetch series. Status: ${res.status}`);
+    }
+    const result = await res.json();
+    return result.data || result;
+  } catch (err: any) {
+    return null;
+  }
+}
+
+export async function getSeriesEpisodes(seriesId: string | number): Promise<Episode[]> {
+  const url = `${API_BASE}/series/${encodeURIComponent(seriesId)}/episodes`;
+  try {
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
+    if (!res.ok) {
+      return await getEpisodesBySeriesId(seriesId);
+    }
+    const result = await res.json();
+    const data = Array.isArray(result) ? result : (result.data || []);
+    return await filterForProfileAsync(data.map(normalizeEpisode));
+  } catch (err: any) {
+    return await getEpisodesBySeriesId(seriesId);
+  }
+}
+
+export async function getEpisodesBySeriesId(seriesId: string | number): Promise<Episode[]> {
+  const url = `${API_BASE}/episodes?season_id=${encodeURIComponent(seriesId)}&series_id=${encodeURIComponent(seriesId)}`;
+  try {
+    const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
+    if (!res.ok) return [];
+    const result = await res.json();
+    const data = Array.isArray(result) ? result : (result.data || []);
+    return await filterForProfileAsync(data.map(normalizeEpisode));
   } catch (err: any) {
     return [];
   }
@@ -1384,7 +1435,7 @@ export async function removeFromWatchlist(
 export interface SearchResultItem {
   id: number | string;
   title: string;
-  type: 'movie' | 'series' | 'episode' | 'interactive' | 'short';
+  type: 'movie' | 'series' | 'episode' | 'interactive' | 'short' | 'video';
   slug?: string;
   image: string;
   card_image?: string;
@@ -1423,6 +1474,7 @@ export interface SearchResponseData {
       series: number;
       interactive: number;
       short: number;
+      video?: number;
     };
   };
   trendingSearches: string[];
@@ -1474,7 +1526,7 @@ export async function searchGlobal(params?: SearchQueryParams): Promise<SearchRe
       meta: { total: 0, query: params?.q || '', category: params?.category || 'All', counts: { all: 0, movie: 0, series: 0, interactive: 0, short: 0 } },
       trendingSearches: [],
       recommended: [],
-      categories: ['All', 'Action', 'Sci-Fi', 'Interactive', 'Shorts', 'Drama', 'Comedy']
+      categories: ['All']
     };
   } catch (err) {
     console.error('searchGlobal error:', err);
@@ -1483,7 +1535,7 @@ export async function searchGlobal(params?: SearchQueryParams): Promise<SearchRe
       meta: { total: 0, query: params?.q || '', category: params?.category || 'All', counts: { all: 0, movie: 0, series: 0, interactive: 0, short: 0 } },
       trendingSearches: [],
       recommended: [],
-      categories: ['All', 'Action', 'Sci-Fi', 'Interactive', 'Shorts', 'Drama', 'Comedy']
+      categories: ['All']
     };
   }
 }

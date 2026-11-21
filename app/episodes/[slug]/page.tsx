@@ -1,6 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { getEpisodeById, getEpisodes } from '@/lib/vtagu.api';
+import { getEpisodeById, getEpisodes, getEpisodesBySeriesId } from '@/lib/vtagu.api';
 import { Metadata } from 'next';
 import TitleHero from '@/components/title/TitleHero';
 import EpisodeDetailContent from '@/components/title/EpisodeDetailContent';
@@ -68,8 +68,10 @@ export default async function EpisodeDetailsPage({ params }: PageProps) {
     notFound();
   }
 
-  // Fetch all episodes for the Explorer Grid list
-  const allEpisodes = await getEpisodes();
+  // Fetch episodes for the current series (or fall back to all episodes)
+  const seriesId = episode.season_id || episode.seasonId || (episode as any).series_id;
+  const seriesEpisodes = seriesId ? await getEpisodesBySeriesId(seriesId) : [];
+  const explorerEpisodes = seriesEpisodes.length > 0 ? seriesEpisodes : await getEpisodes();
 
   // Parse the iframe src from the raw embed HTML (or plain URL)
   const iframeSrc = extractIframeSrc(episode.media?.video?.url || episode.url as string);
@@ -100,7 +102,7 @@ export default async function EpisodeDetailsPage({ params }: PageProps) {
         <EpisodeDetailContent episode={episode} iframeSrc={iframeSrc} />
 
         {/* Dynamic Episode Grid Explorer */}
-        <EpisodeSection episodes={allEpisodes} currentEpisodeId={episode.id || episode.episodeId} />
+        <EpisodeSection episodes={explorerEpisodes} currentEpisodeId={episode.id || episode.episodeId} />
 
         {/* Related episodes */}
         {/* <RelatedNarratives /> */}

@@ -17,15 +17,6 @@ function resolveImageUrl(path?: string): string {
   return `${IMAGE_BASE_URL}${cleanPath}`;
 }
 
-// Preset content type tabs
-const CONTENT_TYPE_TABS = [
-  { label: 'All', value: 'all' },
-  { label: 'Movies', value: 'movie' },
-  { label: 'Web Series', value: 'series' },
-  { label: 'Interactive', value: 'interactive' },
-  { label: 'Shorts', value: 'short' },
-];
-
 export default function SearchClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -37,16 +28,12 @@ export default function SearchClient() {
   const [query, setQuery] = useState(initialQ);
   const [debouncedQuery, setDebouncedQuery] = useState(initialQ.trim());
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
-  const [categories, setCategories] = useState<string[]>([
-    'All', 'Action', 'Sci-Fi', 'Interactive', 'Shorts', 'Drama', 'Comedy'
-  ]);
+  const [categories, setCategories] = useState<string[]>(['All']);
   const [results, setResults] = useState<SearchResultItem[]>([]);
   const [recommended, setRecommended] = useState<SearchResultItem[]>([]);
-  const [trendingSearches, setTrendingSearches] = useState<string[]>([
-    'Obsidian', 'Crossroads: Choose Your Destiny', 'Agent Vikram', 'Sci-Fi Action', 'Shorts Series', 'Interactive Thriller'
-  ]);
-  const [counts, setCounts] = useState<{ all: number; movie: number; series: number; interactive: number; short: number }>({
-    all: 0, movie: 0, series: 0, interactive: 0, short: 0
+  const [trendingSearches, setTrendingSearches] = useState<string[]>([]);
+  const [counts, setCounts] = useState<{ all: number; movie: number; series: number; interactive: number; short: number; video?: number }>({
+    all: 0, movie: 0, series: 0, interactive: 0, short: 0, video: 0
   });
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -200,6 +187,8 @@ export default function SearchClient() {
         return counts.interactive;
       case 'short':
         return counts.short;
+      case 'video':
+        return counts.video ?? 0;
       default:
         return null;
     }
@@ -340,13 +329,13 @@ export default function SearchClient() {
                       image={resolveImageUrl(item.card_image || item.image)}
                       year={item.year ? Number(item.year) : undefined}
                       subtitle={item.type ? item.type.toUpperCase() : undefined}
-                      rating={item.rating ?? 9.0}
+                      rating={item.rating !== null && item.rating !== undefined ? Number(item.rating) : undefined}
                       badge={item.certificate?.code}
                       badgeColor={(item.certificate?.badge_color as any) || 'purple'}
                       quality={item.quality || undefined}
                       isFree={item.isFree}
                       isComingSoon={item.isComingSoon}
-                      description={item.description || `Experience ${item.title} on VtagU PrimeTime.`}
+                      description={item.description || ''}
                     />
                     {/* Content Type Glow Pill Badge */}
                     {item.type && (
@@ -421,13 +410,13 @@ export default function SearchClient() {
                           image={resolveImageUrl(item.card_image || item.image)}
                           year={item.year ? Number(item.year) : undefined}
                           subtitle={item.type ? item.type.toUpperCase() : undefined}
-                          rating={item.rating ?? 9.0}
+                          rating={item.rating !== null && item.rating !== undefined ? Number(item.rating) : undefined}
                           badge={item.certificate?.code}
                           badgeColor={(item.certificate?.badge_color as any) || 'purple'}
                           quality={item.quality || undefined}
                           isFree={item.isFree}
                           isComingSoon={item.isComingSoon}
-                          description={item.description || `Experience ${item.title} on VtagU PrimeTime.`}
+                          description={item.description || ''}
                         />
                       </Link>
                     ))}
@@ -485,13 +474,13 @@ export default function SearchClient() {
                       image={resolveImageUrl(item.card_image || item.image)}
                       year={item.year ? Number(item.year) : undefined}
                       subtitle={item.type ? item.type.toUpperCase() : undefined}
-                      rating={item.rating ?? 9.0}
+                      rating={item.rating !== null && item.rating !== undefined ? Number(item.rating) : undefined}
                       badge={item.certificate?.code}
                       badgeColor={(item.certificate?.badge_color as any) || 'purple'}
                       quality={item.quality || undefined}
                       isFree={item.isFree}
                       isComingSoon={item.isComingSoon}
-                      description={item.description || `Experience ${item.title} on VtagU PrimeTime.`}
+                      description={item.description || ''}
                     />
                   </Link>
                 ))}

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Search, Menu, X, ChevronRight, LogOut, User, Users, ChevronDown, Settings, Shield, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Genre, InteractiveMovie, getInteractiveMovies, Language, getLanguages, getGenres } from "@/lib/vtagu.api";
+import { Genre, Language } from "@/lib/vtagu.api";
 import { removeToken, clearAuthSession } from "@/lib/api-client";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
@@ -18,10 +18,6 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const [interactiveMovies, setInteractiveMovies] = useState<InteractiveMovie[]>([]);
-  const [genresList, setGenresList] = useState<Genre[]>(genres);
-
-  const [languagesList, setLanguagesList] = useState<Language[]>(languages);
   const [currentProfile, setCurrentProfile] = useState<any>(null);
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
@@ -34,48 +30,8 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
   }, []);
 
   useEffect(() => {
-    if (genres && genres.length > 0) {
-      setGenresList(genres);
-    }
-  }, [genres]);
-
-  useEffect(() => {
-    if (languages && languages.length > 0) {
-      setLanguagesList(languages);
-    }
-  }, [languages]);
-
-  useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 40);
-    };
-
-    const fetchInteractive = async () => {
-      const data = await getInteractiveMovies();
-      setInteractiveMovies(data);
-    };
-
-    const fetchDropdownData = async () => {
-      try {
-        const shouldFetchLanguages = languagesList.length === 0;
-        const shouldFetchGenres = genresList.length === 0;
-
-        if (shouldFetchLanguages || shouldFetchGenres) {
-          const results = await Promise.all([
-            shouldFetchLanguages ? getLanguages() : Promise.resolve(languagesList),
-            shouldFetchGenres ? getGenres() : Promise.resolve(genresList)
-          ]);
-
-          if (shouldFetchLanguages && results[0]?.length > 0) {
-            setLanguagesList(results[0]);
-          }
-          if (shouldFetchGenres && results[1]?.length > 0) {
-            setGenresList(results[1]);
-          }
-        }
-      } catch (e) {
-        console.error("Error fetching header dropdown data:", e);
-      }
     };
 
     const loadUser = () => {
@@ -113,8 +69,6 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
 
     window.addEventListener("scroll", handleScroll);
     window.addEventListener("profileChanged", loadProfile);
-    fetchInteractive();
-    fetchDropdownData();
     loadUser();
     loadProfile();
 
@@ -122,7 +76,7 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("profileChanged", loadProfile);
     };
-  }, [dispatch, languagesList.length, genresList.length]);
+  }, [dispatch]);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -187,42 +141,11 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
         {/* Menu */}
         <nav className="hidden lg:flex items-center gap-1">
           <NavItem href="/" label="HOME" active={pathname === "/"} scrolled={scrolled} />
-
-          <DropdownNavItem
-            label="MOVIES"
-            href="/movies"
-            items={genresList.map(g => ({ id: g.genre_id, name: g.genre_name || g.name || "", path: g.genre_name || g.name || "" }))}
-            active={pathname === "/movies"}
-            scrolled={scrolled}
-          />
-
-          <DropdownNavItem
-            label="WEB SERIES"
-            href="/episodes"
-            items={genresList.map(g => ({ id: g.genre_id, name: g.genre_name || g.name || "", path: g.genre_name || g.name || "" }))}
-            active={pathname === "/episodes"}
-            scrolled={scrolled}
-          />
-
-          <DropdownNavItem
-            label="INTERACTIVE"
-            href="/interactive"
-            items={interactiveMovies.map(m => ({ id: m.interactive_movie_id, name: m.title, path: m.interactive_movie_id.toString() }))}
-            active={pathname?.startsWith("/interactive")}
-            scrolled={scrolled}
-            isInteractive
-          />
-
-          <NavItem href="/pricing" label="PRICING" active={pathname === "/pricing"} scrolled={scrolled} />
-
-          <DropdownNavItem
-            label="LANGUAGES"
-            href="/languages"
-            items={languagesList.map(l => ({ id: l.slug, name: l.name, path: l.slug }))}
-            active={pathname?.startsWith("/languages")}
-            scrolled={scrolled}
-            isLanguage
-          />
+          <NavItem href="/movies" label="MOVIES" active={pathname === "/movies" || pathname?.startsWith("/movies")} scrolled={scrolled} />
+          <NavItem href="/episodes" label="WEB SERIES" active={pathname === "/episodes" || pathname?.startsWith("/episodes") || pathname === "/shows" || pathname?.startsWith("/shows")} scrolled={scrolled} />
+          <NavItem href="/interactive" label="INTERACTIVE" active={pathname?.startsWith("/interactive")} scrolled={scrolled} />
+          <NavItem href="/pricing" label="PRICING" active={pathname === "/pricing" || pathname?.startsWith("/pricing")} scrolled={scrolled} />
+          <NavItem href="/languages" label="LANGUAGES" active={pathname?.startsWith("/languages")} scrolled={scrolled} />
         </nav>
 
         {/* Right Actions */}
@@ -410,38 +333,11 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
             {/* Mobile Menu Links */}
             <div className="flex-1 overflow-y-auto px-6 py-8 space-y-1">
               <MobileNavItem href="/" label="HOME" active={pathname === "/"} onClick={() => setIsMobileMenuOpen(false)} />
-
-              <MobileDropdownNavItem
-                label="MOVIES"
-                href="/movies"
-                items={genresList.map(g => ({ id: g.genre_id, name: g.genre_name || g.name || "", path: g.genre_name || g.name || "" }))}
-                onClick={() => setIsMobileMenuOpen(false)}
-              />
-
-              <MobileDropdownNavItem
-                label="WEB SERIES"
-                href="/episodes"
-                items={genresList.map(g => ({ id: g.genre_id, name: g.genre_name || g.name || "", path: g.genre_name || g.name || "" }))}
-                onClick={() => setIsMobileMenuOpen(false)}
-              />
-
-              <MobileDropdownNavItem
-                label="INTERACTIVE"
-                href="/interactive"
-                items={interactiveMovies.map(m => ({ id: m.interactive_movie_id, name: m.title, path: m.interactive_movie_id.toString() }))}
-                isInteractive
-                onClick={() => setIsMobileMenuOpen(false)}
-              />
-
-              <MobileNavItem href="/pricing" label="PRICING" active={pathname === "/pricing"} onClick={() => setIsMobileMenuOpen(false)} />
-
-              <MobileDropdownNavItem
-                label="LANGUAGES"
-                href="/languages"
-                items={languagesList.map(l => ({ id: l.slug, name: l.name, path: l.slug }))}
-                isLanguage
-                onClick={() => setIsMobileMenuOpen(false)}
-              />
+              <MobileNavItem href="/movies" label="MOVIES" active={pathname === "/movies" || pathname?.startsWith("/movies")} onClick={() => setIsMobileMenuOpen(false)} />
+              <MobileNavItem href="/episodes" label="WEB SERIES" active={pathname === "/episodes" || pathname?.startsWith("/episodes") || pathname === "/shows" || pathname?.startsWith("/shows")} onClick={() => setIsMobileMenuOpen(false)} />
+              <MobileNavItem href="/interactive" label="INTERACTIVE" active={pathname?.startsWith("/interactive")} onClick={() => setIsMobileMenuOpen(false)} />
+              <MobileNavItem href="/pricing" label="PRICING" active={pathname === "/pricing" || pathname?.startsWith("/pricing")} onClick={() => setIsMobileMenuOpen(false)} />
+              <MobileNavItem href="/languages" label="LANGUAGES" active={pathname?.startsWith("/languages")} onClick={() => setIsMobileMenuOpen(false)} />
             </div>
 
             {/* Mobile Menu Footer (Profile/Login) */}
@@ -491,79 +387,6 @@ export default function Navbar({ genres = [], languages = [] }: { genres?: Genre
         )}
       </AnimatePresence>
     </header>
-  );
-}
-
-function DropdownNavItem({
-  label,
-  href,
-  items,
-  active,
-  scrolled,
-  isInteractive = false,
-  isLanguage = false
-}: {
-  label: string;
-  href: string;
-  items: { id: number | string, name: string, path: string }[];
-  active?: boolean;
-  scrolled: boolean;
-  isInteractive?: boolean;
-  isLanguage?: boolean;
-}) {
-  if (!items || items.length === 0) return null;
-
-  return (
-    <div className="relative group/dropdown px-1">
-      <Link
-        href={href}
-        className={`
-          relative font-medium px-5 rounded-full transition-all duration-300 uppercase flex items-center gap-1.5
-          ${scrolled ? 'py-2 text-sm xl:text-base' : 'py-3 text-base'}
-          ${active
-            ? "bg-secondary text-primary shadow-[inset_0_2px_4px_rgba(0,0,0,0.4),0_1px_1px_rgba(255,255,255,0.1)] border border-white/10"
-            : "text-white/60 hover:text-white hover:bg-white/5 active:bg-black/20"
-          }
-        `}
-      >
-        {label}
-        <svg
-          className="w-2.5 h-2.5 transition-transform duration-300 group-hover/dropdown:rotate-180 opacity-60"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </Link>
-
-      {/* Dropdown Menu */}
-      <div className={`absolute top-full left-1/2 -translate-x-1/2 w-64 opacity-0 translate-y-2 pointer-events-none group-hover/dropdown:opacity-100 group-hover/dropdown:translate-y-0 group-hover/dropdown:pointer-events-auto transition-all duration-300 z-[60] ${scrolled ? 'pt-2' : 'pt-4'}`}>
-        <div className="bg-secondary/95 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.1)] p-2 overflow-hidden overflow-y-auto max-h-[450px] scrollbar-hide">
-          <div className="grid grid-cols-1 gap-1">
-            {(items && items.length > 0) ? (
-              items.map((item) => (
-                <Link
-                  key={item.id}
-                  href={isInteractive ? `${href}/${item.id}` : isLanguage ? `${href}/${item.path}` : `${href}?genre=${item.path}`}
-                  className="px-4 py-3 rounded-xl text-xs font-semibold text-white/50 hover:text-white hover:bg-white/5 transition-all uppercase flex items-center justify-between group/item"
-                >
-                  {item.name}
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary opacity-0 group-hover/item:opacity-100 transition-opacity shadow-[0_0_8px_rgba(50,153,255,0.8)]" />
-                </Link>
-              ))
-            ) : (
-              <div className="px-4 py-3 text-[10px] text-white/30 italic text-center uppercase tracking-widest">
-                Loading {label.toLowerCase()}...
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -618,74 +441,5 @@ function MobileNavItem({
       <span className="text-sm font-bold uppercase tracking-[0.2em]">{label}</span>
       <ChevronRight className={`w-4 h-4 transition-transform ${active ? "opacity-100" : "opacity-0 group-hover:opacity-40"}`} />
     </Link>
-  );
-}
-
-function MobileDropdownNavItem({
-  label,
-  href,
-  items,
-  isInteractive = false,
-  isLanguage = false,
-  onClick
-}: {
-  label: string;
-  href: string;
-  items: { id: number | string, name: string, path: string }[];
-  isInteractive?: boolean;
-  isLanguage?: boolean;
-  onClick: () => void;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  if (!items || items.length === 0) return null;
-
-  return (
-    <div className="space-y-1">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`
-          w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all duration-300
-          ${isOpen ? "bg-white/5 text-white" : "text-white/60 hover:text-white hover:bg-white/5"}
-        `}
-      >
-        <span className="text-sm font-bold uppercase tracking-[0.2em]">{label}</span>
-        <svg
-          className={`w-4 h-4 transition-transform duration-300 ${isOpen ? "rotate-180" : "opacity-40"}`}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden bg-white/5 rounded-2xl mx-2"
-          >
-            <div className="p-2 space-y-1">
-              {items.map((item) => (
-                <Link
-                  key={item.id}
-                  href={isInteractive ? `${href}/${item.id}` : isLanguage ? `${href}/${item.path}` : `${href}?genre=${item.path}`}
-                  onClick={onClick}
-                  className="block px-4 py-3 rounded-xl text-xs font-bold text-white/40 hover:text-white hover:bg-white/5 transition-all uppercase"
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
   );
 }

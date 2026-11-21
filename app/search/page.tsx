@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function SearchPage() {
   return (
-     <div className="min-h-screen bg-[#0f0a19] pt-16 sm:pt-24 md:pt-28 pb-24 lg:pb-20">
+     <div className="min-h-screen bg-[#0f0a19] pt-28 sm:pt-36 md:pt-40 lg:pt-44 pb-24 lg:pb-20">
         <div className="standard-container">
            <Suspense fallback={
              <div className="w-full animate-pulse space-y-6">
