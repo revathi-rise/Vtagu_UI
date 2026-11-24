@@ -59,8 +59,8 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className={`${montserrat.variable} ${inter.variable}`}>
-      <body className={`${montserrat.className} antialiased`}>
+    <html lang="en" suppressHydrationWarning className={`${montserrat.variable} ${inter.variable}`}>
+      <body suppressHydrationWarning className={`${montserrat.className} antialiased`}>
         <ReduxProvider>
           <AlertProvider>
             <ConditionalLayout genres={genres} languages={languages}>

@@ -375,7 +375,8 @@ export async function getSeries(userId?: string | null): Promise<Series[]> {
 }
 
 export async function getSeriesById(id: string | number, userId?: string | null): Promise<Series | null> {
-  const url = appendUserId(`${API_BASE}/series/${encodeURIComponent(id)}`, userId);
+  const cleanId = typeof id === 'string' ? decodeURIComponent(id).trim() : id;
+  const url = appendUserId(`${API_BASE}/series/${encodeURIComponent(cleanId)}`, userId);
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
@@ -383,7 +384,10 @@ export async function getSeriesById(id: string | number, userId?: string | null)
       throw new Error(`Failed to fetch series. Status: ${res.status}`);
     }
     const result = await res.json();
-    return result.data || result;
+    if (!result || result.status === false || !result.data) {
+      return null;
+    }
+    return result.data;
   } catch (err: any) {
     return null;
   }
@@ -682,8 +686,8 @@ export async function getEpisodes(userId?: string | null): Promise<Episode[]> {
 }
 
 export async function getEpisodeById(id: string | number, userId?: string | null): Promise<Episode | null> {
-  const url = `${API_BASE}/episodes/${encodeURIComponent(id)}${userId ? `?userId=${userId}` : ''}`;
-  console.log(url);
+  const cleanId = typeof id === 'string' ? decodeURIComponent(id).trim() : id;
+  const url = `${API_BASE}/episodes/${encodeURIComponent(cleanId)}${userId ? `?userId=${userId}` : ''}`;
 
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
@@ -692,8 +696,14 @@ export async function getEpisodeById(id: string | number, userId?: string | null
       throw new Error(`Failed to fetch episode. Status: ${res.status}`);
     }
     const result = await res.json();
-    const epObj = normalizeEpisode(result.data || result);
-    if (epObj && (await isKidsProfileActiveAsync()) && !isContentKidsApproved(epObj)) {
+    if (!result || result.status === false || !result.data) {
+      return null;
+    }
+    const epObj = normalizeEpisode(result.data);
+    if (!epObj || !epObj.id) {
+      return null;
+    }
+    if ((await isKidsProfileActiveAsync()) && !isContentKidsApproved(epObj)) {
       return null;
     }
     return epObj;
@@ -890,7 +900,8 @@ export async function getMovies(userId?: string | null): Promise<Movie[]> {
 }
 
 export async function getMovieBySlug(slug: string, userId?: string | null): Promise<Movie | null> {
-  const url = appendUserId(`${API_BASE}/movies/${encodeURIComponent(slug)}`, userId);
+  const cleanSlug = typeof slug === 'string' ? decodeURIComponent(slug).trim() : slug;
+  const url = appendUserId(`${API_BASE}/movies/${encodeURIComponent(cleanSlug)}`, userId);
   try {
     const res = await fetchWithRetry(url, { next: { revalidate: 0 } });
     if (!res.ok) {
@@ -898,8 +909,14 @@ export async function getMovieBySlug(slug: string, userId?: string | null): Prom
       throw new Error(`Failed to fetch movie detail. Status: ${res.status}`);
     }
     const result = await res.json();
-    const movieObj = normalizeMovie(result.data || result);
-    if (movieObj && (await isKidsProfileActiveAsync()) && !isContentKidsApproved(movieObj)) {
+    if (!result || result.status === false || !result.data) {
+      return null;
+    }
+    const movieObj = normalizeMovie(result.data);
+    if (!movieObj || !movieObj.id) {
+      return null;
+    }
+    if ((await isKidsProfileActiveAsync()) && !isContentKidsApproved(movieObj)) {
       return null;
     }
     return movieObj;

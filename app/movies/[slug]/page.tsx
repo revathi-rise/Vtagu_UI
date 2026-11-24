@@ -10,23 +10,36 @@ interface MovieDetailsPageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: MovieDetailsPageProps) {
-  const { slug } = await params;
-  const movie = await getMovieBySlug(slug);
-  
-  if (!movie) return { title: 'Movie Not Found' };
+export const dynamic = 'force-dynamic';
 
-  return {
-    title: `${movie.title} - PrimeTime`,
-    description: movie.shortDescription,
-  };
+export async function generateMetadata({ params }: MovieDetailsPageProps) {
+  try {
+    const { slug } = await params;
+    const movie = await getMovieBySlug(slug);
+    
+    if (!movie || !movie.id) return { title: 'Movie Not Found - PrimeTime' };
+
+    return {
+      title: `${movie.title || 'Movie'} - PrimeTime`,
+      description: movie.shortDescription || '',
+    };
+  } catch (e) {
+    return { title: 'Movie Details - PrimeTime' };
+  }
 }
 
 export async function generateStaticParams() {
-  const movies = await getMovies();
-  return movies.map((movie) => ({
-    slug: movie.slug,
-  }));
+  try {
+    const movies = await getMovies();
+    if (!Array.isArray(movies)) return [];
+    return movies
+      .filter((movie) => movie && movie.slug)
+      .map((movie) => ({
+        slug: movie.slug,
+      }));
+  } catch (error) {
+    return [];
+  }
 }
 
 export default async function MovieDetailsPage({ params }: MovieDetailsPageProps) {
@@ -35,7 +48,7 @@ export default async function MovieDetailsPage({ params }: MovieDetailsPageProps
   const userId = cookieStore.get('userId')?.value || null;
   const movie = await getMovieBySlug(slug, userId);
 
-  if (!movie) {
+  if (!movie || !movie.id) {
     notFound();
   }
 
